@@ -1,0 +1,721 @@
+<!--
+  ⚠️ ไฟล์นี้คือ "เวอร์ชัน GitHub Pages" ของ ClientPortal.html (report.ruanganan.com)
+  ต้นฉบับอยู่ ~/Desktop/apps-script-port/พร้อมวาง/ClientPortal.html
+  ถ้าแก้ดีไซน์ ให้แก้ต้นฉบับแล้ว build ใหม่ — ความต่างมีแค่:
+    1. companyName / โลโก้ ฝังเป็นค่าคงที่
+    2. google.script.run → fetch(API_URL) ไปที่ Apps Script doPost
+
+  ClientPortal.html — เว็บลูกค้า (รายวัน / รายสัปดาห์ / สถานะการเงิน)
+
+  หน้านี้ทำให้ "หน้าตาเหมือนเว็บเดโม" (client-portal-ราชเทวี/index.html) ทุกส่วน
+  แต่ต่างกันตรงที่ของเดโมพิมพ์เนื้อหาใส่มือไว้ ส่วนอันนี้ดึงจากข้อมูลจริงทั้งหมด
+
+  ⚠️ ของที่ในเดโมเป็น hardcode แล้วที่นี่ต้องหาทางแทน:
+   1. สภาพอากาศ / เครื่องมือ–เครื่องจักร → WarRoom_Data ไม่มีคอลัมน์นี้
+      → ทำเป็นช่องแก้ได้ในหน้าตรวจ (คอลัมน์ Weather/Equipment ใน Published_Reports)
+        มีค่าเริ่มต้นให้ ผู้ตรวจแก้ก่อนกดอนุมัติได้
+   2. timeline ขั้นตอนโครงการ → เดโมใส่ [1,1,1,1,1,2,2,0,0] ไว้ตรงๆ
+      → ย้ายไปเป็น PROJECTS[site].phases ใน Config.gs ให้ผู้จัดการโครงการอัปเดต
+        โครงการที่ยังไม่ระบุ (phases: null) จะ "ซ่อนทั้งบล็อก" ดีกว่าโชว์ข้อมูลมั่ว
+   3. "สัปดาห์นี้โดยสรุป" + "งานที่ดำเนินการสัปดาห์นี้" แยกหมวด → เดโมเขียนมือ
+      → สร้างจากงานจริงด้วยการจับคำ (groupTasks) ไม่ใช้ AI เพื่อไม่ให้มีค่าใช้จ่ายต่อสัปดาห์
+        และผลลัพธ์คงที่ ตรวจสอบย้อนหลังได้
+
+  ข้อจำกัดที่ยกมาจากเวอร์ชันก่อนหน้า (อย่าเผลอแก้กลับ):
+   - ไม่ฝังข้อมูลจริงใน HTML ตั้งแต่แรก ดึงผ่าน google.script.run หลัง PIN ถูกเท่านั้น
+     (เซิร์ฟเวอร์ตรวจ PIN ซ้ำใน getClientData กันคนแก้ HTML ข้ามหน้า gate)
+   - โลโก้ base64 ฝังแค่ "จุดเดียว" ที่ #logoGate แล้วก๊อป src ไปหัวข้อด้วย JS
+     เคยฝังสองจุดแล้วหน้ากลายเป็น 1.5MB โหลด 20 วินาที
+   - ทุกบล็อกใน onData ต้องแยก try กัน ถ้าส่วนใดพังส่วนอื่นต้องยังขึ้นได้
+-->
+<!doctype html><html><head><base target="_top">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>รายงานความคืบหน้าโครงการ — RUANGANAN</title>
+<style>
+:root{--ink:#16233a;--ink2:#33445e;--muted:#6b7c93;--line:#dde4ec;--navy:#16324f;--gold:#b8873b;--green:#1e8449;--amber:#c77700;--bg:#eef1f5}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);font-family:"IBM Plex Sans Thai","Sarabun",sans-serif;color:var(--ink);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+header{background:var(--navy);color:#fff;padding:16px 0 0}
+.wrap{max-width:920px;margin:0 auto;padding:0 16px}
+.hrow{display:flex;align-items:center;gap:16px;padding-bottom:14px}
+.hrow img{height:56px;width:auto;background:#fff;border-radius:8px;padding:5px 9px}
+.hrow h1{font-size:20px;font-weight:700;line-height:1.25}
+.hrow .sub{font-size:12.5px;color:#b9c6d6}
+.tabs{display:flex;gap:0;max-width:920px;margin:0 auto;padding:0 16px}
+.tab{padding:10px 20px;font-size:14.5px;font-weight:700;color:#b9c6d6;background:transparent;border:0;cursor:pointer;font-family:inherit;border-radius:10px 10px 0 0}
+.tab.on{background:var(--bg);color:var(--navy)}
+main{max-width:920px;margin:0 auto;padding:16px 16px 70px}
+section{background:#fff;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-bottom:13px}
+h2{font-size:15.5px;font-weight:700;padding-left:9px;border-left:4px solid var(--gold);margin-bottom:10px;display:flex;align-items:baseline;gap:8px}
+h2 em{font-style:normal;font-size:11.5px;color:var(--muted);font-weight:400}
+.calhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px}
+.calhead b{font-size:15px}
+.calnav{display:flex;align-items:center;gap:6px}
+.calnav button{border:1px solid var(--line);background:#fbfcfd;border-radius:7px;width:28px;height:28px;font-size:15px;cursor:pointer;font-family:inherit;color:var(--ink2)}
+.calnav button:disabled{opacity:.35;cursor:default}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.cal .dw{font-size:11px;color:var(--muted);padding:4px 0}
+.cd{border:1.5px solid transparent;border-radius:8px;padding:7px 0 5px;font-size:14px;cursor:default;color:#b7c0cc;position:relative}
+.cd.has{color:var(--ink);cursor:pointer;background:#f6f8fb;border-color:var(--line)}
+.cd.has:hover{border-color:var(--gold)}
+.cd.sel{background:var(--navy);color:#fff;border-color:var(--navy);font-weight:700}
+.cd.has::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:99px;background:var(--green)}
+.cd.sel::after{background:#f4d9a8}
+.chips{display:flex;gap:8px;margin-bottom:13px}
+.chip{flex:1;display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:8px;padding:10.5px 13px 8px;background:#fbfcfd}
+.chip .ic{font-size:21px;line-height:1;display:flex;align-items:center;height:26px}
+.chip .txt{display:flex;flex-direction:column;justify-content:center}
+.chip b{display:block;font-size:15px;line-height:1.3}
+.chip small{display:block;font-size:11px;line-height:1.35;color:var(--muted);margin-top:1px}
+ol.tasks{margin-left:22px;font-size:15px}
+ol.tasks li{margin-bottom:4px}
+.strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px}
+.strip img{height:140px;border-radius:8px;cursor:zoom-in;flex:0 0 auto}
+.nophoto{font-size:13px;color:var(--muted);background:#f6f8fb;border-radius:8px;padding:14px;text-align:center}
+.laybox{border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.laybox .hd2{background:var(--navy);color:#fff;padding:8px 14px;display:flex;justify-content:space-between;font-size:13.5px;font-weight:600}
+.laybox .hd2 b{color:#f4d9a8;font-size:15px}
+.layrow{display:flex;justify-content:space-between;padding:7px 14px;border-bottom:1px solid #eef1f5;font-size:14px}
+.layrow:nth-child(even){background:#fafbfd}
+.layrow .n{font-weight:700;color:var(--navy);background:#eef2f7;border-radius:99px;padding:1px 12px;font-size:13px}
+.grid2{display:grid;grid-template-columns:1fr 1.1fr;gap:12px}
+.box{border:1px solid var(--line);border-radius:8px;padding:10px 13px;margin-bottom:9px}
+.box h3{font-size:12.5px;color:var(--ink);font-weight:700;margin-bottom:4px}
+.ok{color:var(--green);font-weight:700}
+.prog{display:flex;align-items:center;gap:10px;border:1.5px solid #cfe4d6;background:#f4faf6;border-radius:8px;padding:10px 14px;margin:12px 0}
+.prog .badge{background:var(--green);color:#fff;border-radius:99px;padding:5px 15px;font-size:13.5px;font-weight:700;white-space:nowrap}
+.prog span{font-size:12.5px;color:var(--ink2)}
+.pdfbtn{display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:#fff;border:0;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:14.5px;font-weight:700;cursor:pointer;text-decoration:none}
+.pdfbtn.ghost{background:#fff;color:var(--navy);border:1.5px solid var(--line)}
+.pdfbtn.off{background:#eef1f5;color:#9aa7b6;cursor:default}
+/* weekly */
+.sumbox{background:#fff;border:1px solid var(--line);border-left:4px solid var(--navy);border-radius:0 8px 8px 0;padding:12px 15px;font-size:14.5px;line-height:1.65;margin-bottom:13px}
+.sumbox b{color:var(--navy)}
+.steps{display:flex;overflow-x:auto;padding:6px 2px 2px}
+.step{flex:1;min-width:82px;text-align:center;position:relative}
+.step::before{content:'';position:absolute;top:15px;left:-50%;width:100%;height:3px;background:var(--line);z-index:0}
+.step:first-child::before{display:none}
+.step.d::before{background:var(--green)}
+.step .dot{width:28px;height:28px;border-radius:99px;background:#e6ebf1;color:#8a97a8;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;position:relative;z-index:1;border:2.5px solid #e6ebf1}
+.step.d .dot{background:var(--green);border-color:var(--green);color:#fff}
+.step.c .dot{background:#fff;border-color:var(--gold);color:var(--gold);box-shadow:0 0 0 4px rgba(184,135,59,.16)}
+.step .nm{font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.3}
+.step.d .nm{color:var(--green)} .step.c .nm{color:var(--gold);font-weight:700}
+.wkgrp h4{font-size:13.5px;color:var(--gold);font-weight:700;margin:8px 0 3px}
+.wkgrp ul{margin-left:20px;font-size:14.5px}
+.wkgrp li{margin-bottom:3px}
+.kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.k{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.k b{display:block;font-size:11px;color:var(--muted);font-weight:500}
+.k .v{font-size:19px;font-weight:700}
+.bars{display:flex;align-items:flex-end;gap:10px;height:110px;border-bottom:1px solid var(--line);margin:6px 0}
+.bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
+.bar .b{width:100%;max-width:56px;background:linear-gradient(180deg,#2f5f8f,#16324f);border-radius:5px 5px 0 0}
+.bar .b.na{background:repeating-linear-gradient(45deg,#f0d5d1,#f0d5d1 4px,#fbeeec 4px,#fbeeec 8px);border:1px dashed #dfa79e}
+.bar .n{font-size:13px;font-weight:700;margin-bottom:3px}
+.xl{display:flex;gap:10px}
+.xl div{flex:1;text-align:center;font-size:11px;color:var(--muted)}
+.rc{display:inline-block;background:#f2f5f9;border:1px solid var(--line);border-radius:99px;padding:4px 13px;font-size:13px;color:var(--ink2);margin:0 5px 6px 0}
+.rc b{color:var(--navy)}
+.note{font-size:12px;color:var(--muted)}
+.iss{border-left:3px solid var(--amber);background:#fffaf2;border-radius:0 8px 8px 0;padding:9px 13px;margin-bottom:8px;font-size:14px}
+.daytabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.dt{border:1px solid var(--line);background:#fbfcfd;border-radius:99px;padding:6px 14px;font-family:inherit;font-size:12.5px;cursor:pointer;color:var(--ink2)}
+.dt.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+/* finance */
+.finhead{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.notice{border:1.5px solid #e3cd9a;background:#fffaf0;border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;gap:12px;align-items:flex-start}
+.notice .ic{font-size:22px}
+.notice b{color:#7a5c1e}
+.notice p{font-size:13.5px;color:#5c4a20;margin-top:2px;line-height:1.6}
+.donutwrap{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.leg{font-size:13.5px;display:flex;flex-direction:column;gap:6px}
+.leg span{display:flex;align-items:center;gap:7px}
+.leg i{width:11px;height:11px;border-radius:3px;display:inline-block}
+.instRow{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f0f2f6;font-size:13.5px}
+.instRow:last-child{border-bottom:0}
+.instRow .lab{flex:0 0 240px;color:var(--ink2);line-height:1.4}
+.instRow .track{flex:1;height:9px;background:#eef1f5;border-radius:5px;overflow:hidden}
+.instRow .track i{display:block;height:100%;border-radius:5px}
+.instRow .amt{flex:0 0 92px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.instRow .st{flex:0 0 78px;text-align:right;font-size:11.5px}
+.finfoot{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.6}
+.slipLink{display:inline-block;margin-left:6px;font-size:11px;color:var(--navy);text-decoration:underline;cursor:pointer}
+.slipGroup{margin-bottom:14px}
+.slipGroupTitle{font-size:13.5px;font-weight:700;color:var(--ink2);margin-bottom:6px}
+.lb{position:fixed;inset:0;background:rgba(10,18,30,.93);display:none;z-index:200;align-items:center;justify-content:center;flex-direction:column}
+.lb.on{display:flex}
+.lb img{max-width:94vw;max-height:82vh;border-radius:8px}
+.lb .cap{color:#cfd8e3;font-size:13px;margin-top:10px}
+.lb button{position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);border:0;color:#fff;font-size:26px;width:46px;height:64px;border-radius:8px;cursor:pointer}
+.lb .prev{left:12px} .lb .next{right:12px}
+.lb .x{position:fixed;top:14px;right:14px;transform:none;width:42px;height:42px;font-size:20px;border-radius:99px}
+#gate{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(160deg,#0e2138 0%,#16324f 55%,#1d3f63 100%)}
+#gate::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 40% at 50% 0%,rgba(184,135,59,.14),transparent 70%)}
+#gate .box{position:relative;background:#fff;border-radius:16px;padding:40px 42px 34px;text-align:center;max-width:400px;width:calc(100% - 40px);
+  box-shadow:0 24px 70px rgba(4,12,24,.45);border-top:4px solid var(--gold)}
+#gate img{height:76px;margin-bottom:14px}
+#gate .co{font-size:11px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+#gate h1{color:var(--navy);font-size:19.5px;font-weight:700;margin-bottom:6px}
+#gate .desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:4px}
+#gate .rule{width:44px;height:2.5px;background:var(--gold);border-radius:2px;margin:14px auto 16px}
+#gate label{display:block;font-size:11.5px;color:var(--ink2);font-weight:600;letter-spacing:.06em;margin-bottom:7px}
+#gate input{font-size:24px;letter-spacing:.42em;text-align:center;border:1.5px solid var(--line);border-radius:10px;padding:11px 0 11px 8px;width:210px;margin:0 0 10px;font-family:inherit;transition:border-color .15s}
+#gate input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,135,59,.14)}
+#gate button{background:var(--gold);color:#fff;border:0;border-radius:10px;padding:11px 0;width:210px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:background .15s}
+#gate button:hover{background:#a6772f}
+#gate .err{color:#c0392b;font-size:12.5px;height:18px;margin-bottom:2px}
+#gate .foot{margin-top:18px;padding-top:14px;border-top:1px solid #eef1f5;font-size:11px;color:var(--muted);line-height:1.7}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
+.preparedby{text-align:center;margin-top:16px;padding-top:15px;border-top:1px solid var(--line)}
+.preparedby .bar{width:38px;height:3px;background:var(--gold);border-radius:2px;margin:0 auto 8px}
+.preparedby .lbl{display:block;font-size:11px;color:var(--muted);letter-spacing:.12em;margin-bottom:3px}
+.preparedby .nm{display:block;font-size:15px;font-weight:700;color:var(--navy)}
+@media(max-width:640px){.chips{flex-direction:column}.grid2{grid-template-columns:1fr}.kpi{grid-template-columns:1fr 1fr}.instRow .lab{flex-basis:120px;font-size:12px}}
+</style></head><body>
+
+<div id="gate"><div class="box">
+  <img id="logoGate" src="data:image/png;base64,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" alt="RUANGANAN">
+  <div class="co">Ruanganan Corporation Limited</div>
+  <h1>ระบบรายงานความคืบหน้าโครงการ</h1>
+  <div class="desc">สำหรับท่านเจ้าของโครงการ<br>กรุณากรอกรหัสประจำโครงการที่ได้รับจากผู้จัดการโครงการ</div>
+  <div class="rule"></div>
+  <label>รหัสประจำโครงการ (6 หลัก)</label>
+  <input id="pin" type="password" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="off">
+  <div class="err" id="pinerr"></div>
+  <button id="gateBtn" onclick="checkPin()">เข้าสู่รายงาน</button>
+  <div class="foot">บริษัท เรืองอนันต์ คอร์ปอเรชั่น จำกัด<br>ข้อมูลในระบบผ่านการตรวจสอบโดยผู้จัดการโครงการก่อนเผยแพร่ทุกฉบับ</div>
+</div></div>
+
+<header>
+  <div class="wrap"><div class="hrow">
+    <img id="logoHeader" alt="RUANGANAN">
+    <div><h1 id="projTitle">รายงานความคืบหน้าโครงการ</h1>
+    <div class="sub" id="projSub"></div></div>
+  </div></div>
+  <div class="tabs">
+    <button class="tab on" id="tabD" onclick="showTab('d')">📅 รายวัน</button>
+    <button class="tab" id="tabW" onclick="showTab('w')">📊 รายสัปดาห์</button>
+    <button class="tab" id="tabF" onclick="showTab('f')">💳 สถานะการเงิน</button>
+  </div>
+</header>
+
+<main>
+<div id="viewD">
+  <section>
+    <div class="calhead">
+      <b id="calTitle"></b>
+      <div class="calnav">
+        <span class="note">● วันที่มีรายงาน — แตะเพื่อเปิดดู</span>
+        <button id="calPrev" onclick="moveMonth(-1)">‹</button>
+        <button id="calNext" onclick="moveMonth(1)">›</button>
+      </div>
+    </div>
+    <div class="cal" id="cal"></div>
+  </section>
+  <section id="daySec">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+      <h2 style="margin-bottom:0">รายงานประจำวัน <em id="dayLabel"></em></h2>
+      <a class="pdfbtn" id="pdfbtn" target="_blank" rel="noopener">⬇ ดาวน์โหลด PDF</a>
+    </div>
+    <div class="chips">
+      <div class="chip"><span class="ic">📋</span><div class="txt"><b style="color:var(--green)" id="cProg"></b><small>ความก้าวหน้าโครงการ</small></div></div>
+      <div class="chip"><span class="ic">👷</span><div class="txt"><b id="cMan"></b><small>บุคลากรเข้าปฏิบัติงาน</small></div></div>
+      <div class="chip" id="cIssueChip"><span class="ic">✅</span><div class="txt"><b style="color:var(--green)" id="cIssue"></b><small>ปัญหา–อุปสรรคหน้างาน</small></div></div>
+    </div>
+    <h2>📝 สรุปงานประจำวัน <em>Work Summary</em></h2>
+    <ol class="tasks" id="tasks"></ol>
+    <h2 style="margin-top:14px">📷 ภาพการปฏิบัติงาน <em id="phnote"></em></h2>
+    <div id="phwrap"></div>
+    <div class="grid2" style="margin-top:14px">
+      <div>
+        <h2 style="margin-bottom:8px">👷 บุคลากรเข้าปฏิบัติงาน</h2>
+        <div class="laybox"><div class="hd2"><span>รวมบุคลากรวันนี้</span><b id="labTot"></b></div><div id="labRows"></div></div>
+      </div>
+      <div>
+        <h2 style="margin-bottom:8px">รายละเอียดเพิ่มเติม</h2>
+        <div class="box"><h3>☀️ สภาพอากาศ</h3><div style="font-size:13.5px" id="wxBox"></div></div>
+        <div class="box"><h3>⚠️ ปัญหาที่พบ / แนวทางแก้ไข</h3><div id="issueBox" style="font-size:14px"></div></div>
+        <div class="box"><h3>🛠️ เครื่องมือ – เครื่องจักร</h3><div style="font-size:13.5px;color:var(--ink2)" id="eqBox"></div></div>
+      </div>
+    </div>
+    <div class="prog"><span class="badge" id="progBadge"></span><span id="progNote"></span></div>
+    <div class="preparedby"><div class="bar"></div><span class="lbl">จัดทำโดย</span><span class="nm">บริษัท เรืองอนันต์ คอร์ปอเรชั่น จำกัด</span></div>
+  </section>
+  <section id="noDaily" style="display:none">
+    <h2>ยังไม่มีรายงานที่เผยแพร่</h2>
+    <div class="nophoto">เมื่อผู้จัดการโครงการตรวจและอนุมัติรายงานแล้ว จะแสดงที่นี่</div>
+  </section>
+</div>
+
+<div id="viewW" style="display:none">
+  <section>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <h2 style="margin-bottom:0" id="wkTitle"></h2>
+      <div class="calnav">
+        <button onclick="moveWeek(-1)">‹</button>
+        <button onclick="moveWeek(1)">›</button>
+      </div>
+    </div>
+  </section>
+  <div class="sumbox" id="wkSum"></div>
+  <section>
+    <div class="kpi">
+      <div class="k"><b>จำนวนคนเข้าทำงาน</b><div class="v" id="wkMan"></div></div>
+      <div class="k"><b>วันที่มีรายงาน</b><div class="v" id="wkDays"></div></div>
+      <div class="k"><b>ภาพหน้างาน</b><div class="v" id="wkNph"></div></div>
+      <div class="k"><b>สถานะความก้าวหน้า</b><div class="v" style="color:var(--green);font-size:15px" id="wkProg"></div></div>
+    </div>
+  </section>
+  <section id="stepSec">
+    <h2>ขั้นตอนของโครงการ <em>ตอนนี้อยู่ขั้นไหน และเหลืออะไรบ้าง</em></h2>
+    <div class="steps" id="steps"></div>
+  </section>
+  <section>
+    <h2>งานที่ดำเนินการสัปดาห์นี้</h2>
+    <div id="wkWork" class="wkgrp"></div>
+  </section>
+  <section>
+    <h2>ภาพความคืบหน้าหน้างาน <em>คัดจากภาพที่ใช้ในรายงานประจำวันแต่ละวัน</em></h2>
+    <div class="daytabs" id="wkDaytabs"></div>
+    <div class="strip" id="wkStrip"></div>
+  </section>
+  <section>
+    <h2>จำนวนคนเข้าทำงานรายวัน</h2>
+    <div class="bars" id="wkBars"></div><div class="xl" id="wkXl"></div>
+    <div style="margin-top:12px" id="wkRoles"></div>
+  </section>
+  <section>
+    <h2>ปัญหาหน้างานในสัปดาห์นี้</h2>
+    <div id="wkIss"></div>
+  </section>
+</div>
+
+<div id="viewF" style="display:none">
+  <div class="notice">
+    <span class="ic">📌</span>
+    <div><b id="finNoticeTitle"></b><p id="finNoticeBody"></p></div>
+  </div>
+  <section>
+    <div class="finhead"><h2 style="margin-bottom:0">ภาพรวมการชำระเงินตามงวดงาน</h2></div>
+    <div class="kpi" style="margin-top:6px">
+      <div class="k"><b>มูลค่าสัญญารวม</b><div class="v" id="finTotal"></div></div>
+      <div class="k"><b>ชำระแล้ว</b><div class="v" style="color:var(--green)" id="finPaid"></div></div>
+      <div class="k"><b>คงเหลือ</b><div class="v" style="color:var(--gold)" id="finRemain"></div></div>
+      <div class="k"><b>ความคืบหน้าการชำระ</b><div class="v" id="finPct"></div></div>
+    </div>
+    <div class="donutwrap" style="margin-top:16px">
+      <svg id="finDonut" width="150" height="150" viewBox="0 0 150 150"></svg>
+      <div class="leg" id="finLeg"></div>
+    </div>
+  </section>
+  <section>
+    <h2>รายละเอียดงวดงาน <em id="finCount"></em></h2>
+    <div id="finList"></div>
+    <div class="finfoot">หมายเหตุ: รายการนี้จัดทำขึ้นเพื่อความสะดวกในการติดตามของท่านลูกค้า ไม่ถือเป็นใบแจ้งหนี้หรือเอกสารทางบัญชี — บริษัทจะจัดส่งใบแจ้งเบิกงวดงานอย่างเป็นทางการแยกต่างหากทุกครั้งก่อนถึงกำหนด</div>
+  </section>
+  <section>
+    <h2>หลักฐานการชำระเงิน <em>กดที่รูปเพื่อขยาย</em></h2>
+    <div id="slipGallery"></div>
+  </section>
+</div>
+</main>
+
+<footer>บริษัท เรืองอนันต์ คอร์ปอเรชั่น จำกัด · รายงานผ่านการตรวจสอบโดยผู้จัดการโครงการก่อนเผยแพร่ทุกฉบับ</footer>
+
+<div class="lb" id="lb" onclick="if(event.target===this)closeLb()">
+  <button class="x" onclick="closeLb()">✕</button>
+  <button class="prev" onclick="stepLb(-1)">‹</button>
+  <img id="lbimg"><div class="cap" id="lbcap"></div>
+  <button class="next" onclick="stepLb(1)">›</button>
+</div>
+
+<script>
+// ปลายทางข้อมูล: Apps Script เดิม (doPost ใน Code.gs) — หน้าเว็บนี้เป็นแค่เปลือก
+const API_URL = 'https://script.google.com/macros/s/AKfycbxo5iY4E9CazLb2sEkbR9XS4mkEUdoPAfYCsLAtR2IcqCMuEuQJGiab-ShKvSHfeVhC/exec';
+const $ = id => document.getElementById(id);
+let DATA = null, cur = '', lbList = [], lbIdx = 0;
+let calY = 0, calM = 0;      // เดือนที่ปฏิทินกำลังแสดง
+let wkAnchor = '';            // วันใดวันหนึ่งในสัปดาห์ที่แท็บรายสัปดาห์กำลังแสดง
+
+// โลโก้ฝังไว้แค่จุดเดียว (#logoGate) เพื่อลดขนาดหน้า — ก๊อป src มาใส่โลโก้หัวข้อด้วย JS
+$('logoHeader').src = $('logoGate').src;
+
+function store(k,v){try{sessionStorage[k]=v}catch(e){}}
+function recall(k){try{return sessionStorage[k]}catch(e){return null}}
+
+function checkPin(){
+  const pin=$('pin').value.trim();
+  if(!pin) return;
+  $('pinerr').textContent='';
+  $('gateBtn').textContent='กำลังตรวจสอบ...';
+  // เวอร์ชัน GitHub Pages: ดึงข้อมูลจาก Apps Script ผ่าน fetch
+  // ⚠️ Content-Type ต้องเป็น text/plain เพื่อเลี่ยง CORS preflight (Apps Script ไม่รองรับ OPTIONS)
+  // ⚠️ Apps Script ตอบ HTTP 200 เสมอแม้ error — ต้องเช็ค field error ในตัว JSON เอง
+  fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action: 'clientData', pin: pin }),
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if (data && data.error) throw new Error(data.error);
+    store('client_pin', pin);
+    onData(data);
+  })
+  .catch(function(e){
+    $('gateBtn').textContent='เข้าสู่รายงาน';
+    $('pinerr').textContent = /PIN/.test(String(e && e.message))
+      ? 'รหัสไม่ถูกต้อง กรุณาตรวจสอบและลองใหม่อีกครั้ง'
+      : 'เชื่อมต่อระบบไม่ได้ กรุณาลองใหม่อีกครั้ง';
+  });
+}
+$('pin').addEventListener('keydown',e=>{if(e.key==='Enter')checkPin()});
+(function autoLogin(){
+  const saved=recall('client_pin');
+  if(saved){ $('pin').value=saved; checkPin(); }
+})();
+
+function onData(data){
+  DATA=data;
+  $('gate').style.display='none';
+
+  // เติมชื่อโครงการบนหัวเว็บ (หน้า gate ตั้งใจไม่บอกชื่อโครงการ — รู้ได้หลัง PIN ผ่านเท่านั้น)
+  const pi=DATA.projectInfo||{};
+  $('projTitle').textContent='โครงการ'+(pi.label||'');
+  document.title='โครงการ'+(pi.label||'')+' — รายงานความคืบหน้า';
+  const sub=[pi.workType, pi.client?'ผู้ว่าจ้าง '+pi.client:'', pi.contractNo&&pi.contractNo!=='-'?'สัญญา '+pi.contractNo:'']
+    .filter(function(x){return x&&x!=='-'}).join(' · ');
+  $('projSub').textContent=sub;
+
+  const dates=Object.keys(DATA.days).sort();
+  cur=dates[dates.length-1]||'';
+  wkAnchor=cur;
+  if(cur){ const p=cur.split('-'); calY=+p[0]; calM=+p[1]-1; }
+  else { const n=new Date(); calY=n.getFullYear(); calM=n.getMonth(); }
+
+  // ⚠️ สำคัญ: แต่ละส่วนต้องแยก try กัน — ถ้าส่วนใดพัง (เช่นยังไม่มีรายงานที่อนุมัติเลย)
+  // ส่วนที่เหลือ (โดยเฉพาะ "สถานะการเงิน") ต้องยังแสดงได้
+  try { buildCal(); } catch(e){ console.error('buildCal',e); }
+  try {
+    if(cur){ render(); }
+    else { $('daySec').style.display='none'; $('noDaily').style.display=''; }
+  } catch(e){ console.error('render',e); $('daySec').style.display='none'; $('noDaily').style.display=''; }
+  try { buildWeekly(); } catch(e){ console.error('buildWeekly',e); }
+  try { buildFinance(); } catch(e){ console.error('buildFinance',e); }
+}
+
+function showTab(t){
+  $('viewD').style.display=t==='d'?'':'none';
+  $('viewW').style.display=t==='w'?'':'none';
+  $('viewF').style.display=t==='f'?'':'none';
+  $('tabD').classList.toggle('on',t==='d');
+  $('tabW').classList.toggle('on',t==='w');
+  $('tabF').classList.toggle('on',t==='f');
+}
+
+// ---------- วันที่ ----------
+// ⚠️ อย่าใช้ new Date('2026-08-22') — เบราว์เซอร์ตีความเป็น UTC ทำให้วันเพี้ยนไป 1 วัน
+// ในเขตเวลาไทย เลยประกอบ Date เองจากเลขปี/เดือน/วันเสมอ
+const TH_M=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+function iso(y,m,d){return y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0')}
+function toDate(s){const p=s.split('-');return new Date(+p[0],+p[1]-1,+p[2])}
+
+function buildCal(){
+  $('calTitle').textContent=TH_M[calM]+' '+(calY+543);
+  const dws=['จ','อ','พ','พฤ','ศ','ส','อา'];
+  let html=dws.map(d=>`<div class="dw">${d}</div>`).join('');
+  const first=new Date(calY,calM,1).getDay();
+  const blank=(first+6)%7;                     // ปฏิทินเริ่มวันจันทร์
+  for(let i=0;i<blank;i++) html+='<div></div>';
+  const last=new Date(calY,calM+1,0).getDate();
+  for(let d=1;d<=last;d++){
+    const k=iso(calY,calM,d);
+    const has=!!DATA.days[k];
+    html+=`<div class="cd ${has?'has':''} ${k===cur?'sel':''}" ${has?`onclick="pick('${k}')"`:''}>${d}</div>`;
+  }
+  $('cal').innerHTML=html;
+  const all=Object.keys(DATA.days).sort();
+  $('calPrev').disabled = !all.length || iso(calY,calM,1) <= all[0].slice(0,8)+'01';
+  $('calNext').disabled = !all.length || iso(calY,calM,1) >= all[all.length-1].slice(0,8)+'01';
+}
+function moveMonth(step){
+  const d=new Date(calY,calM+step,1);
+  calY=d.getFullYear(); calM=d.getMonth();
+  buildCal();
+}
+function pick(k){cur=k;render();buildCal()}
+
+function render(){
+  const d=DATA.days[cur];
+  $('daySec').style.display=''; $('noDaily').style.display='none';
+  $('dayLabel').textContent=d.label;
+  $('cProg').textContent=d.progress||'ดำเนินการตามแผน';
+  $('cMan').textContent=d.total+' คน';
+  const noIssue=(!d.issue||d.issue==='-'||d.issue==='None');
+  $('cIssue').textContent=noIssue?'ไม่พบปัญหา':'มีประเด็นติดตาม';
+  $('cIssue').style.color=noIssue?'var(--green)':'var(--amber)';
+  $('cIssueChip').querySelector('.ic').textContent=noIssue?'✅':'⚠️';
+  $('tasks').innerHTML=d.tasks.length
+    ? d.tasks.map(t=>`<li>${esc(t)}</li>`).join('')
+    : '<li style="color:var(--muted);list-style:none;margin-left:-22px">ไม่มีการบันทึกสรุปงานเป็นลายลักษณ์อักษรในวันนี้</li>';
+  const n=(d.photoUrls||[]).length;
+  $('phnote').textContent=n?`${n} ภาพ (คัดจากภาพที่ใช้ในรายงานประจำวัน) · เลื่อนดูได้ กดที่รูปเพื่อขยาย`:'';
+  lbList=d.photoUrls||[];
+  $('phwrap').innerHTML=n
+    ? `<div class="strip">${d.photoUrls.map((p,i)=>`<img loading="lazy" src="${p}" onclick="openLb(${i})">`).join('')}</div>`
+    : `<div class="nophoto">ไม่มีภาพประกอบรายงานวันนี้</div>`;
+  $('labTot').textContent=d.total+' คน';
+  $('labRows').innerHTML=Object.entries(d.labour).sort((a,b)=>b[1]-a[1])
+    .map(([r,v])=>`<div class="layrow"><span>${esc(r)}</span><span class="n">${v} คน</span></div>`).join('');
+  $('wxBox').textContent=d.weather||'';
+  $('eqBox').textContent=d.equipment||'';
+  $('issueBox').innerHTML=noIssue?'<span class="ok">— ไม่พบปัญหา —</span>':esc(d.issue);
+  $('progBadge').textContent='✓ ความก้าวหน้า: '+(d.progress||'ดำเนินการตามแผน');
+  $('progNote').textContent='ความคืบหน้าจริง (Actual) เป็นไปตามแผน (Planned) — ไม่มีส่วนต่างที่ต้องรายงาน';
+
+  // ปุ่ม PDF: มีไฟล์จริงเฉพาะวันที่ระบบสร้าง PDF ไว้แล้ว (วันที่ backfill ย้อนหลังจะยังไม่มี)
+  const btn=$('pdfbtn');
+  if(d.pdfUrl){ btn.href=d.pdfUrl; btn.classList.remove('off'); btn.removeAttribute('title'); btn.onclick=null; }
+  else { btn.removeAttribute('href'); btn.classList.add('off'); btn.title='ยังไม่มีไฟล์ PDF ของวันนี้ในระบบ'; btn.onclick=e=>e.preventDefault(); }
+}
+
+function esc(s){return String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+
+// ---------- รายสัปดาห์ ----------
+/** คืนวันจันทร์ของสัปดาห์ที่มี dateStr อยู่ */
+function mondayOf(dateStr){
+  const d=toDate(dateStr);
+  d.setDate(d.getDate()-((d.getDay()+6)%7));
+  return d;
+}
+/** เลขสัปดาห์แบบ ISO — เลขเดียวกับที่รายงาน PDF รายสัปดาห์ของเดิมใช้ */
+function isoWeek(d){
+  const t=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  t.setDate(t.getDate()+3-((t.getDay()+6)%7));
+  const first=new Date(t.getFullYear(),0,4);
+  return 1+Math.round(((t-first)/86400000-3+((first.getDay()+6)%7))/7);
+}
+function moveWeek(step){
+  const m=mondayOf(wkAnchor||cur);
+  m.setDate(m.getDate()+step*7);
+  wkAnchor=iso(m.getFullYear(),m.getMonth(),m.getDate());
+  buildWeekly();
+}
+
+/**
+ * จัดกลุ่มงานเป็นหมวดด้วยการจับคำ
+ * ⚠️ ตั้งใจไม่ใช้ AI: หน้านี้ลูกค้าเปิดเมื่อไหร่ก็ได้ ถ้าเรียก AI ทุกครั้งจะมีค่าใช้จ่ายไม่จำกัด
+ * และผลจะเปลี่ยนไปมาทุกครั้งที่เปิด ตรวจย้อนหลังไม่ได้ — การจับคำให้ผลคงที่เสมอ
+ * ลำดับสำคัญ: เช็คหมวดเฉพาะเจาะจงก่อนหมวดกว้าง (เช่น "ฝ้า" ต้องมาก่อน "ผนัง")
+ */
+const TASK_GROUPS=[
+  ['งานฝ้าเพดานและผนังเบา', ['ฝ้า','ผนังเบา','ยิงแผ่น','โครงคร่าว']],
+  ['งานระบบ (ไฟฟ้า–ประปา)', ['ไฟฟ้า','ประปา','สายไฟ','ท่อ','บล็อกไฟ','Floor Drain','ดวงโคม','เมนไฟ','สุขภัณฑ์']],
+  ['งานกระเบื้องและเคาน์เตอร์', ['กระเบื้อง','เคาน์เตอร์']],
+  ['งานโครงสร้างและพื้น', ['เทคาน','เทเสา','เทปรับพื้น','คาน','เสา','บันได','เหล็ก','โครงสร้าง','เทเอ็น','เทฟิน','ฐานราก']],
+  ['งานก่อ ฉาบ และซ่อมผิว', ['ฉาบ','ก่อ','เซี้ยม','ปีกนก','ครีบ','ชักร่อง','สกัด','ผนัง']],
+  ['งานกันซึมและเก็บงาน', ['กันซึม','ขังน้ำ','เก็บงาน','ทำความสะอาด','รื้อ','เคลียร์','นั่งร้าน']],
+];
+function groupTasks(tasks){
+  const buckets={}, order=[];
+  tasks.forEach(function(t){
+    let name='งานอื่นๆ';
+    for(const [g,kws] of TASK_GROUPS){
+      if(kws.some(k=>t.indexOf(k)>=0)){ name=g; break; }
+    }
+    if(!buckets[name]){ buckets[name]=[]; order.push(name); }
+    // กันรายการซ้ำคำต่อคำ (งานเดิมอาจถูกพิมพ์ซ้ำหลายวัน)
+    if(buckets[name].indexOf(t)<0) buckets[name].push(t);
+  });
+  return order.map(n=>[n,buckets[n]]);
+}
+
+function buildWeekly(){
+  const today=new Date();
+  const mon=mondayOf(wkAnchor||cur||iso(today.getFullYear(),today.getMonth(),today.getDate()));
+  const keys=[];
+  for(let i=0;i<7;i++){
+    const d=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);
+    keys.push(iso(d.getFullYear(),d.getMonth(),d.getDate()));
+  }
+  const have=keys.filter(k=>DATA.days[k]);
+  const sun=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+6);
+
+  $('wkTitle').innerHTML='สัปดาห์ที่ '+isoWeek(mon)+' <em>'+mon.getDate()+' '+TH_M[mon.getMonth()].slice(0,4)+
+    ' – '+sun.getDate()+' '+TH_M[sun.getMonth()].slice(0,4)+' '+(sun.getFullYear()+543)+'</em>';
+
+  const total=have.reduce((s,k)=>s+DATA.days[k].total,0);
+  const nph=have.reduce((s,k)=>s+(DATA.days[k].photoUrls||[]).length,0);
+  $('wkMan').textContent=total+' คน-วัน';
+  $('wkDays').textContent=have.length+' วัน';
+  $('wkNph').textContent=nph+' รูป';
+  $('wkProg').textContent=have.length?(DATA.days[have[have.length-1]].progress||'ตามแผน'):'—';
+
+  // ---- งานที่ดำเนินการสัปดาห์นี้ (จัดกลุ่มจากงานจริง) ----
+  const allTasks=[];
+  have.forEach(k=>DATA.days[k].tasks.forEach(t=>allTasks.push(t)));
+  const groups=groupTasks(allTasks);
+  $('wkWork').innerHTML=groups.length
+    ? groups.map(g=>`<h4>${esc(g[0])}</h4><ul>`+g[1].map(x=>`<li>${esc(x)}</li>`).join('')+'</ul>').join('')
+    : '<div class="nophoto">ไม่มีการบันทึกสรุปงานในสัปดาห์นี้</div>';
+
+  // ---- สัปดาห์นี้โดยสรุป (ประกอบจากหมวดงานจริง ไม่ใช่ข้อความสำเร็จรูป) ----
+  const issueDays=have.filter(k=>{const s=DATA.days[k].issue;return s&&s!=='-'&&s!=='None'});
+  let sum;
+  if(!have.length){
+    sum='ยังไม่มีรายงานที่เผยแพร่ในสัปดาห์นี้ — กดลูกศรด้านบนเพื่อดูสัปดาห์อื่น';
+  }else{
+    const names=groups.map(g=>g[0].replace(/^งาน/,''));
+    const listTxt=names.length>1?names.slice(0,-1).join(', ')+' และ'+names[names.length-1]:(names[0]||'—');
+    sum='สัปดาห์นี้ทีมงานดำเนินงาน'+listTxt+' รวม '+allTasks.length+' รายการ '
+      +'มีรายงาน '+have.length+' วัน ใช้กำลังคนรวม '+total+' คน-วัน'
+      +(nph?' และบันทึกภาพหน้างาน '+nph+' ภาพ':'')
+      +(issueDays.length?' โดยมีประเด็นที่ต้องติดตาม '+issueDays.length+' วัน (ดูรายละเอียดด้านล่าง)':' ไม่มีการแจ้งปัญหาหน้างานตลอดสัปดาห์');
+  }
+  $('wkSum').innerHTML='<b>สัปดาห์นี้โดยสรุป:</b> '+esc(sum);
+
+  // ---- ขั้นตอนของโครงการ ----
+  // phases เป็น null = ยังไม่ได้ระบุใน Config.gs → ซ่อนทั้งบล็อก ไม่เดาให้ลูกค้าเข้าใจผิด
+  if(DATA.phases && DATA.phases.length){
+    $('stepSec').style.display='';
+    $('steps').innerHTML=DATA.phases.map((st,i)=>{
+      const cls=st===1?'d':st===2?'c':'';
+      const ic=st===1?'✓':(i+1);
+      const nm=(DATA.phaseNames[i]||'').replace('|','<br>');
+      return `<div class="step ${cls}"><div class="dot">${ic}</div><div class="nm">${nm}</div></div>`;
+    }).join('');
+  }else{
+    $('stepSec').style.display='none';
+  }
+
+  // ---- กราฟกำลังคนรายวัน (วันที่ไม่มีรายงานแสดงเป็นแถบลาย เหมือนเดโม) ----
+  const maxv=Math.max(1,...keys.map(k=>DATA.days[k]?DATA.days[k].total:0));
+  $('wkBars').innerHTML=keys.map(k=>{
+    const d=DATA.days[k];
+    return d
+      ? `<div class="bar"><div class="n">${d.total}</div><div class="b" style="height:${d.total/maxv*82}%"></div></div>`
+      : `<div class="bar"><div class="n" style="color:#c0392b;font-size:10px">ไม่มีรายงาน</div><div class="b na" style="height:8%"></div></div>`;
+  }).join('');
+  const DOW=['จั','อั','พุ','พฤ','ศุ','เส','อา'];
+  $('wkXl').innerHTML=keys.map((k,i)=>{
+    const d=toDate(k);
+    return `<div>${DOW[i]}<br>${d.getDate()} ${TH_M[d.getMonth()].slice(0,3)}</div>`;
+  }).join('');
+
+  // ---- คน-วัน แยกตามตำแหน่ง ----
+  const roles={};
+  have.forEach(k=>Object.entries(DATA.days[k].labour).forEach(([r,v])=>{roles[r]=(roles[r]||0)+v}));
+  $('wkRoles').innerHTML=Object.entries(roles).sort((a,b)=>b[1]-a[1])
+    .map(([r,v])=>`<span class="rc">${esc(r)} <b>${v} คน-วัน</b></span>`).join('')
+    +(have.length?`<span class="rc" style="background:var(--navy);color:#fff">รวม <b style="color:#f4d9a8">${total} คน-วัน</b></span>`:'');
+
+  // ---- ภาพความคืบหน้ารายวัน ----
+  const phDays=have.filter(k=>(DATA.days[k].photoUrls||[]).length);
+  $('wkDaytabs').innerHTML=phDays.map((k,i)=>
+    `<button class="dt ${i===0?'on':''}" onclick="wkPickDay('${k}',this)">${esc(DATA.days[k].short)} <small>(${DATA.days[k].photoUrls.length})</small></button>`
+  ).join('');
+  if(phDays.length) wkPickDay(phDays[0]);
+  else { $('wkStrip').innerHTML='<div class="nophoto">ไม่มีภาพหน้างานในสัปดาห์นี้</div>'; }
+
+  // ---- ปัญหาในสัปดาห์ ----
+  $('wkIss').innerHTML=issueDays.length
+    ? issueDays.map(k=>`<div class="iss"><b>${esc(DATA.days[k].short)}</b> — ${esc(DATA.days[k].issue)}</div>`).join('')
+    : '<div class="ok" style="font-size:14.5px">✓ ไม่มีการแจ้งปัญหาหน้างานในสัปดาห์นี้</div>';
+}
+function wkPickDay(k,btn){
+  document.querySelectorAll('.dt').forEach(b=>b.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  cur=k; lbList=DATA.days[k].photoUrls||[];
+  $('wkStrip').innerHTML=lbList.map((p,i)=>`<img loading="lazy" src="${p}" onclick="openLb(${i})">`).join('');
+}
+
+// ---------- สถานะการเงิน ----------
+function buildFinance(){
+  const b=DATA.billing;
+  if(!b||!b.items||!b.items.length){
+    $('finNoticeTitle').textContent='ยังไม่ได้ผูกข้อมูลงวดงานของโครงการนี้';
+    $('finNoticeBody').textContent='เมื่อผูกข้อมูลแล้ว รายละเอียดงวดงานจะแสดงที่นี่';
+    return;
+  }
+  const pct=b.total?(b.paid/b.total*100):0;
+  $('finTotal').textContent=(b.total/1e6).toFixed(2)+' ล.บ.';
+  $('finPaid').textContent=(b.paid/1e6).toFixed(2)+' ล.บ.';
+  $('finRemain').textContent=((b.total-b.paid)/1e6).toFixed(2)+' ล.บ.';
+  $('finPct').textContent=pct.toFixed(1)+'%';
+  $('finCount').textContent=b.items.length+' งวด ตามสัญญาก่อสร้าง';
+
+  const r=60,cx=75,cy=75,C=2*Math.PI*r,paidLen=C*pct/100;
+  $('finDonut').innerHTML=`
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#eef1f5" stroke-width="18"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#1e8449" stroke-width="18"
+      stroke-dasharray="${paidLen} ${C-paidLen}" stroke-dashoffset="${C*0.25}" stroke-linecap="round"/>
+    <text x="${cx}" y="${cy-2}" text-anchor="middle" font-size="22" font-weight="700" fill="#16233a">${pct.toFixed(0)}%</text>
+    <text x="${cx}" y="${cy+16}" text-anchor="middle" font-size="10" fill="#6b7c93">ชำระแล้ว</text>`;
+  $('finLeg').innerHTML=`<span><i style="background:#1e8449"></i>ชำระแล้ว ${(b.paid/1e6).toFixed(2)} ล้านบาท</span>
+    <span><i style="background:#eef1f5;border:1px solid #dde4ec"></i>คงเหลือ ${((b.total-b.paid)/1e6).toFixed(2)} ล้านบาท</span>`;
+
+  const slipsByInst=DATA.paymentSlips||{};
+  const maxAmt=Math.max(1,...b.items.map(i=>i.amount));
+  $('finList').innerHTML=b.items.map(i=>{
+    const w=(i.amount/maxAmt*100).toFixed(0);
+    const col=i.paid?'#1e8449':'#d9dfe6';
+    const st=i.paid?'<span style="color:#1e8449">ชำระแล้ว</span>':'<span style="color:#b8873b">รอดำเนินการ</span>';
+    const slips=slipsByInst[i.label]||[];
+    const last=slips[slips.length-1];
+    const slipLink=last?`<span class="slipLink" onclick="openLbUrl('${last.view}')">📎 ดูสลิป${slips.length>1?' ('+slips.length+')':''}</span>`:'';
+    return `<div class="instRow"><div class="lab"><b style="color:var(--ink);font-weight:600">${esc(i.label)}</b><br><span style="font-size:11.5px;color:var(--muted)">${esc(i.desc)}</span></div><div class="track"><i style="width:${w}%;background:${col}"></i></div><div class="amt">${i.amount.toLocaleString()} บ.</div><div class="st">${st}${slipLink}</div></div>`;
+  }).join('');
+
+  const due=b.items.find(i=>!i.paid);
+  if(due){
+    $('finNoticeTitle').textContent=`งวดถัดไปที่จะถึงกำหนด: ${due.label} — ${due.desc}`;
+    $('finNoticeBody').textContent=`บริษัทขอเรียนแจ้งเพื่อทราบว่า ${due.label} (มูลค่า ${due.amount.toLocaleString()} บาท) กำลังจะเข้าสู่ขอบเขตงานตามสัญญา บริษัทจะจัดส่งใบแจ้งเบิกอย่างเป็นทางการให้ท่านล่วงหน้าตามรอบที่กำหนดต่อไป`;
+  }else{
+    $('finNoticeTitle').textContent='ชำระครบทุกงวดแล้ว';
+    $('finNoticeBody').textContent='ขอบคุณที่ไว้วางใจ บริษัทจะรายงานความคืบหน้าให้ทราบอย่างต่อเนื่อง';
+  }
+  buildSlipGallery(slipsByInst);
+}
+
+function buildSlipGallery(slipsByInst){
+  const groups=Object.keys(slipsByInst||{});
+  if(!groups.length){
+    $('slipGallery').innerHTML='<div class="nophoto">ยังไม่มีเอกสารหลักฐานการชำระเงินในระบบ</div>';
+    return;
+  }
+  // เรียงตามลำดับงวดใน billing (ไม่ใช่ตามชื่อไฟล์) เพื่อให้ลำดับตรงกับตารางด้านบน
+  const order=(DATA.billing.items||[]).map(i=>i.label);
+  groups.sort((a,b)=>{
+    const ia=order.indexOf(a), ib=order.indexOf(b);
+    return (ia<0?9999:ia)-(ib<0?9999:ib);
+  });
+  $('slipGallery').innerHTML=groups.map(g=>{
+    const slips=slipsByInst[g];
+    const thumbs=slips.map(s=>`<img src="${s.thumb}" title="${esc(s.name)}" onclick="openLbUrl('${s.view}')">`).join('');
+    return `<div class="slipGroup"><div class="slipGroupTitle">${esc(g)}
+      <span style="font-weight:400;color:var(--muted);font-size:11.5px">· ${slips.length} ไฟล์</span></div>
+      <div class="strip">${thumbs}</div></div>`;
+  }).join('');
+}
+
+// ---------- ไลท์บ็อกซ์ ----------
+function openLb(i){
+  lbIdx=i;
+  $('lbimg').src=lbList[i];
+  $('lbcap').textContent=(DATA.days[cur]?DATA.days[cur].label+' · ':'')+'รูปที่ '+(i+1)+' / '+lbList.length;
+  $('lb').classList.add('on');
+}
+function openLbUrl(u){ lbList=[u]; lbIdx=0; $('lbimg').src=u; $('lbcap').textContent=''; $('lb').classList.add('on'); }
+function stepLb(d){ if(lbList.length<2)return; lbIdx=(lbIdx+d+lbList.length)%lbList.length; openLb(lbIdx); }
+function closeLb(){$('lb').classList.remove('on')}
+document.addEventListener('keydown',e=>{
+  if(!$('lb').classList.contains('on'))return;
+  if(e.key==='ArrowLeft')stepLb(-1);
+  if(e.key==='ArrowRight')stepLb(1);
+  if(e.key==='Escape')closeLb();
+});
+</script>
+</body></html>
