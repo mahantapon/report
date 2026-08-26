@@ -98,8 +98,15 @@ h2 em{font-style:normal;font-size:11.5px;color:var(--muted);font-weight:400}
 .calhollist .hi b{color:var(--ink);font-weight:600}
 .calhollist .none{font-size:12px;color:var(--muted)}
 .chips{display:flex;gap:8px;margin-bottom:13px}
-.chip{flex:1;display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:8px;padding:10.5px 13px 8px;background:#fbfcfd}
-.chip .ic{font-size:21px;line-height:1;display:flex;align-items:center;height:26px}
+.chip{flex:1;display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:8px;padding:10.5px 13px 8px;background:#fbfcfd;
+  transition:transform .15s,box-shadow .15s}
+.chip:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(22,35,58,.07)}
+/* ไอคอนใส่ตรากลมสีพาสเทล ไม่ให้เป็นตัวอักษรลอยเดี่ยวๆ จำเจ — ให้สีต่างกันตามความหมายแต่ละใบ */
+.chip .ic{font-size:18px;line-height:1;display:flex;align-items:center;justify-content:center;
+  width:34px;height:34px;border-radius:10px;flex:0 0 auto}
+.chip:nth-child(1) .ic{background:linear-gradient(135deg,#e3f5ea,#c3e8d1)}
+.chip:nth-child(2) .ic{background:linear-gradient(135deg,#faf1de,#f0dcae)}
+.chip:nth-child(3) .ic{background:linear-gradient(135deg,#e7eef7,#cfdcee)}
 .chip .txt{display:flex;flex-direction:column;justify-content:center}
 .chip b{display:block;font-size:15px;line-height:1.3}
 .chip small{display:block;font-size:11px;line-height:1.35;color:var(--muted);margin-top:1px}
@@ -164,6 +171,10 @@ ol.tasks li{margin-bottom:4px}
   margin-bottom:13px;display:flex;align-items:center;gap:26px;flex-wrap:wrap;position:relative;overflow:hidden}
 .hero::after{content:'';position:absolute;inset:0;pointer-events:none;
   background:radial-gradient(40% 60% at 88% 10%,rgba(240,210,154,.20),transparent 70%)}
+/* ลายเส้นตารางจางๆ แบบพิมพ์เขียวงานก่อสร้าง — จุดเดียวที่ใส่ลูกเล่นนี้ ไม่ใส่ซ้ำทุกกล่องจะรก */
+.hero::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.06;
+  background-image:repeating-linear-gradient(90deg,#fff 0,#fff 1px,transparent 1px,transparent 34px),
+  repeating-linear-gradient(0deg,#fff 0,#fff 1px,transparent 1px,transparent 34px)}
 .hero .ring{position:relative;z-index:1;flex:0 0 auto}
 .hero .info{position:relative;z-index:1;flex:1;min-width:200px}
 .hero .info .lbl{font-size:11px;letter-spacing:.14em;color:#a8bcd4;text-transform:uppercase;margin-bottom:5px}
@@ -186,7 +197,13 @@ ol.tasks li{margin-bottom:4px}
 .ovc:nth-child(2)::before{background:linear-gradient(90deg,var(--gold),#f0d29a)}
 .ovc:nth-child(3)::before{background:linear-gradient(90deg,#1e8449,#4fb87a)}
 .ovc:nth-child(4)::before{background:linear-gradient(90deg,#2f8f9e,#74cdda)}
-.ovc .ic{font-size:16px;margin-bottom:5px;display:block}
+/* ตรากลมสีพาสเทลจางๆ ตามโทนเดิมของแบรนด์ (กรม/ทอง/เขียว/ฟ้าอมเทา) — แค่พอให้แยกใบต่อใบ ไม่ฉูดฉาด */
+.ovc .ic{font-size:15px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;
+  width:32px;height:32px;border-radius:9px}
+.ovc:nth-child(1) .ic{background:linear-gradient(135deg,#e7eef7,#cfdcee)}
+.ovc:nth-child(2) .ic{background:linear-gradient(135deg,#faf1de,#f0dcae)}
+.ovc:nth-child(3) .ic{background:linear-gradient(135deg,#e3f5ea,#c3e8d1)}
+.ovc:nth-child(4) .ic{background:linear-gradient(135deg,#e2f4f6,#c8e8ec)}
 .ovc b{display:block;font-size:11px;color:var(--muted);font-weight:500}
 .ovc .v{font-size:20px;font-weight:700;line-height:1.25;margin-top:1px}
 /* flow ขั้นตอน (แนวนอน เลื่อนได้) — ขั้นปัจจุบันยกเด่นแยกจากขั้นอื่นชัดเจน
@@ -209,7 +226,10 @@ ol.tasks li{margin-bottom:4px}
 .fst.done .nm{color:var(--green)}
 /* ขั้นตอนปัจจุบัน: จุดใหญ่เต็มความสูงแถว (44px) เส้นเชื่อมยังอยู่ระดับเดิม */
 .fst.cur .dot{width:44px;height:44px;margin:0;font-size:15px;background:#fff;border-color:var(--gold);color:var(--gold);
-  box-shadow:0 6px 16px rgba(184,135,59,.3),0 0 0 5px rgba(184,135,59,.14)}
+  box-shadow:0 6px 16px rgba(184,135,59,.3),0 0 0 5px rgba(184,135,59,.14);animation:curPulse 2.4s ease-in-out infinite}
+/* วงแหวนจางๆ เต้นช้าๆ รอบจุด "กำลังทำ" — ลูกเล่นเดียวที่ใส่ ให้รู้สึกว่าเว็บมีชีวิต ไม่ใช่ภาพนิ่ง */
+@keyframes curPulse{0%,100%{box-shadow:0 6px 16px rgba(184,135,59,.3),0 0 0 5px rgba(184,135,59,.14)}
+  50%{box-shadow:0 6px 16px rgba(184,135,59,.3),0 0 0 8px rgba(184,135,59,.08)}}
 .fst.cur .nm{color:var(--gold);font-weight:700;font-size:11px}
 .fst.cur .tag{display:inline-block;margin-top:5px;background:var(--gold);color:#fff;font-size:9px;font-weight:700;
   padding:2.5px 8px;border-radius:99px;letter-spacing:.03em}
@@ -238,11 +258,14 @@ ol.tasks li{margin-bottom:4px}
 .upd .t small{display:block;color:var(--muted);font-size:11.5px;margin-top:1px}
 .upd:hover .t{color:var(--gold)}
 /* finance */
-.fintotal{background:linear-gradient(135deg,#16324f,#1e4166 55%,#26527e);border-radius:14px;padding:20px 24px;
-  color:#fff;text-align:center;margin-bottom:14px}
-.fintotal b{display:block;font-size:11px;letter-spacing:.14em;color:#a8bcd4;text-transform:uppercase;font-weight:600;margin-bottom:8px}
-.fintotal .v{font-size:32px;font-weight:700;color:#fff;line-height:1.15}
-.fintotal .u{font-size:11.5px;color:#c3d3e5;margin-top:6px}
+/* โทนทอง/บรอนซ์เข้ม — ตั้งใจให้ต่างจาก .hero (กรมน้ำเงิน) ของแท็บภาพรวม กันสองหน้าดูซ้ำเป็นแผ่นเดียวกัน */
+.fintotal{background:linear-gradient(135deg,#5c4519,#8f6f21 55%,#b8873b);border-radius:14px;padding:20px 24px;
+  color:#fff;text-align:center;margin-bottom:14px;position:relative;overflow:hidden}
+.fintotal::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(45% 65% at 15% 110%,rgba(255,255,255,.14),transparent 65%)}
+.fintotal b{position:relative;display:block;font-size:11px;letter-spacing:.14em;color:#f3e2bc;text-transform:uppercase;font-weight:600;margin-bottom:8px}
+.fintotal .v{position:relative;font-size:32px;font-weight:700;color:#fff;line-height:1.15}
+.fintotal .u{position:relative;font-size:11.5px;color:#f1e4c9;margin-top:6px}
 .notice{border:1.5px solid #e3cd9a;background:#fffaf0;border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;gap:12px;align-items:flex-start}
 .notice .ic{font-size:22px}
 .notice b{color:#7a5c1e}
