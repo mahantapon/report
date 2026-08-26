@@ -704,13 +704,20 @@ function buildOverview(){
   $('ovLast').textContent=last?DATA.days[last].short:'—';
 
   // flow ขั้นตอน — ขั้นปัจจุบันยกเด่นเป็นการ์ดใหญ่กว่า พร้อมป้าย "ตอนนี้"
+  // ⚠️ ถ้าข้อมูล phases มีสถานะ "กำลังทำ" (2) มากกว่า 1 ขั้น (เช่น [..,2,2,..])
+  // ให้ยกเด่นเฉพาะขั้น "กำลังทำ" ตัวสุดท้าย (ตัวที่คืบหน้าไปไกลสุด) ตัวก่อนหน้าถือว่าใกล้เสร็จแล้ว โชว์เป็น "เสร็จแล้ว" แทน
+  // ไม่งั้นจะมีป้าย "ตอนนี้" ขึ้นซ้อนกัน 2 อัน ดูเหมือนหน้าพัง
   if(ph&&ph.length){
     $('ovStepSec').style.display='';
+    let lastCur=-1;
+    ph.forEach(function(st,i){ if(st===2) lastCur=i; });
     $('ovFlow').innerHTML=ph.map(function(st,i){
-      const cls=st===1?'done':(st===2?'cur':'');
-      const ic=st===1?'✓':(i+1);
+      const isCur=st===2&&i===lastCur;
+      const isDone=st===1||(st===2&&!isCur);
+      const cls=isDone?'done':(isCur?'cur':'');
+      const ic=isDone?'✓':(i+1);
       const nm=(DATA.phaseNames[i]||'').replace('|','<br>');
-      const tag=st===2?'<div class="tag">ตอนนี้</div>':'';
+      const tag=isCur?'<div class="tag">ตอนนี้</div>':'';
       return '<div class="fst '+cls+'"><div class="dot">'+ic+'</div><div class="nm">'+nm+'</div>'+tag+'</div>';
     }).join('');
   }else{ $('ovStepSec').style.display='none'; }
