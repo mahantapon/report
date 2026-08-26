@@ -16,9 +16,27 @@
   --ok:#57c98a;--warn:#f2b866;--bad:#ef8b7e}
 *{box-sizing:border-box;margin:0;padding:0}
 body{min-height:100vh;font-family:"IBM Plex Sans Thai","Sarabun",sans-serif;color:var(--ink);font-size:15px;line-height:1.6;
-  background:#0c1624 url('hero-art.jpg') center/cover fixed no-repeat}
-body::before{content:'';position:fixed;inset:0;z-index:0;
-  background:linear-gradient(180deg,rgba(8,15,27,.72),rgba(8,15,27,.86))}
+  background:#080d15;overflow-x:hidden}
+/* พื้นหลังสไตล์เดียวกับหน้า login (ClientPortal.html #gate) — light leak หลายชั้น + เคลื่อนช้ามาก
+   ทั้งหมดเป็น CSS ล้วน ไม่ใช้รูปภาพ เลยเบากว่า hero-art.jpg เดิมเยอะ และหน้าตาเข้าธีมเดียวกับตอนกรอกรหัส */
+body::before{content:'';position:fixed;inset:-30%;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(38% 26% at 18% 14%, rgba(226,186,116,.30), transparent 62%),
+    radial-gradient(32% 22% at 84% 26%, rgba(96,150,214,.22), transparent 64%),
+    radial-gradient(46% 30% at 62% 92%, rgba(150,116,200,.16), transparent 66%),
+    linear-gradient(112deg, transparent 34%, rgba(240,210,154,.11) 44%, rgba(240,210,154,.04) 50%, transparent 58%),
+    linear-gradient(112deg, transparent 60%, rgba(140,190,255,.07) 68%, transparent 76%);
+  filter:blur(28px);
+  animation:drift 26s ease-in-out infinite alternate}
+@keyframes drift{
+  0%{transform:translate3d(-2%,-1%,0) scale(1.04)}
+  100%{transform:translate3d(2.5%,2%,0) scale(1.12)}}
+/* ชั้นเนื้อฟิล์ม (noise) + vignette มืดขอบ — ตัวเดียวกับ #gate::after ในหน้าลูกค้า */
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 78% 68% at 50% 46%, transparent 42%, rgba(3,7,13,.72) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.28'/%3E%3C/svg%3E");
+  mix-blend-mode:overlay;opacity:.5}
 .wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:26px 18px 70px}
 
 header{display:flex;align-items:center;gap:14px;margin-bottom:4px}
