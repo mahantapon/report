@@ -131,30 +131,50 @@ ol.tasks li{margin-bottom:4px}
 .hero .info p{font-size:12.5px;color:#c3d3e5;line-height:1.65}
 .hero .badge{display:inline-block;margin-top:9px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);
   border-radius:99px;padding:4px 13px;font-size:12.5px;font-weight:600}
+.hero .contract{position:relative;z-index:1;flex:0 0 auto;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);
+  border-radius:12px;padding:14px 24px;text-align:center;min-width:168px}
+.hero .contract b{display:block;font-size:10.5px;letter-spacing:.1em;color:#a8bcd4;text-transform:uppercase;font-weight:600;margin-bottom:7px}
+.hero .contract .v{font-size:23px;font-weight:700;color:#fff;line-height:1.2}
+.hero .contract .u{font-size:11px;color:#9fb4cc;margin-top:3px}
 .ov{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:13px}
 .ovc{background:#fff;border:1px solid var(--line);border-radius:11px;padding:13px 15px}
 .ovc .ic{font-size:16px;margin-bottom:5px;display:block}
 .ovc b{display:block;font-size:11px;color:var(--muted);font-weight:500}
 .ovc .v{font-size:20px;font-weight:700;line-height:1.25;margin-top:1px}
-/* flow ขั้นตอน (แนวนอน เลื่อนได้) */
-.flow{display:flex;gap:0;overflow-x:auto;padding:8px 2px 4px;-webkit-overflow-scrolling:touch}
-.fst{flex:1;min-width:96px;text-align:center;position:relative;padding-top:4px}
-.fst::before{content:'';position:absolute;top:18px;left:-50%;width:100%;height:2.5px;background:var(--line);z-index:0}
+/* flow ขั้นตอน (แนวนอน เลื่อนได้) — ขั้นปัจจุบันยกเด่นแยกจากขั้นอื่นชัดเจน */
+.flow{display:flex;gap:2px;overflow-x:auto;padding:16px 4px 6px;-webkit-overflow-scrolling:touch;align-items:flex-end}
+.fst{flex:1;min-width:82px;text-align:center;position:relative;padding-top:4px;transition:transform .2s}
+.fst::before{content:'';position:absolute;top:20px;left:-50%;width:100%;height:3px;background:var(--line);z-index:0;border-radius:2px}
 .fst:first-child::before{display:none}
 .fst.done::before{background:var(--green)}
+.fst.cur::before{background:linear-gradient(90deg,var(--green),var(--gold))}
 .fst .dot{width:30px;height:30px;border-radius:99px;background:#eef1f5;color:#8a97a8;display:inline-flex;align-items:center;
   justify-content:center;font-size:12px;font-weight:700;position:relative;z-index:1;border:2px solid #eef1f5;transition:.2s}
 .fst.done .dot{background:var(--green);border-color:var(--green);color:#fff}
-.fst.cur .dot{background:#fff;border-color:var(--gold);color:var(--gold);box-shadow:0 0 0 4px rgba(184,135,59,.15)}
 .fst .nm{font-size:10.5px;color:var(--muted);margin-top:6px;line-height:1.35}
-.fst.done .nm{color:var(--green)} .fst.cur .nm{color:var(--gold);font-weight:700}
-/* แถบ mini bar (กำลังคนรายเดือน) */
-.mbars{display:flex;align-items:flex-end;gap:8px;height:104px;border-bottom:1px solid var(--line);margin:8px 0 0}
+.fst.done .nm{color:var(--green)}
+/* ขั้นตอนปัจจุบัน: การ์ดเด่น ยกสูงกว่าขั้นอื่น มีป้าย "ตอนนี้" */
+.fst.cur{transform:translateY(-9px)}
+.fst.cur .dot{width:40px;height:40px;font-size:14.5px;background:#fff;border-color:var(--gold);color:var(--gold);
+  box-shadow:0 6px 16px rgba(184,135,59,.3),0 0 0 5px rgba(184,135,59,.14)}
+.fst.cur .nm{color:var(--gold);font-weight:700;font-size:11px}
+.fst.cur .tag{display:inline-block;margin-top:5px;background:var(--gold);color:#fff;font-size:9px;font-weight:700;
+  padding:2.5px 8px;border-radius:99px;letter-spacing:.03em}
+/* แถบ mini bar (กำลังคนรายเดือน/รายสัปดาห์) */
+.mbarshead{display:flex;gap:7px;margin-bottom:12px}
+.mbars{display:flex;align-items:flex-end;gap:8px;height:104px;border-bottom:1px solid var(--line);margin:8px 0 0;
+  background-image:linear-gradient(180deg,transparent 0,transparent calc(100% - 1px),var(--line) 100%),
+  repeating-linear-gradient(180deg,#f4f6f9 0,#f4f6f9 1px,transparent 1px,transparent 26px);background-repeat:no-repeat}
 .mbar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
 .mbar .b{width:100%;max-width:46px;background:linear-gradient(180deg,#39699b,#16324f);border-radius:6px 6px 0 0;min-height:3px}
 .mbar .n{font-size:11.5px;font-weight:700;margin-bottom:4px;color:var(--ink2)}
 .mxl{display:flex;gap:8px;margin-top:5px}
 .mxl div{flex:1;text-align:center;font-size:10.5px;color:var(--muted)}
+/* เมื่อมีแท่งน้อย (≤3) อย่ายืดเต็มแถว — จะดูโบ๋ว่างๆ ให้รวมกลุ่มไว้ตรงกลางแทน */
+.mbars.few{justify-content:center;gap:34px}
+.mbars.few .mbar{flex:0 0 68px}
+.mxl.few{justify-content:center;gap:34px}
+.mxl.few div{flex:0 0 68px}
 /* รายการอัปเดตล่าสุด */
 .upd{display:flex;gap:11px;padding:10px 0;border-bottom:1px solid #f0f2f6;cursor:pointer}
 .upd:last-child{border-bottom:0}
@@ -163,6 +183,11 @@ ol.tasks li{margin-bottom:4px}
 .upd .t small{display:block;color:var(--muted);font-size:11.5px;margin-top:1px}
 .upd:hover .t{color:var(--gold)}
 /* finance */
+.fintotal{background:linear-gradient(135deg,#16324f,#1e4166 55%,#26527e);border-radius:14px;padding:20px 24px;
+  color:#fff;text-align:center;margin-bottom:14px}
+.fintotal b{display:block;font-size:11px;letter-spacing:.14em;color:#a8bcd4;text-transform:uppercase;font-weight:600;margin-bottom:8px}
+.fintotal .v{font-size:32px;font-weight:700;color:#fff;line-height:1.15}
+.fintotal .u{font-size:11.5px;color:#c3d3e5;margin-top:6px}
 .notice{border:1.5px solid #e3cd9a;background:#fffaf0;border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;gap:12px;align-items:flex-start}
 .notice .ic{font-size:22px}
 .notice b{color:#7a5c1e}
@@ -367,6 +392,11 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
       <p id="ovLine">—</p>
       <span class="badge" id="ovBadge">—</span>
     </div>
+    <div class="contract" id="heroContract" style="display:none">
+      <b>มูลค่าสัญญารวม</b>
+      <div class="v" id="heroContractV">—</div>
+      <div class="u">ตามสัญญาก่อสร้าง</div>
+    </div>
   </div>
 
   <div class="ov">
@@ -382,22 +412,13 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
   </section>
 
   <section>
-    <h2>กำลังคนเข้าทำงาน <em>รายเดือน</em></h2>
+    <h2>กำลังคนเข้าทำงาน <em>ดูย้อนหลังได้ทั้งรายเดือนและรายสัปดาห์</em></h2>
+    <div class="mbarshead">
+      <button class="dt on" id="ovBarsMonBtn" onclick="setBarsMode('m')">รายเดือน</button>
+      <button class="dt" id="ovBarsWkBtn" onclick="setBarsMode('w')">รายสัปดาห์</button>
+    </div>
     <div class="mbars" id="ovBars"></div>
     <div class="mxl" id="ovBarsX"></div>
-  </section>
-
-  <section id="ovFinSec">
-    <h2>ความคืบหน้าการชำระเงิน <em>ตามงวดงานในสัญญา</em></h2>
-    <div class="kpi" style="grid-template-columns:repeat(3,1fr)">
-      <div class="k"><b>มูลค่าสัญญารวม</b><div class="v" id="ovFinTotal">—</div></div>
-      <div class="k"><b>ชำระแล้ว</b><div class="v" style="color:var(--green)" id="ovFinPaid">—</div></div>
-      <div class="k"><b>คงเหลือ</b><div class="v" style="color:var(--gold)" id="ovFinLeft">—</div></div>
-    </div>
-    <div style="margin-top:13px;height:10px;background:#eef1f5;border-radius:6px;overflow:hidden">
-      <i id="ovFinBar" style="display:block;height:100%;background:linear-gradient(90deg,#2f9e63,#1e8449);border-radius:6px;width:0"></i>
-    </div>
-    <div style="margin-top:7px;font-size:12px;color:var(--muted)" id="ovFinNote"></div>
   </section>
 
   <section>
@@ -499,19 +520,24 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
 </div>
 
 <div id="viewF" style="display:none">
+  <section class="fintotal" id="finTotalSec" style="display:none">
+    <b>มูลค่าสัญญารวม</b>
+    <div class="v" id="finTotalTop">—</div>
+    <div class="u">ตามสัญญาก่อสร้าง</div>
+  </section>
   <div class="notice">
     <span class="ic">📌</span>
     <div><b id="finNoticeTitle"></b><p id="finNoticeBody"></p></div>
   </div>
-  <section id="finExtraSec" style="display:none">
-    <h2>งานเพิ่ม–ลด <em>นอกเหนืองวดงานตามสัญญา</em></h2>
-    <div id="finExtra"></div>
-    <div class="finfoot">รายการนี้สรุปเป็นยอดรวมของแต่ละหมวด — รายละเอียดแยกรายการอยู่ในเอกสารสรุปงานเพิ่ม-ลดที่บริษัทจัดส่งให้ท่านแยกต่างหาก</div>
-  </section>
   <section>
     <h2>รายละเอียดงวดงาน <em id="finCount"></em></h2>
     <div id="finList"></div>
     <div class="finfoot">หมายเหตุ: รายการนี้จัดทำขึ้นเพื่อความสะดวกในการติดตามของท่านลูกค้า ไม่ถือเป็นใบแจ้งหนี้หรือเอกสารทางบัญชี — บริษัทจะจัดส่งใบแจ้งเบิกงวดงานอย่างเป็นทางการแยกต่างหากทุกครั้งก่อนถึงกำหนด</div>
+  </section>
+  <section id="finExtraSec" style="display:none">
+    <h2>งานเพิ่ม–ลด <em>นอกเหนืองวดงานตามสัญญา</em></h2>
+    <div id="finExtra"></div>
+    <div class="finfoot">รายการนี้สรุปเป็นยอดรวมของแต่ละหมวด — รายละเอียดแยกรายการอยู่ในเอกสารสรุปงานเพิ่ม-ลดที่บริษัทจัดส่งให้ท่านแยกต่างหาก</div>
   </section>
   <section>
     <h2>หลักฐานการชำระเงิน <em>กดที่รูปเพื่อขยาย</em></h2>
@@ -677,49 +703,30 @@ function buildOverview(){
   $('ovPh').textContent=totPh.toLocaleString()+' ภาพ';
   $('ovLast').textContent=last?DATA.days[last].short:'—';
 
-  // flow ขั้นตอน
+  // flow ขั้นตอน — ขั้นปัจจุบันยกเด่นเป็นการ์ดใหญ่กว่า พร้อมป้าย "ตอนนี้"
   if(ph&&ph.length){
     $('ovStepSec').style.display='';
     $('ovFlow').innerHTML=ph.map(function(st,i){
       const cls=st===1?'done':(st===2?'cur':'');
       const ic=st===1?'✓':(i+1);
       const nm=(DATA.phaseNames[i]||'').replace('|','<br>');
-      return '<div class="fst '+cls+'"><div class="dot">'+ic+'</div><div class="nm">'+nm+'</div></div>';
+      const tag=st===2?'<div class="tag">ตอนนี้</div>':'';
+      return '<div class="fst '+cls+'"><div class="dot">'+ic+'</div><div class="nm">'+nm+'</div>'+tag+'</div>';
     }).join('');
   }else{ $('ovStepSec').style.display='none'; }
 
-  // กำลังคนรายเดือน (6 เดือนล่าสุด)
-  const byM={};
-  keys.forEach(function(k){ const m=k.slice(0,7); byM[m]=(byM[m]||0)+DATA.days[k].total; });
-  // ⚠️ ข้ามเดือนที่กำลังคน = 0 (บางเดือนช่างส่งงานแต่ไม่ได้กรอกจำนวนคน)
-  // ถ้าไม่ข้าม กราฟจะมีแท่งสูง 0 ดูเหมือนระบบพัง
-  const ms=Object.keys(byM).filter(function(m){return byM[m]>0}).sort().slice(-6);
-  if(ms.length){
-    const mx=Math.max(1,...ms.map(function(m){return byM[m]}));
-    $('ovBars').innerHTML=ms.map(function(m){
-      return '<div class="mbar"><div class="n">'+byM[m]+'</div><div class="b" style="height:'+(byM[m]/mx*80)+'%"></div></div>';
-    }).join('');
-    $('ovBarsX').innerHTML=ms.map(function(m){
-      const d=toDate(m+'-01');
-      return '<div>'+TH_M[d.getMonth()].slice(0,4)+' '+String(d.getFullYear()+543).slice(-2)+'</div>';
-    }).join('');
-  }else{
-    $('ovBars').innerHTML='<div class="nophoto" style="width:100%;align-self:center">ยังไม่มีการบันทึกจำนวนกำลังคน</div>';
-    $('ovBarsX').innerHTML='';
-  }
+  // กำลังคนเข้าทำงาน — เก็บ keys ไว้ให้ renderBars() ใช้สลับรายเดือน/รายสัปดาห์ได้
+  BARS_KEYS=keys;
+  barsMode='m';
+  $('ovBarsMonBtn').classList.add('on'); $('ovBarsWkBtn').classList.remove('on');
+  renderBars();
 
-  // การเงิน
+  // การเงิน — ยอดสัญญารวมย้ายไปโชว์เด่นๆ ในการ์ดบนสุดแทน (ตัดชำระแล้ว/คงเหลือออก ไม่ให้ดูเหมือนบิลละเอียด)
   const b=DATA.billing;
-  if(b&&b.items&&b.items.length){
-    $('ovFinSec').style.display='';
-    const fp=b.total?(b.paid/b.total*100):0;
-    $('ovFinTotal').textContent=(b.total/1e6).toFixed(2)+' ล.บ.';
-    $('ovFinPaid').textContent=(b.paid/1e6).toFixed(2)+' ล.บ.';
-    $('ovFinLeft').textContent=((b.total-b.paid)/1e6).toFixed(2)+' ล.บ.';
-    $('ovFinBar').style.width=fp.toFixed(1)+'%';
-    const paidN=b.items.filter(function(i){return i.paid}).length;
-    $('ovFinNote').textContent='ชำระแล้ว '+paidN+' จาก '+b.items.length+' งวด ('+fp.toFixed(1)+'%)';
-  }else{ $('ovFinSec').style.display='none'; }
+  if(b&&b.total){
+    $('heroContract').style.display='';
+    $('heroContractV').textContent=(b.total/1e6).toFixed(2)+' ล.บ.';
+  }else{ $('heroContract').style.display='none'; }
 
   // อัปเดตล่าสุด 5 วัน
   $('ovUpd').innerHTML=keys.slice(-5).reverse().map(function(k){
@@ -731,6 +738,47 @@ function buildOverview(){
   }).join('')||'<div class="nophoto">ยังไม่มีรายงานที่เผยแพร่</div>';
 }
 function goDay(k){ cur=k; showTab('d'); render(); buildCal(); }
+
+// ---------- กราฟกำลังคนเข้าทำงาน (สลับรายเดือน/รายสัปดาห์) ----------
+let BARS_KEYS=[], barsMode='m';
+function setBarsMode(mode){
+  barsMode=mode;
+  $('ovBarsMonBtn').classList.toggle('on', mode==='m');
+  $('ovBarsWkBtn').classList.toggle('on', mode==='w');
+  renderBars();
+}
+function renderBars(){
+  const keys=BARS_KEYS, buckets={};
+  let order;
+  if(barsMode==='w'){
+    keys.forEach(function(k){
+      const mon=mondayOf(k), wk=iso(mon.getFullYear(),mon.getMonth(),mon.getDate());
+      buckets[wk]=(buckets[wk]||0)+DATA.days[k].total;
+    });
+    // ⚠️ เหตุผลข้ามค่า 0 เดียวกับรายเดือน — ป้องกันแท่งสูง 0 ที่ทำให้ดูเหมือนระบบพัง
+    order=Object.keys(buckets).filter(function(w){return buckets[w]>0}).sort().slice(-8);
+  }else{
+    keys.forEach(function(k){ const m=k.slice(0,7); buckets[m]=(buckets[m]||0)+DATA.days[k].total; });
+    order=Object.keys(buckets).filter(function(m){return buckets[m]>0}).sort().slice(-6);
+  }
+  const few=order.length>0&&order.length<=3;
+  $('ovBars').classList.toggle('few',few);
+  $('ovBarsX').classList.toggle('few',few);
+  if(order.length){
+    const mx=Math.max(1,...order.map(function(x){return buckets[x]}));
+    $('ovBars').innerHTML=order.map(function(x){
+      return '<div class="mbar"><div class="n">'+buckets[x]+'</div><div class="b" style="height:'+(buckets[x]/mx*80)+'%"></div></div>';
+    }).join('');
+    $('ovBarsX').innerHTML=order.map(function(x){
+      if(barsMode==='w'){ const d=toDate(x); return '<div>'+String(d.getDate())+' '+TH_M[d.getMonth()].slice(0,3)+'</div>'; }
+      const d=toDate(x+'-01');
+      return '<div>'+TH_M[d.getMonth()].slice(0,4)+' '+String(d.getFullYear()+543).slice(-2)+'</div>';
+    }).join('');
+  }else{
+    $('ovBars').innerHTML='<div class="nophoto" style="width:100%;align-self:center">ยังไม่มีการบันทึกจำนวนกำลังคน</div>';
+    $('ovBarsX').innerHTML='';
+  }
+}
 
 function showTab(t){
   ['o','d','w','f'].forEach(function(k){
@@ -961,6 +1009,10 @@ function wkPickDay(k,btn){
 // ---------- สถานะการเงิน ----------
 function buildFinance(){
   const b=DATA.billing;
+  if(b&&b.total){
+    $('finTotalSec').style.display='';
+    $('finTotalTop').textContent=(b.total/1e6).toFixed(2)+' ล้านบาท';
+  }else{ $('finTotalSec').style.display='none'; }
   if(!b||!b.items||!b.items.length){
     $('finNoticeTitle').textContent='ยังไม่ได้ผูกข้อมูลงวดงานของโครงการนี้';
     $('finNoticeBody').textContent='เมื่อผูกข้อมูลแล้ว รายละเอียดงวดงานจะแสดงที่นี่';
