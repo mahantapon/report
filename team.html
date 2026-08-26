@@ -1,8 +1,9 @@
 <!--
   team.html — หน้ารวมโครงการ "สำหรับทีมภายใน" บน report.ruanganan.com/team.html
-  ⚠️ ห้ามส่งลิงก์นี้ให้ลูกค้า — หลังใส่รหัสทีมจะเห็น PIN ของทุกโครงการ
+  ⚠️ ห้ามส่งลิงก์นี้ให้ลูกค้า — หลังใส่รหัสทีมจะเห็น PIN ของทุกโครงการ และเปลี่ยนรหัสได้
 
   ข้อมูลดึงจาก Apps Script (doPost action:'hubData' — ตรวจ TEAM_SECRET ฝั่งเซิร์ฟเวอร์)
+  เปลี่ยนรหัสลูกค้า: action:'setPin' / 'rollPin' — เซิร์ฟเวอร์ตรวจรหัสทีมซ้ำทุกครั้ง
   หน้านี้เป็นแค่เปลือกเหมือน index.html — ไม่มีความลับฝังในไฟล์
 -->
 <!doctype html><html lang="th"><head>
@@ -11,19 +12,20 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>ทีมภายใน — รายงานความคืบหน้าโครงการ</title>
 <style>
-:root{--ink:#e8edf4;--muted:#93a1b5;--navy:#16324f;--gold:#d4ac5e;--gold-dk:#a97e33;--line:rgba(255,255,255,.09);--card:rgba(13,21,34,.88)}
+:root{--ink:#e8edf4;--muted:#93a1b5;--navy:#16324f;--gold:#d4ac5e;--gold-dk:#a97e33;--line:rgba(255,255,255,.09);--card:rgba(13,21,34,.88);
+  --ok:#57c98a;--warn:#f2b866;--bad:#ef8b7e}
 *{box-sizing:border-box;margin:0;padding:0}
 body{min-height:100vh;font-family:"IBM Plex Sans Thai","Sarabun",sans-serif;color:var(--ink);font-size:15px;line-height:1.6;
   background:#0c1624 url('hero-art.jpg') center/cover fixed no-repeat}
 body::before{content:'';position:fixed;inset:0;z-index:0;
   background:linear-gradient(180deg,rgba(8,15,27,.72),rgba(8,15,27,.86))}
-.wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:26px 18px 70px}
+.wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:26px 18px 70px}
 
 header{display:flex;align-items:center;gap:14px;margin-bottom:4px}
 .chip{background:rgba(255,255,255,.94);border-radius:11px;padding:6px 9px}
 .chip img{height:38px;display:block}
 h1{font-size:19px;font-weight:700;color:#f3f6fa}
-.sub{color:var(--muted);font-size:12.5px;margin:4px 0 22px}
+.sub{color:var(--muted);font-size:12.5px;margin:4px 0 20px}
 .sub b{color:#f0d29a;font-weight:600}
 
 /* gate รหัสทีม */
@@ -39,25 +41,57 @@ h1{font-size:19px;font-weight:700;color:#f3f6fa}
 #gate input{width:100%;padding:12px 14px;font:inherit;font-size:15px;color:#f4d9a8;text-align:center;letter-spacing:.06em;
   background:rgba(16,26,42,.85);border:1.5px solid #2b3a53;border-radius:11px;margin-bottom:10px}
 #gate input:focus{outline:none;border-color:#c69a49;box-shadow:0 0 0 3.5px rgba(198,154,73,.2)}
-#gate .err{color:#ef8b7e;font-size:12.5px;height:18px;margin-bottom:6px}
+#gate .err{color:var(--bad);font-size:12.5px;height:18px;margin-bottom:6px}
 #gate button{width:100%;padding:12px 0;font:inherit;font-size:15px;font-weight:700;color:#161616;border:0;border-radius:11px;
   cursor:pointer;background:linear-gradient(180deg,#d3a854,#a97e33);box-shadow:0 8px 22px rgba(198,154,73,.3)}
 #gate button:disabled{filter:grayscale(.3) brightness(.85)}
 #gate .note{margin-top:14px;font-size:10.5px;color:#7d8ba0}
 
+/* แถบสรุปภาพรวม */
+.sumbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:11px;margin-bottom:14px}
+.sum{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:12px 14px}
+.sum .n{font-size:22px;font-weight:700;line-height:1.15;color:#f3f6fa}
+.sum .l{font-size:11px;color:var(--muted);margin-top:1px}
+.sum .s{font-size:10.5px;color:#7d8ba0;margin-top:3px}
+.sum.ok .n{color:var(--ok)} .sum.warn .n{color:var(--warn)} .sum.bad .n{color:var(--bad)}
+
+/* ตารางเทียบ */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:15px;overflow:hidden;margin-bottom:22px}
+.panel h3{font-size:13.5px;font-weight:700;padding:12px 15px;border-bottom:1px solid var(--line);color:#f0d29a}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:12.5px;min-width:720px}
+th,td{padding:9px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap;background:rgba(255,255,255,.03)}
+tr:last-child td{border-bottom:0}
+td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.name{font-weight:600;color:#f3f6fa;white-space:nowrap}
+.dash{color:#5d6a7d}
+.issuetxt{color:var(--warn);max-width:260px}
+.bar{position:relative;height:5px;border-radius:3px;background:rgba(255,255,255,.09);width:84px;margin:4px 0 0 auto}
+.bar > i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--gold)}
+
+.tag{display:inline-block;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.tag.ok{background:rgba(87,201,138,.13);color:var(--ok)}
+.tag.wait{background:rgba(242,184,102,.13);color:var(--warn)}
+.tag.none{background:rgba(239,139,126,.13);color:var(--bad)}
+.tag.raw{background:rgba(129,150,255,.15);color:#a9b8ff}
+
 /* การ์ดโครงการ */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px}
 .card{background:var(--card);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   border:1px solid var(--line);border-radius:16px;padding:18px 18px 15px;display:flex;flex-direction:column;gap:11px}
-.card h2{font-size:16.5px;color:#f3f6fa;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card h2{font-size:16.5px;color:#f3f6fa;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .pin{font-family:ui-monospace,monospace;font-size:13px;letter-spacing:.14em;color:#f0d29a;
   background:rgba(212,172,94,.10);border:1px solid rgba(212,172,94,.3);border-radius:7px;padding:2px 9px;cursor:pointer}
 .meta{font-size:12.5px;color:var(--muted);line-height:1.7}
 .meta b{color:#cdd7e4;font-weight:600}
-.stats{display:flex;gap:16px;padding:9px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.pinacts{display:flex;gap:10px;margin-top:2px}
+.mini{font:inherit;font-size:11.5px;font-weight:600;cursor:pointer;background:none;border:0;padding:0;
+  color:#e9cf9b;text-decoration:underline}
+.stats{display:flex;gap:16px;padding:9px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);flex-wrap:wrap}
 .stat .n{font-size:18px;font-weight:700;color:#f3f6fa;line-height:1.2}
 .stat .l{font-size:10.5px;color:var(--muted)}
-.flag{font-size:11.5px;color:#f2b866;background:rgba(242,184,102,.08);border:1px solid rgba(242,184,102,.25);
+.flag{font-size:11.5px;color:var(--warn);background:rgba(242,184,102,.08);border:1px solid rgba(242,184,102,.25);
   border-radius:8px;padding:6px 10px;line-height:1.6}
 .acts{display:flex;gap:7px;flex-wrap:wrap}
 .btn{font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;text-decoration:none;text-align:center;
@@ -65,10 +99,25 @@ h1{font-size:19px;font-weight:700;color:#f3f6fa}
   background:linear-gradient(180deg,#d3a854,#a97e33)}
 .btn.ghost{background:transparent;color:#e9cf9b;border-color:rgba(212,172,94,.45)}
 .btn:hover{filter:brightness(1.08)}
+.btn:disabled{filter:grayscale(.4) brightness(.8);cursor:default}
 .foot{margin-top:26px;text-align:center;font-size:11px;color:#7d8ba0;line-height:1.8}
 .toast{position:fixed;left:50%;bottom:24px;z-index:60;transform:translateX(-50%) translateY(70px);
   background:#f0d29a;color:#161616;font-weight:600;padding:9px 18px;border-radius:9px;font-size:13px;opacity:0;transition:.25s;pointer-events:none}
 .toast.on{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* กล่องเปลี่ยนรหัส */
+#modal{position:fixed;inset:0;z-index:65;display:none;align-items:center;justify-content:center;padding:18px;
+  background:rgba(8,14,25,.6);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+#modal.on{display:flex}
+#modal .box{width:min(380px,100%);background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 24px 20px}
+#modal h3{font-size:16px;margin-bottom:5px;color:#f3f6fa}
+#modal p{font-size:12px;color:var(--muted);margin-bottom:14px}
+#modal input{width:100%;padding:12px;font:inherit;font-size:18px;letter-spacing:.2em;text-align:center;color:#f4d9a8;
+  font-family:ui-monospace,monospace;background:rgba(16,26,42,.85);border:1.5px solid #2b3a53;border-radius:11px}
+#modal input:focus{outline:none;border-color:#c69a49}
+#modal .err{color:var(--bad);font-size:12px;min-height:17px;margin:7px 0 2px}
+#modal .row{display:flex;gap:8px;margin-top:6px}
+#modal .row .btn{flex:1}
 @media(max-width:640px){.wrap{padding:18px 12px 60px}.grid{grid-template-columns:1fr}}
 </style></head><body>
 
@@ -91,10 +140,34 @@ h1{font-size:19px;font-weight:700;color:#f3f6fa}
     </div>
   </header>
   <div class="sub" id="stamp"></div>
+  <div class="sumbar" id="sumbar"></div>
+  <div class="panel" id="tablePanel" style="display:none">
+    <h3>เทียบทุกโครงการ</h3>
+    <div class="scroll"><table>
+      <thead><tr>
+        <th>โครงการ</th><th>รายงานวันนี้</th><th>คนงาน</th><th>เผยแพร่ล่าสุด</th>
+        <th>รวมวันที่เผยแพร่</th><th>งวดที่เบิกแล้ว</th><th>ปัญหาที่ค้างอยู่</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table></div>
+  </div>
   <div class="grid" id="grid"></div>
   <div class="foot">
     ลิงก์ลูกค้า: <b style="color:#e9cf9b">report.ruanganan.com</b> (ลิงก์เดียวทุกโครงการ ระบบแยกด้วย PIN)<br>
-    แตะกล่อง PIN เพื่อคัดลอก · ปุ่ม "ข้อความส่งลูกค้า" คัดลอกลิงก์+รหัสพร้อมส่งใน LINE
+    แตะกล่อง PIN เพื่อคัดลอก · "ข้อความส่งลูกค้า" คัดลอกลิงก์+รหัสพร้อมส่งใน LINE · เปลี่ยนรหัสแล้วรหัสเดิมใช้ไม่ได้ทันที
+  </div>
+</div>
+
+<div id="modal">
+  <div class="box">
+    <h3 id="mTitle">เปลี่ยนรหัสลูกค้า</h3>
+    <p>ตัวเลข 6 หลัก · ห้ามซ้ำกับโครงการอื่น · รหัสเดิมจะใช้ไม่ได้ทันทีที่บันทึก</p>
+    <input id="mPin" type="text" inputmode="numeric" maxlength="6" placeholder="######">
+    <div class="err" id="mErr"></div>
+    <div class="row">
+      <button class="btn ghost" id="mCancel">ยกเลิก</button>
+      <button class="btn" id="mSave">บันทึกรหัสใหม่</button>
+    </div>
   </div>
 </div>
 
@@ -103,17 +176,22 @@ h1{font-size:19px;font-weight:700;color:#f3f6fa}
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbxo5iY4E9CazLb2sEkbR9XS4mkEUdoPAfYCsLAtR2IcqCMuEuQJGiab-ShKvSHfeVhC/exec';
 const $ = id => document.getElementById(id);
-let busy=false;
+let busy=false, TEAM_KEY='', DATA=null, cur={site:'',label:''};
+
+/* ---------- เรียก API (Content-Type: text/plain เพื่อเลี่ยง CORS preflight) ---------- */
+function api(body){
+  return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)})
+    .then(r=>r.json())
+    .then(d=>{ if(d&&d.error) throw new Error(d.error); return d; });
+}
 
 function unlock(){
   const key=$('key').value.trim();
   if(!key||busy) return;
   busy=true; $('goBtn').disabled=true; $('goBtn').textContent='กำลังโหลด...'; $('keyerr').textContent='';
-  fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body:JSON.stringify({action:'hubData',key:key})})
-  .then(r=>r.json())
+  api({action:'hubData',key:key})
   .then(d=>{
-    if(d&&d.error) throw new Error(d.error);
+    TEAM_KEY=key;
     try{localStorage.setItem('team_key',key)}catch(e){}
     render(d);
   })
@@ -126,40 +204,145 @@ $('key').addEventListener('keydown',e=>{if(e.key==='Enter')unlock()});
 (function auto(){try{const k=localStorage.getItem('team_key');if(k){$('key').value=k;unlock();}}catch(e){}})();
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function money(n){return String(Math.round(Number(n)||0)).replace(/\B(?=(\d{3})+(?!\d))/g,',')}
+
+function statusTag(p){
+  if(p.todayStatus==='published') return '<span class="tag ok">เผยแพร่แล้ว</span>';
+  if(p.todayStatus==='draft')     return '<span class="tag wait">ร่างรอตรวจ</span>';
+  if(p.rawToday)                  return '<span class="tag raw">ช่างส่งแล้ว รอสร้างร่าง</span>';
+  return '<span class="tag none">ยังไม่มีข้อมูล</span>';
+}
 
 function render(d){
+  DATA=d;
   $('gate').style.display='none';
   $('stamp').innerHTML='ข้อมูล ณ <b>'+esc(d.stampedAt)+'</b> · '+d.projects.length+' โครงการ';
+
+  /* ---------- แถบสรุป ---------- */
+  const s=d.summary||{};
+  $('sumbar').innerHTML=[
+    ['<div class="sum'+(s.publishedToday===s.total?' ok':'')+'"><div class="n">'+s.publishedToday+'/'+s.total+'</div><div class="l">เผยแพร่ให้ลูกค้าแล้ววันนี้</div></div>'],
+    ['<div class="sum'+(s.draftToday?' warn':'')+'"><div class="n">'+s.draftToday+'</div><div class="l">ร่างรอตรวจ</div></div>'],
+    ['<div class="sum'+(s.noReportToday?' bad':'')+'"><div class="n">'+s.noReportToday+'</div><div class="l">ยังไม่มีรายงานวันนี้</div>'
+      +'<div class="s">ช่างส่งเข้าระบบแล้ว '+s.rawToday+'/'+s.total+' ไซต์</div></div>'],
+    ['<div class="sum"><div class="n">'+s.workersToday+'</div><div class="l">คนงานรวมวันนี้</div></div>'],
+    ['<div class="sum'+(s.issues?' warn':'')+'"><div class="n">'+s.issues+'</div><div class="l">ไซต์ที่มีปัญหาค้าง</div></div>'],
+    ['<div class="sum"><div class="n">'+s.billingPct+'%</div><div class="l">เบิกงวดแล้ว (ทุกโครงการ)</div>'
+      +'<div class="s">'+money(s.billingPaid)+' / '+money(s.billingTotal)+' บาท</div></div>'],
+  ].join('');
+
+  /* ---------- ตารางเทียบ ---------- */
+  $('tablePanel').style.display='';
+  $('tbody').innerHTML=d.projects.map(function(p){
+    return '<tr>'
+      +'<td class="name">'+esc(p.label)+'</td>'
+      +'<td>'+statusTag(p)+'</td>'
+      +'<td class="num">'+(p.workers?esc(p.workers)+' คน'+(p.workersToday?'':' <span class="dash">(ล่าสุด)</span>'):'<span class="dash">—</span>')+'</td>'
+      +'<td class="num">'+esc(p.latest)+(p.missDays!==null&&p.missDays>=2?'<br><span class="issuetxt">ห่างมา '+p.missDays+' วัน</span>':'')+'</td>'
+      +'<td class="num">'+p.days+' วัน <span class="dash">(มีรูป '+p.photoDays+')</span></td>'
+      +'<td class="num">'+(p.billing&&p.billing.count
+          ? p.billing.paidCount+'/'+p.billing.count+' งวด · '+p.billing.pct+'%<div class="bar"><i style="width:'+p.billing.pct+'%"></i></div>'
+          : '<span class="dash">ยังไม่ผูกงวดงาน</span>')+'</td>'
+      +'<td class="issuetxt">'+(p.issue?esc(p.issue):'<span class="dash">ไม่มี</span>')+'</td>'
+    +'</tr>';
+  }).join('');
+
+  /* ---------- การ์ดรายโครงการ ---------- */
   $('grid').innerHTML=d.projects.map(function(p,i){
     const warns=(p.warnings||[]).length
       ? '<div class="flag">⚠ '+p.warnings.map(esc).join(' · ')+'</div>' : '';
+    const issue=p.issue?'<div class="flag">ปัญหาที่รายงานมาล่าสุด: '+esc(p.issue)+'</div>':'';
     return '<div class="card">'
-      +'<h2>'+esc(p.label)+'<span class="pin" title="แตะเพื่อคัดลอก PIN" onclick="cp(\''+esc(p.pin)+'\')">'+esc(p.pin)+'</span></h2>'
-      +'<div class="meta">ลูกค้า: <b>'+esc(p.client)+'</b><br>สัญญา: <b>'+esc(p.contractNo)+'</b></div>'
+      +'<h2>'+esc(p.label)+statusTag(p)+'</h2>'
+      +'<div class="meta">ลูกค้า: <b>'+esc(p.client)+'</b><br>สัญญา: <b>'+esc(p.contractNo)+'</b><br>'
+        +'รหัสลูกค้า: <span class="pin" id="pin-'+i+'" title="แตะเพื่อคัดลอก" onclick="cp(this.textContent.trim())">'+esc(p.pin)+'</span>'
+        +'<div class="pinacts">'
+          +'<button class="mini" onclick="openModal(\''+esc(p.site)+'\',\''+esc(p.label)+'\','+i+')">เปลี่ยนรหัส</button>'
+          +'<button class="mini" onclick="rollPin(\''+esc(p.site)+'\',\''+esc(p.label)+'\','+i+',this)">สุ่มใหม่</button>'
+        +'</div>'
+      +'</div>'
       +'<div class="stats">'
         +'<div class="stat"><div class="n">'+p.days+'</div><div class="l">วันที่เผยแพร่</div></div>'
         +'<div class="stat"><div class="n">'+p.photoDays+'</div><div class="l">วันที่มีรูป</div></div>'
         +'<div class="stat"><div class="n">'+esc(p.latest)+'</div><div class="l">วันล่าสุด</div></div>'
+        +'<div class="stat"><div class="n">'+(p.workers?esc(p.workers):'—')+'</div><div class="l">คนงานล่าสุด</div></div>'
       +'</div>'
-      +warns
+      +issue+warns
       +'<div class="acts">'
         // เปิดหน้าลูกค้าโดยไม่ต้องกรอก PIN: ฝาก PIN ไว้ใน sessionStorage แล้วหน้า index จะ login ให้เอง
-        +'<button class="btn" onclick="openClient(\''+esc(p.pin)+'\')">เปิดหน้าลูกค้า</button>'
+        +'<button class="btn" onclick="openClient(document.getElementById(\'pin-'+i+'\').textContent.trim())">เปิดหน้าลูกค้า</button>'
         +'<a class="btn ghost" href="'+esc(p.reviewUrl)+'" target="_blank" rel="noopener">ตรวจรายงานวันนี้</a>'
-        +'<button class="btn ghost" onclick="cpMsg(\''+esc(p.label)+'\',\''+esc(p.pin)+'\')">ข้อความส่งลูกค้า</button>'
+        +'<button class="btn ghost" onclick="cpMsg(\''+esc(p.label)+'\','+i+')">ข้อความส่งลูกค้า</button>'
       +'</div>'
     +'</div>';
   }).join('');
 }
 
+/* ---------- เปลี่ยนรหัส ---------- */
+function openModal(site,label,i){
+  cur={site:site,label:label,idx:i};
+  $('mTitle').textContent='เปลี่ยนรหัสลูกค้า — '+label;
+  $('mErr').textContent=''; $('mPin').value='';
+  $('modal').classList.add('on');
+  setTimeout(function(){$('mPin').focus()},30);
+}
+$('mCancel').onclick=function(){$('modal').classList.remove('on')};
+$('mPin').addEventListener('keydown',e=>{if(e.key==='Enter')savePin()});
+$('mSave').onclick=savePin;
+
+function savePin(){
+  const pin=$('mPin').value.trim(), btn=$('mSave');
+  if(!/^\d{6}$/.test(pin)){ $('mErr').textContent='ต้องเป็นตัวเลข 6 หลัก'; return; }
+  btn.disabled=true; btn.textContent='กำลังบันทึก...';
+  api({action:'setPin',site:cur.site,pin:pin,key:TEAM_KEY})
+    .then(res=>{
+      btn.disabled=false; btn.textContent='บันทึกรหัสใหม่';
+      $('modal').classList.remove('on');
+      applyPin(cur.idx,res.pin);
+      toast('เปลี่ยนรหัส'+cur.label+'แล้ว: '+res.pin);
+    })
+    .catch(e=>{
+      btn.disabled=false; btn.textContent='บันทึกรหัสใหม่';
+      $('mErr').textContent=(e&&e.message)?e.message:'บันทึกไม่สำเร็จ';
+    });
+}
+
+let rollArm=null;
+function rollPin(site,label,i,btn){
+  // ยืนยันด้วยการกดซ้ำภายใน 4 วินาที (ไม่ใช้ confirm ให้ทำงานเหมือนกันทุกเบราว์เซอร์)
+  if(rollArm!==btn){
+    if(rollArm) rollArm.textContent='สุ่มใหม่';
+    rollArm=btn; btn.textContent='กดอีกครั้งเพื่อยืนยัน';
+    setTimeout(function(){ if(rollArm===btn){btn.textContent='สุ่มใหม่'; rollArm=null;} },4000);
+    return;
+  }
+  rollArm=null; btn.disabled=true; btn.textContent='กำลังสุ่ม...';
+  api({action:'rollPin',site:site,key:TEAM_KEY})
+    .then(res=>{
+      btn.disabled=false; btn.textContent='สุ่มใหม่';
+      applyPin(i,res.pin);
+      toast('รหัสใหม่ของ'+label+': '+res.pin);
+    })
+    .catch(e=>{
+      btn.disabled=false; btn.textContent='สุ่มใหม่';
+      toast((e&&e.message)?e.message:'สุ่มรหัสไม่สำเร็จ');
+    });
+}
+
+function applyPin(i,pin){
+  const el=$('pin-'+i);
+  if(el) el.textContent=pin;
+  if(DATA&&DATA.projects[i]) DATA.projects[i].pin=pin;
+}
+
+/* ---------- อื่นๆ ---------- */
 function openClient(pin){
   try{sessionStorage.setItem('client_pin',pin)}catch(e){}
   location.href='/';   // แท็บเดิม เพราะ sessionStorage ไม่ข้ามแท็บ
 }
-function cp(text){
-  copyText(text); toast('คัดลอก PIN แล้ว');
-}
-function cpMsg(label,pin){
+function cp(text){ copyText(text); toast('คัดลอก PIN แล้ว'); }
+function cpMsg(label,i){
+  const pin=$('pin-'+i).textContent.trim();
   copyText('เรียนท่านเจ้าของโครงการ'+label+'\n'
     +'บริษัทขอส่งช่องทางติดตามความคืบหน้าโครงการครับ\n\n'
     +'เว็บไซต์: https://report.ruanganan.com\n'
@@ -180,7 +363,7 @@ function fallbackCopy(t){
 let toastT;
 function toast(msg){
   $('toast').textContent=msg; $('toast').classList.add('on');
-  clearTimeout(toastT); toastT=setTimeout(function(){$('toast').classList.remove('on')},1600);
+  clearTimeout(toastT); toastT=setTimeout(function(){$('toast').classList.remove('on')},2400);
 }
 </script>
 </body></html>
