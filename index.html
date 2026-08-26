@@ -148,6 +148,7 @@ ol.tasks li{margin-bottom:4px}
 .box h3{font-size:12.5px;color:var(--ink);font-weight:700;margin-bottom:4px}
 .ok{color:var(--green);font-weight:700}
 .prog{display:flex;align-items:center;gap:10px;border:1.5px solid #cfe4d6;background:#f4faf6;border-radius:8px;padding:10px 14px;margin:12px 0}
+.prog.warn{border-color:#f0d5a8;background:#fffaf2}
 .prog .badge{background:var(--green);color:#fff;border-radius:99px;padding:5px 15px;font-size:13.5px;font-weight:700;white-space:nowrap}
 .prog span{font-size:12.5px;color:var(--ink2)}
 .pdfbtn{display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:#fff;border:0;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:14.5px;font-weight:700;cursor:pointer;text-decoration:none}
@@ -428,6 +429,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
 .preparedby .nm{display:block;font-size:15px;font-weight:700;color:var(--navyink)}
 /* ── โหมดมืด: override เฉพาะจุดที่พื้นสีครีม/พาสเทลของโหมดสว่างใช้ต่อไม่ได้ ── */
 [data-theme="dark"] .prog{border-color:#2e5240;background:#132b1f}
+[data-theme="dark"] .prog.warn{border-color:#5a4520;background:#2a2110}
 [data-theme="dark"] .iss{background:#2a2413}
 [data-theme="dark"] .notice{background:#251f0e;border-color:#5b4a22}
 [data-theme="dark"] .notice b{color:#e8c987}
@@ -459,6 +461,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
   .chips{flex-direction:column}
   .grid2{grid-template-columns:1fr}
   .kpi{grid-template-columns:1fr 1fr}
+  /* การ์ดภาพรวม 4 ใบ: จอ 375px เหลือใบละ ~80px ตัวเลข "1,234 คน-วัน" ตกบรรทัดจนอ่านไม่ออก */
+  .ov{grid-template-columns:1fr 1fr}
   main{padding:22px 10px 60px}
   section{padding:13px 13px;border-radius:9px}
   h2{font-size:14.5px}
@@ -1035,7 +1039,12 @@ function render(){
   const d=DATA.days[cur];
   $('daySec').style.display=''; $('noDaily').style.display='none';
   $('dayLabel').textContent=d.label;
-  $('cProg').textContent=d.progress||'ดำเนินการตามแผน';
+  const prog_=d.progress||'ดำเนินการตามแผน';
+  const behind_=/ช้า|ล่าช้า|delay/i.test(prog_);
+  const ahead_=/เร็วกว่า|ahead/i.test(prog_);
+  $('cProg').textContent=prog_;
+  // สีต้องตรงกับสถานะจริง — ของเดิมฮาร์ดโค้ดเขียวไว้ ทำให้ "ช้ากว่าแผน" ขึ้นเป็นสีเขียว
+  $('cProg').style.color = behind_ ? 'var(--amber)' : 'var(--green)';
   $('cMan').textContent=d.total+' คน';
   const noIssue=(!d.issue||d.issue==='-'||d.issue==='None');
   $('cIssue').textContent=noIssue?'ไม่พบปัญหา':'มีประเด็นติดตาม';
@@ -1057,7 +1066,15 @@ function render(){
   $('eqBox').textContent=d.equipment||'';
   $('issueBox').innerHTML=noIssue?'<span class="ok">— ไม่พบปัญหา —</span>':esc(d.issue);
   $('progBadge').textContent='✓ ความก้าวหน้า: '+(d.progress||'ดำเนินการตามแผน');
-  $('progNote').textContent='ความคืบหน้าจริง (Actual) เป็นไปตามแผน (Planned) — ไม่มีส่วนต่างที่ต้องรายงาน';
+  // ⚠️ ของเดิมเขียนตายว่า "เป็นไปตามแผน ไม่มีส่วนต่าง" ทุกกรณี ขัดกับป้ายที่เขียนว่า "ช้ากว่าแผน"
+  $('progNote').textContent = behind_
+    ? 'ความคืบหน้าจริง (Actual) ช้ากว่าแผน (Planned) — ทีมงานกำลังเร่งปรับแผนให้ทันกำหนด'
+    : ahead_
+      ? 'ความคืบหน้าจริง (Actual) เร็วกว่าแผน (Planned)'
+      : 'ความคืบหน้าจริง (Actual) เป็นไปตามแผน (Planned) — ไม่มีส่วนต่างที่ต้องรายงาน';
+  const progBox_=document.querySelector('.prog');
+  if(progBox_) progBox_.classList.toggle('warn', behind_);
+  $('progBadge').style.background = behind_ ? 'var(--amber)' : 'var(--green)';
 
   // ปุ่ม PDF: มีไฟล์จริงเฉพาะวันที่ระบบสร้าง PDF ไว้แล้ว (วันที่ backfill ย้อนหลังจะยังไม่มี)
   const btn=$('pdfbtn');
@@ -1182,11 +1199,17 @@ function buildWeekly(){
 
   // ---- กราฟกำลังคนรายวัน (วันที่ไม่มีรายงานแสดงเป็นแถบลาย เหมือนเดโม) ----
   const maxv=Math.max(1,...keys.map(k=>DATA.days[k]?DATA.days[k].total:0));
+  // ⚠️ วันที่ยังมาไม่ถึง และวันหยุดบริษัท ต้องไม่ขึ้น "ไม่มีรายงาน" สีแดง
+  //    (เปิดดูวันอังคารจะเห็นแดงทั้งอาทิตย์ ทั้งที่ยังไม่ถึงวัน — ลูกค้าตกใจโดยไม่จำเป็น)
+  const hmapW_=holidayMap_();
+  const todayIso_=(()=>{const t=new Date();return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0')})();
   $('wkBars').innerHTML=keys.map(k=>{
     const d=DATA.days[k];
-    return d
-      ? `<div class="bar"><div class="n">${d.total}</div><div class="b" style="height:${d.total/maxv*82}%"></div></div>`
-      : `<div class="bar"><div class="n" style="color:#c0392b;font-size:10px">ไม่มีรายงาน</div><div class="b na" style="height:8%"></div></div>`;
+    if(d) return `<div class="bar"><div class="n">${d.total}</div><div class="b" style="height:${d.total/maxv*82}%"></div></div>`;
+    if(k>todayIso_) return `<div class="bar"><div class="n" style="color:var(--daymute);font-size:10px">—</div><div class="b na" style="height:6%;opacity:.35"></div></div>`;
+    const h_=hmapW_[k];
+    if(h_) return `<div class="bar"><div class="n" style="color:var(--holiday);font-size:9.5px">วันหยุด</div><div class="b na" style="height:8%;opacity:.5"></div></div>`;
+    return `<div class="bar"><div class="n" style="color:#c0392b;font-size:10px">ไม่มีรายงาน</div><div class="b na" style="height:8%"></div></div>`;
   }).join('');
   const DOW=['จั','อั','พุ','พฤ','ศุ','เส','อา'];
   $('wkXl').innerHTML=keys.map((k,i)=>{

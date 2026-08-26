@@ -27,11 +27,14 @@ p{font-size:14px;color:#9fb0c6;line-height:1.7}
 <script>
 var GAS = 'https://script.google.com/macros/s/AKfycbxo5iY4E9CazLb2sEkbR9XS4mkEUdoPAfYCsLAtR2IcqCMuEuQJGiab-ShKvSHfeVhC/exec';
 var q = new URLSearchParams(location.search);
+var t = q.get('t') || '';                     // โทเคนชั่วคราว (ลิงก์จาก LINE ใช้แบบนี้)
 var s = q.get('s') || q.get('site') || '';
 var d = q.get('d') || q.get('date') || '';
 var k = q.get('k') || q.get('key') || '';
-if (!k) {
-  document.getElementById('msg').textContent = 'ลิงก์ไม่สมบูรณ์ — ไม่มีรหัสทีม กรุณาเปิดจากลิงก์ในกลุ่ม LINE อีกครั้ง';
+if (t) {
+  location.replace(GAS + '?view=review&t=' + encodeURIComponent(t));
+} else if (!k) {
+  document.getElementById('msg').textContent = 'ลิงก์ไม่สมบูรณ์ — กรุณาเปิดจากลิงก์ในกลุ่ม LINE หรือหน้ารวมโครงการอีกครั้ง';
   document.querySelector('.sp').style.display = 'none';
 } else {
   var url = GAS + '?view=review'
