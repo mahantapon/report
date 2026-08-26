@@ -369,7 +369,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
   <div class="hero">
     <div class="ring"><svg id="ovRing" width="118" height="118" viewBox="0 0 118 118"></svg></div>
     <div class="info">
-      <div class="lbl">ความคืบหน้าโครงการ</div>
+      <div class="lbl" id="ovPctLbl">ความคืบหน้าโครงการ</div>
       <h3 id="ovTitle">—</h3>
       <p id="ovLine">—</p>
       <span class="badge" id="ovBadge">—</span>
@@ -660,12 +660,14 @@ function buildOverview(){
   const ph=DATA.phases;
 
   // % ความคืบหน้า: ขั้นที่เสร็จ = 1 คะแนน, กำลังทำ = ครึ่งคะแนน
-  let pct=null;
+  // ⚠️ ต้องบอกให้ชัดว่า % นี้วัดจากอะไร ไม่งั้นลูกค้าเข้าใจผิดว่างานก่อสร้างเดินไปเท่านี้
+  let pct=null, pctFrom='';
   if(ph&&ph.length){
     let sc=0; ph.forEach(function(v){ sc += (v===1?1:(v===2?0.5:0)); });
-    pct=Math.round(sc/ph.length*100);
+    pct=Math.round(sc/ph.length*100); pctFrom='งานก่อสร้าง';
   }else if(DATA.billing&&DATA.billing.total){
-    pct=Math.round(DATA.billing.paid/DATA.billing.total*100);   // ไม่มี phases → ใช้สัดส่วนงวดที่ชำระแทน
+    pct=Math.round(DATA.billing.paid/DATA.billing.total*100);
+    pctFrom='การชำระเงิน';   // โครงการที่ยังไม่ได้ระบุขั้นตอน → วัดจากงวดที่ชำระแทน
   }
 
   // วงแหวน %
@@ -675,7 +677,11 @@ function buildOverview(){
    +'<circle cx="59" cy="59" r="'+R+'" fill="none" stroke="#f0d29a" stroke-width="9" stroke-linecap="round"'
    +' stroke-dasharray="'+(C*val/100)+' '+(C-C*val/100)+'" stroke-dashoffset="'+(C*0.25)+'"/>'
    +'<text x="59" y="56" text-anchor="middle" font-size="27" font-weight="700" fill="#fff">'+(pct==null?'—':val+'%')+'</text>'
-   +'<text x="59" y="74" text-anchor="middle" font-size="10" fill="#bcd0e6">ความคืบหน้า</text>';
+   +'<text x="59" y="74" text-anchor="middle" font-size="9" fill="#bcd0e6">'+(pctFrom||'ความคืบหน้า')+'</text>';
+
+  $('ovPctLbl').textContent = pctFrom==='การชำระเงิน'
+    ? 'ความคืบหน้าการชำระเงินตามงวดงาน'
+    : 'ความคืบหน้างานก่อสร้าง';
 
   const pi=DATA.projectInfo||{};
   $('ovTitle').textContent='โครงการ'+(pi.label||'');
@@ -705,15 +711,22 @@ function buildOverview(){
   // กำลังคนรายเดือน (6 เดือนล่าสุด)
   const byM={};
   keys.forEach(function(k){ const m=k.slice(0,7); byM[m]=(byM[m]||0)+DATA.days[k].total; });
-  const ms=Object.keys(byM).sort().slice(-6);
-  const mx=Math.max(1,...ms.map(function(m){return byM[m]}));
-  $('ovBars').innerHTML=ms.map(function(m){
-    return '<div class="mbar"><div class="n">'+byM[m]+'</div><div class="b" style="height:'+(byM[m]/mx*80)+'%"></div></div>';
-  }).join('');
-  $('ovBarsX').innerHTML=ms.map(function(m){
-    const d=toDate(m+'-01');
-    return '<div>'+TH_M[d.getMonth()].slice(0,4)+' '+String(d.getFullYear()+543).slice(-2)+'</div>';
-  }).join('');
+  // ⚠️ ข้ามเดือนที่กำลังคน = 0 (บางเดือนช่างส่งงานแต่ไม่ได้กรอกจำนวนคน)
+  // ถ้าไม่ข้าม กราฟจะมีแท่งสูง 0 ดูเหมือนระบบพัง
+  const ms=Object.keys(byM).filter(function(m){return byM[m]>0}).sort().slice(-6);
+  if(ms.length){
+    const mx=Math.max(1,...ms.map(function(m){return byM[m]}));
+    $('ovBars').innerHTML=ms.map(function(m){
+      return '<div class="mbar"><div class="n">'+byM[m]+'</div><div class="b" style="height:'+(byM[m]/mx*80)+'%"></div></div>';
+    }).join('');
+    $('ovBarsX').innerHTML=ms.map(function(m){
+      const d=toDate(m+'-01');
+      return '<div>'+TH_M[d.getMonth()].slice(0,4)+' '+String(d.getFullYear()+543).slice(-2)+'</div>';
+    }).join('');
+  }else{
+    $('ovBars').innerHTML='<div class="nophoto" style="width:100%;align-self:center">ยังไม่มีการบันทึกจำนวนกำลังคน</div>';
+    $('ovBarsX').innerHTML='';
+  }
 
   // การเงิน
   const b=DATA.billing;
