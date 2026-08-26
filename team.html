@@ -146,7 +146,7 @@ td.name{font-weight:600;color:#f3f6fa;white-space:nowrap}
     <div class="scroll"><table>
       <thead><tr>
         <th>โครงการ</th><th>รายงานวันนี้</th><th>คนงาน</th><th>เผยแพร่ล่าสุด</th>
-        <th>รวมวันที่เผยแพร่</th><th>งวดที่เบิกแล้ว</th><th>ปัญหาที่ค้างอยู่</th>
+        <th>รวมวันที่เผยแพร่</th><th>งวดที่เบิกแล้ว</th><th>ปัญหาที่รายงานล่าสุด</th>
       </tr></thead>
       <tbody id="tbody"></tbody>
     </table></div>
@@ -226,7 +226,7 @@ function render(d){
     ['<div class="sum'+(s.noReportToday?' bad':'')+'"><div class="n">'+s.noReportToday+'</div><div class="l">ยังไม่มีรายงานวันนี้</div>'
       +'<div class="s">ช่างส่งเข้าระบบแล้ว '+s.rawToday+'/'+s.total+' ไซต์</div></div>'],
     ['<div class="sum"><div class="n">'+s.workersToday+'</div><div class="l">คนงานรวมวันนี้</div></div>'],
-    ['<div class="sum'+(s.issues?' warn':'')+'"><div class="n">'+s.issues+'</div><div class="l">ไซต์ที่มีปัญหาค้าง</div></div>'],
+    ['<div class="sum'+(s.issues?' warn':'')+'"><div class="n">'+s.issues+'</div><div class="l">ไซต์ที่รายงานปัญหา</div></div>'],
     ['<div class="sum"><div class="n">'+s.billingPct+'%</div><div class="l">เบิกงวดแล้ว (ทุกโครงการ)</div>'
       +'<div class="s">'+money(s.billingPaid)+' / '+money(s.billingTotal)+' บาท</div></div>'],
   ].join('');
