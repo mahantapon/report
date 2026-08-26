@@ -28,36 +28,75 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>รายงานความคืบหน้าโครงการ — RUANGANAN</title>
 <style>
-:root{--ink:#16233a;--ink2:#33445e;--muted:#6b7c93;--line:#dde4ec;--navy:#16324f;--gold:#b8873b;--green:#1e8449;--amber:#c77700;--bg:#eef1f5}
+:root{--ink:#16233a;--ink2:#33445e;--muted:#6b7c93;--line:#dde4ec;--navy:#16324f;--gold:#b8873b;--green:#1e8449;--amber:#c77700;--bg:#eef1f5;
+  --holiday:#c0532b;--holiday-ink:#8a3c1e;--holiday2:#7c4fd1;--holiday2-ink:#5b3a99}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);font-family:"IBM Plex Sans Thai","Sarabun",sans-serif;color:var(--ink);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
-header{background:var(--navy);color:#fff;padding:16px 0 0}
-.wrap{max-width:920px;margin:0 auto;padding:0 16px}
-.hrow{display:flex;align-items:center;gap:16px;padding-bottom:14px}
+body{background:
+    radial-gradient(60% 420px at 18% 0,rgba(184,135,59,.05),transparent 70%),
+    radial-gradient(50% 380px at 100% 0,rgba(22,50,79,.05),transparent 70%),
+    var(--bg);
+  background-attachment:fixed;
+  font-family:"IBM Plex Sans Thai","Sarabun",sans-serif;color:var(--ink);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+/* header: กราเดียนต์เฉียง + แสงสลัวลอยเบาๆ (คงที่ ไม่ใช่แอนิเมชันวิ่งวน กันดูรกตอนอ่านข้อมูล) */
+header{background:linear-gradient(120deg,#101f34,var(--navy) 45%,#1c3d61);color:#fff;padding:16px 0 0;position:relative;overflow:hidden}
+header::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(46% 70% at 82% -10%,rgba(240,210,154,.16),transparent 65%)}
+.wrap{max-width:920px;margin:0 auto;padding:0 16px;position:relative;z-index:1}
+.hrow{display:flex;align-items:center;gap:16px;padding-bottom:14px;animation:hdrIn .5s cubic-bezier(.2,.8,.2,1)}
+@keyframes hdrIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 /* โลโก้ที่ส่งมาเป็นตัวอักษรสีขาว พื้นหลังโปร่งใส → วางบนพื้นกรมได้เลย ไม่ต้องรองแผ่นขาว */
 .hrow img{height:52px;width:auto;display:block}
 .hrow h1{font-size:20px;font-weight:700;line-height:1.25}
 .hrow .sub{font-size:12.5px;color:#b9c6d6}
-.tabs{display:flex;gap:0;max-width:920px;margin:0 auto;padding:0 16px}
-.tab{padding:10px 20px;font-size:14.5px;font-weight:700;color:#b9c6d6;background:transparent;border:0;cursor:pointer;font-family:inherit;border-radius:10px 10px 0 0}
+.tabs{display:flex;gap:0;max-width:920px;margin:0 auto;padding:0 16px;position:relative;z-index:1}
+.tab{padding:10px 20px;font-size:14.5px;font-weight:700;color:#b9c6d6;background:transparent;border:0;cursor:pointer;
+  font-family:inherit;border-radius:10px 10px 0 0;transition:color .2s,background-color .2s,transform .15s}
+.tab:hover{color:#fff}
 .tab.on{background:var(--bg);color:var(--navy)}
+.tab:active{transform:scale(.96)}
+/* แถบทองไถลใต้แท็บที่เลือกอยู่ — จัดตำแหน่ง/ความกว้างด้วย JS ใน showTab() */
+.tabInd{position:absolute;bottom:0;left:0;height:3px;width:0;border-radius:3px 3px 0 0;
+  background:linear-gradient(90deg,var(--gold),#f0d29a);
+  transition:transform .32s cubic-bezier(.4,0,.2,1),width .32s cubic-bezier(.4,0,.2,1)}
 main{max-width:920px;margin:0 auto;padding:16px 16px 70px}
-section{background:#fff;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-bottom:13px}
+section{background:#fff;border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-bottom:13px;
+  box-shadow:0 1px 2px rgba(22,35,58,.03);transition:box-shadow .2s}
+section:hover{box-shadow:0 4px 14px rgba(22,35,58,.06)}
 h2{font-size:15.5px;font-weight:700;padding-left:9px;border-left:4px solid var(--gold);margin-bottom:10px;display:flex;align-items:baseline;gap:8px}
 h2 em{font-style:normal;font-size:11.5px;color:var(--muted);font-weight:400}
 .calhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px}
 .calhead b{font-size:15px}
 .calnav{display:flex;align-items:center;gap:6px}
-.calnav button{border:1px solid var(--line);background:#fbfcfd;border-radius:7px;width:28px;height:28px;font-size:15px;cursor:pointer;font-family:inherit;color:var(--ink2)}
+.calnav button{border:1px solid var(--line);background:#fbfcfd;border-radius:7px;width:28px;height:28px;font-size:15px;cursor:pointer;font-family:inherit;color:var(--ink2);transition:background .15s,border-color .15s}
+.calnav button:hover:not(:disabled){background:var(--navy);border-color:var(--navy);color:#fff}
 .calnav button:disabled{opacity:.35;cursor:default}
+.callegend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-bottom:9px}
+.callegend span{display:flex;align-items:center;gap:5px}
+.callegend i{width:7px;height:7px;border-radius:99px;display:inline-block;flex:0 0 auto}
+.callegend .dotrep{background:var(--green)}
+.callegend .dothol{background:var(--holiday)}
+.callegend .dotcus{background:var(--holiday2)}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
 .cal .dw{font-size:11px;color:var(--muted);padding:4px 0}
-.cd{border:1.5px solid transparent;border-radius:8px;padding:7px 0 5px;font-size:14px;cursor:default;color:#b7c0cc;position:relative}
+.cd{border:1.5px solid transparent;border-radius:8px;padding:7px 0 5px;font-size:14px;cursor:default;color:#b7c0cc;position:relative;transition:transform .12s}
 .cd.has{color:var(--ink);cursor:pointer;background:#f6f8fb;border-color:var(--line)}
-.cd.has:hover{border-color:var(--gold)}
+.cd.has:hover{border-color:var(--gold);transform:translateY(-1px)}
 .cd.sel{background:var(--navy);color:#fff;border-color:var(--navy);font-weight:700}
 .cd.has::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:99px;background:var(--green)}
 .cd.sel::after{background:#f4d9a8}
+/* วันหยุด — สีต่างกันชัดเจนระหว่างวันหยุดบริษัท (ทุกโครงการ) กับวันหยุดพิเศษเฉพาะกิจของโครงการนี้ */
+.cd.hol{background:#fbeee6;border-color:#eec4a9;color:var(--holiday-ink)}
+.cd.hol{background:color-mix(in srgb,var(--holiday) 12%,#fff);border-color:color-mix(in srgb,var(--holiday) 38%,#fff)}
+.cd.hol::before{content:'';position:absolute;top:3px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:99px;background:var(--holiday)}
+.cd.holc{background:#f1ebfa;border-color:#d3c0ee;color:var(--holiday2-ink)}
+.cd.holc{background:color-mix(in srgb,var(--holiday2) 12%,#fff);border-color:color-mix(in srgb,var(--holiday2) 38%,#fff)}
+.cd.holc::before{background:var(--holiday2)}
+.cd.sel.hol,.cd.sel.holc{background:var(--navy);border-color:var(--navy)}
+.calhollist{display:flex;flex-direction:column;gap:5px;margin-top:11px;padding-top:11px;border-top:1px solid var(--line)}
+.calhollist .hi{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink2)}
+.calhollist .hi i{width:7px;height:7px;border-radius:99px;flex:0 0 auto}
+.calhollist .hi b{color:var(--ink);font-weight:600}
+.calhollist .none{font-size:12px;color:var(--muted)}
 .chips{display:flex;gap:8px;margin-bottom:13px}
 .chip{flex:1;display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:8px;padding:10.5px 13px 8px;background:#fbfcfd}
 .chip .ic{font-size:21px;line-height:1;display:flex;align-items:center;height:26px}
@@ -138,7 +177,15 @@ ol.tasks li{margin-bottom:4px}
 .hero .contract .v{font-size:23px;font-weight:700;color:#fff;line-height:1.2}
 .hero .contract .u{font-size:11px;color:#9fb4cc;margin-top:3px}
 .ov{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:13px}
-.ovc{background:#fff;border:1px solid var(--line);border-radius:11px;padding:13px 15px}
+.ovc{background:#fff;border:1px solid var(--line);border-radius:11px;padding:15px 15px 13px;position:relative;overflow:hidden;
+  transition:transform .15s,box-shadow .15s}
+.ovc:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(22,35,58,.09)}
+/* แถบสีบางๆ บนการ์ดแต่ละใบ ไม่ให้สี่การ์ดหน้าตาซ้ำกันไปหมด */
+.ovc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.ovc:nth-child(1)::before{background:linear-gradient(90deg,#16324f,#2f5f8f)}
+.ovc:nth-child(2)::before{background:linear-gradient(90deg,var(--gold),#f0d29a)}
+.ovc:nth-child(3)::before{background:linear-gradient(90deg,#1e8449,#4fb87a)}
+.ovc:nth-child(4)::before{background:linear-gradient(90deg,#2f8f9e,#74cdda)}
 .ovc .ic{font-size:16px;margin-bottom:5px;display:block}
 .ovc b{display:block;font-size:11px;color:var(--muted);font-weight:500}
 .ovc .v{font-size:20px;font-weight:700;line-height:1.25;margin-top:1px}
@@ -172,7 +219,9 @@ ol.tasks li{margin-bottom:4px}
   background-image:linear-gradient(180deg,transparent 0,transparent calc(100% - 1px),var(--line) 100%),
   repeating-linear-gradient(180deg,#f4f6f9 0,#f4f6f9 1px,transparent 1px,transparent 26px);background-repeat:no-repeat}
 .mbar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
-.mbar .b{width:100%;max-width:46px;background:linear-gradient(180deg,#39699b,#16324f);border-radius:6px 6px 0 0;min-height:3px}
+.mbar .b{width:100%;max-width:46px;background:linear-gradient(180deg,#39699b,#16324f);border-radius:6px 6px 0 0;min-height:3px;transition:opacity .15s}
+/* สลับสีแท่งตามโหมด รายเดือน=น้ำเงินกรม รายสัปดาห์=ทอง — แยกให้ดูออกทันทีว่ากำลังดูช่วงไหน ไม่ให้จำเจซ้ำสี */
+.mbars.weekly .mbar .b{background:linear-gradient(180deg,#d9a95e,#8f6a2c)}
 .mbar .n{font-size:11.5px;font-weight:700;margin-bottom:4px;color:var(--ink2)}
 .mxl{display:flex;gap:8px;margin-top:5px}
 .mxl div{flex:1;text-align:center;font-size:10.5px;color:var(--muted)}
@@ -385,6 +434,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
     <button class="tab" id="tabD" onclick="showTab('d')">📅 รายวัน</button>
     <button class="tab" id="tabW" onclick="showTab('w')">📊 รายสัปดาห์</button>
     <button class="tab" id="tabF" onclick="showTab('f')">💳 สถานะการเงิน</button>
+    <i class="tabInd" id="tabInd"></i>
   </div>
 </header>
 
@@ -440,12 +490,17 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
     <div class="calhead">
       <b id="calTitle"></b>
       <div class="calnav">
-        <span class="note">● วันที่มีรายงาน — แตะเพื่อเปิดดู</span>
         <button id="calPrev" onclick="moveMonth(-1)">‹</button>
         <button id="calNext" onclick="moveMonth(1)">›</button>
       </div>
     </div>
+    <div class="callegend">
+      <span><i class="dotrep"></i>วันที่มีรายงาน — แตะเพื่อเปิดดู</span>
+      <span><i class="dothol"></i>วันหยุดบริษัท</span>
+      <span><i class="dotcus"></i>วันหยุดพิเศษ</span>
+    </div>
     <div class="cal" id="cal"></div>
+    <div id="calHolList" class="calhollist"></div>
   </section>
   <section id="daySec">
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px">
@@ -531,15 +586,15 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
     <div class="v" id="finTotalTop">—</div>
     <div class="u">ตามสัญญาก่อสร้าง</div>
   </section>
-  <div class="notice">
-    <span class="ic">📌</span>
-    <div><b id="finNoticeTitle"></b><p id="finNoticeBody"></p></div>
-  </div>
   <section>
     <h2>รายละเอียดงวดงาน <em id="finCount"></em></h2>
     <div id="finList"></div>
     <div class="finfoot">หมายเหตุ: รายการนี้จัดทำขึ้นเพื่อความสะดวกในการติดตามของท่านลูกค้า ไม่ถือเป็นใบแจ้งหนี้หรือเอกสารทางบัญชี — บริษัทจะจัดส่งใบแจ้งเบิกงวดงานอย่างเป็นทางการแยกต่างหากทุกครั้งก่อนถึงกำหนด</div>
   </section>
+  <div class="notice">
+    <span class="ic">📌</span>
+    <div><b id="finNoticeTitle"></b><p id="finNoticeBody"></p></div>
+  </div>
   <section id="finExtraSec" style="display:none">
     <h2>งานเพิ่ม–ลด <em>นอกเหนืองวดงานตามสัญญา</em></h2>
     <div id="finExtra"></div>
@@ -562,8 +617,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
 </div>
 
 <script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbxo5iY4E9CazLb2sEkbR9XS4mkEUdoPAfYCsLAtR2IcqCMuEuQJGiab-ShKvSHfeVhC/exec';
 const $ = id => document.getElementById(id);
+const API_URL = 'https://script.google.com/macros/s/AKfycbxo5iY4E9CazLb2sEkbR9XS4mkEUdoPAfYCsLAtR2IcqCMuEuQJGiab-ShKvSHfeVhC/exec';
 let DATA = null, cur = '', lbList = [], lbIdx = 0;
 let calY = 0, calM = 0;      // เดือนที่ปฏิทินกำลังแสดง
 let wkAnchor = '';            // วันใดวันหนึ่งในสัปดาห์ที่แท็บรายสัปดาห์กำลังแสดง
@@ -777,15 +832,16 @@ function renderBars(){
   const few=order.length>0&&order.length<=3;
   $('ovBars').classList.toggle('few',few);
   $('ovBarsX').classList.toggle('few',few);
+  $('ovBars').classList.toggle('weekly',barsMode==='w');
   if(order.length){
     const mx=Math.max(1,...order.map(function(x){return buckets[x]}));
     $('ovBars').innerHTML=order.map(function(x){
       return '<div class="mbar"><div class="n">'+buckets[x]+'</div><div class="b" style="height:'+(buckets[x]/mx*80)+'%"></div></div>';
     }).join('');
     $('ovBarsX').innerHTML=order.map(function(x){
-      if(barsMode==='w'){ const d=toDate(x); return '<div>'+String(d.getDate())+' '+TH_M[d.getMonth()].slice(0,3)+'</div>'; }
+      if(barsMode==='w'){ const d=toDate(x); return '<div>'+String(d.getDate())+' '+TH_M_ABBR[d.getMonth()]+'</div>'; }
       const d=toDate(x+'-01');
-      return '<div>'+TH_M[d.getMonth()].slice(0,4)+' '+String(d.getFullYear()+543).slice(-2)+'</div>';
+      return '<div>'+TH_M_ABBR[d.getMonth()]+' '+String(d.getFullYear()+543).slice(-2)+'</div>';
     }).join('');
   }else{
     $('ovBars').innerHTML='<div class="nophoto" style="width:100%;align-self:center">ยังไม่มีการบันทึกจำนวนกำลังคน</div>';
@@ -800,16 +856,36 @@ function showTab(t){
     $(v).style.display = (k===t) ? '' : 'none';
     $(b).classList.toggle('on', k===t);
   });
+  moveTabIndicator();
   window.scrollTo(0,0);
 }
+/** เลื่อนแถบทองใต้แท็บไปวางตำแหน่งแท็บที่กำลังเลือกอยู่ */
+function moveTabIndicator(){
+  const el=document.querySelector('.tab.on'), ind=$('tabInd');
+  if(!el||!ind) return;
+  ind.style.transform='translateX('+el.offsetLeft+'px)';
+  ind.style.width=el.offsetWidth+'px';
+}
+window.addEventListener('resize',function(){ moveTabIndicator(); });
 
 // ---------- วันที่ ----------
 // ⚠️ อย่าใช้ new Date('2026-08-22') — เบราว์เซอร์ตีความเป็น UTC ทำให้วันเพี้ยนไป 1 วัน
 // ในเขตเวลาไทย เลยประกอบ Date เองจากเลขปี/เดือน/วันเสมอ
 const TH_M=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+// ⚠️ ห้ามใช้ TH_M[i].slice(0,3/4) ย่อเดือน — ตัดตรงตัวอักษรได้คำผิด (เช่น "สิงหาคม".slice(0,4)="สิงห" ไม่ใช่ "ส.ค.")
+// ต้องใช้ตัวย่อทางการนี้เท่านั้น (ชุดเดียวกับ TH_MONTHS_SHORT ฝั่งเซิร์ฟเวอร์ใน Code.gs)
+const TH_M_ABBR=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 function iso(y,m,d){return y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0')}
 function toDate(s){const p=s.split('-');return new Date(+p[0],+p[1]-1,+p[2])}
 
+/** แปลง DATA.holidays (จาก Config.gs) เป็น map: 'YYYY-MM-DD' -> {label,type} — type 'custom' ทับ 'company' ถ้าชนวันเดียวกัน */
+function holidayMap_(){
+  const m={};
+  (DATA.holidays||[]).forEach(function(h){
+    if(!m[h.date]||h.type==='custom') m[h.date]=h;
+  });
+  return m;
+}
 function buildCal(){
   $('calTitle').textContent=TH_M[calM]+' '+(calY+543);
   const dws=['จ','อ','พ','พฤ','ศ','ส','อา'];
@@ -818,12 +894,26 @@ function buildCal(){
   const blank=(first+6)%7;                     // ปฏิทินเริ่มวันจันทร์
   for(let i=0;i<blank;i++) html+='<div></div>';
   const last=new Date(calY,calM+1,0).getDate();
+  const hmap=holidayMap_();
+  const inMonth=[];
   for(let d=1;d<=last;d++){
     const k=iso(calY,calM,d);
     const has=!!DATA.days[k];
-    html+=`<div class="cd ${has?'has':''} ${k===cur?'sel':''}" ${has?`onclick="pick('${k}')"`:''}>${d}</div>`;
+    const h=hmap[k];
+    if(h) inMonth.push(Object.assign({date:k,day:d},h));
+    const holCls=h?(h.type==='custom'?'holc':'hol'):'';
+    const title=h?` title="${esc(h.label)}"`:'';
+    html+=`<div class="cd ${has?'has':''} ${holCls} ${k===cur?'sel':''}"${title} ${has?`onclick="pick('${k}')"`:''}>${d}</div>`;
   }
   $('cal').innerHTML=html;
+  $('calHolList').innerHTML=inMonth.length
+    ? inMonth.map(function(h){
+        const cls=h.type==='custom'?'--holiday2':'--holiday';
+        return '<div class="hi"><i style="background:var('+cls+')"></i>'
+          +'<b>'+h.day+' '+TH_M_ABBR[calM]+'</b> — '+esc(h.label)
+          +(h.type==='custom'?' <span style="color:var(--holiday2-ink);font-size:11px">(เฉพาะกิจ)</span>':'')+'</div>';
+      }).join('')
+    : '<div class="none">เดือนนี้ไม่มีวันหยุด</div>';
   const all=Object.keys(DATA.days).sort();
   $('calPrev').disabled = !all.length || iso(calY,calM,1) <= all[0].slice(0,8)+'01';
   $('calNext').disabled = !all.length || iso(calY,calM,1) >= all[all.length-1].slice(0,8)+'01';
@@ -931,8 +1021,8 @@ function buildWeekly(){
   const have=keys.filter(k=>DATA.days[k]);
   const sun=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+6);
 
-  $('wkTitle').innerHTML='สัปดาห์ที่ '+isoWeek(mon)+' <em>'+mon.getDate()+' '+TH_M[mon.getMonth()].slice(0,4)+
-    ' – '+sun.getDate()+' '+TH_M[sun.getMonth()].slice(0,4)+' '+(sun.getFullYear()+543)+'</em>';
+  $('wkTitle').innerHTML='สัปดาห์ที่ '+isoWeek(mon)+' <em>ตั้งแต่วันที่ '+mon.getDate()+' '+TH_M_ABBR[mon.getMonth()]+
+    ' ถึงวันที่ '+sun.getDate()+' '+TH_M_ABBR[sun.getMonth()]+' '+(sun.getFullYear()+543)+'</em>';
 
   const total=have.reduce((s,k)=>s+DATA.days[k].total,0);
   const nph=have.reduce((s,k)=>s+(DATA.days[k].photoUrls||[]).length,0);
@@ -968,9 +1058,15 @@ function buildWeekly(){
   // phases เป็น null = ยังไม่ได้ระบุใน Config.gs → ซ่อนทั้งบล็อก ไม่เดาให้ลูกค้าเข้าใจผิด
   if(DATA.phases && DATA.phases.length){
     $('stepSec').style.display='';
+    // ⚠️ เหตุผลเดียวกับ .fst ในแท็บภาพรวม: ถ้ามี 2 ขั้นสถานะ "กำลังทำ" (2) ติดกัน
+    // ให้เด่นแค่ขั้นล่าสุดพอ ไม่งั้นมีจุดทอง "กำลังทำ" ขึ้นพร้อมกันหลายจุด ดูเหมือนข้อมูลผิด
+    let lastCurW=-1;
+    DATA.phases.forEach((st,i)=>{ if(st===2) lastCurW=i; });
     $('steps').innerHTML=DATA.phases.map((st,i)=>{
-      const cls=st===1?'d':st===2?'c':'';
-      const ic=st===1?'✓':(i+1);
+      const isCur=st===2&&i===lastCurW;
+      const isDone=st===1||(st===2&&!isCur);
+      const cls=isDone?'d':(isCur?'c':'');
+      const ic=isDone?'✓':(i+1);
       const nm=(DATA.phaseNames[i]||'').replace('|','<br>');
       return `<div class="step ${cls}"><div class="dot">${ic}</div><div class="nm">${nm}</div></div>`;
     }).join('');
@@ -989,7 +1085,7 @@ function buildWeekly(){
   const DOW=['จั','อั','พุ','พฤ','ศุ','เส','อา'];
   $('wkXl').innerHTML=keys.map((k,i)=>{
     const d=toDate(k);
-    return `<div>${DOW[i]}<br>${d.getDate()} ${TH_M[d.getMonth()].slice(0,3)}</div>`;
+    return `<div>${DOW[i]}<br>${d.getDate()} ${TH_M_ABBR[d.getMonth()]}</div>`;
   }).join('');
 
   // ---- คน-วัน แยกตามตำแหน่ง ----
