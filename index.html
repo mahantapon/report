@@ -119,6 +119,49 @@ ol.tasks li{margin-bottom:4px}
 .daytabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 .dt{border:1px solid var(--line);background:#fbfcfd;border-radius:99px;padding:6px 14px;font-family:inherit;font-size:12.5px;cursor:pointer;color:var(--ink2)}
 .dt.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+/* ── แท็บภาพรวม (dashboard) ── */
+.hero{background:linear-gradient(135deg,#16324f,#1e4166 55%,#26527e);border-radius:14px;padding:22px 24px;color:#fff;
+  margin-bottom:13px;display:flex;align-items:center;gap:26px;flex-wrap:wrap;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(40% 60% at 88% 10%,rgba(240,210,154,.20),transparent 70%)}
+.hero .ring{position:relative;z-index:1;flex:0 0 auto}
+.hero .info{position:relative;z-index:1;flex:1;min-width:200px}
+.hero .info .lbl{font-size:11px;letter-spacing:.14em;color:#a8bcd4;text-transform:uppercase;margin-bottom:5px}
+.hero .info h3{font-size:20px;font-weight:700;margin-bottom:6px}
+.hero .info p{font-size:12.5px;color:#c3d3e5;line-height:1.65}
+.hero .badge{display:inline-block;margin-top:9px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);
+  border-radius:99px;padding:4px 13px;font-size:12.5px;font-weight:600}
+.ov{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:13px}
+.ovc{background:#fff;border:1px solid var(--line);border-radius:11px;padding:13px 15px}
+.ovc .ic{font-size:16px;margin-bottom:5px;display:block}
+.ovc b{display:block;font-size:11px;color:var(--muted);font-weight:500}
+.ovc .v{font-size:20px;font-weight:700;line-height:1.25;margin-top:1px}
+/* flow ขั้นตอน (แนวนอน เลื่อนได้) */
+.flow{display:flex;gap:0;overflow-x:auto;padding:8px 2px 4px;-webkit-overflow-scrolling:touch}
+.fst{flex:1;min-width:96px;text-align:center;position:relative;padding-top:4px}
+.fst::before{content:'';position:absolute;top:18px;left:-50%;width:100%;height:2.5px;background:var(--line);z-index:0}
+.fst:first-child::before{display:none}
+.fst.done::before{background:var(--green)}
+.fst .dot{width:30px;height:30px;border-radius:99px;background:#eef1f5;color:#8a97a8;display:inline-flex;align-items:center;
+  justify-content:center;font-size:12px;font-weight:700;position:relative;z-index:1;border:2px solid #eef1f5;transition:.2s}
+.fst.done .dot{background:var(--green);border-color:var(--green);color:#fff}
+.fst.cur .dot{background:#fff;border-color:var(--gold);color:var(--gold);box-shadow:0 0 0 4px rgba(184,135,59,.15)}
+.fst .nm{font-size:10.5px;color:var(--muted);margin-top:6px;line-height:1.35}
+.fst.done .nm{color:var(--green)} .fst.cur .nm{color:var(--gold);font-weight:700}
+/* แถบ mini bar (กำลังคนรายเดือน) */
+.mbars{display:flex;align-items:flex-end;gap:8px;height:104px;border-bottom:1px solid var(--line);margin:8px 0 0}
+.mbar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
+.mbar .b{width:100%;max-width:46px;background:linear-gradient(180deg,#39699b,#16324f);border-radius:6px 6px 0 0;min-height:3px}
+.mbar .n{font-size:11.5px;font-weight:700;margin-bottom:4px;color:var(--ink2)}
+.mxl{display:flex;gap:8px;margin-top:5px}
+.mxl div{flex:1;text-align:center;font-size:10.5px;color:var(--muted)}
+/* รายการอัปเดตล่าสุด */
+.upd{display:flex;gap:11px;padding:10px 0;border-bottom:1px solid #f0f2f6;cursor:pointer}
+.upd:last-child{border-bottom:0}
+.upd .d{flex:0 0 62px;font-size:12px;font-weight:700;color:var(--navy)}
+.upd .t{flex:1;font-size:13.5px;color:var(--ink2);line-height:1.6}
+.upd .t small{display:block;color:var(--muted);font-size:11.5px;margin-top:1px}
+.upd:hover .t{color:var(--gold)}
 /* finance */
 .finhead{display:flex;align-items:center;gap:8px;margin-bottom:2px}
 .notice{border:1.5px solid #e3cd9a;background:#fffaf0;border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;gap:12px;align-items:flex-start}
@@ -129,13 +172,30 @@ ol.tasks li{margin-bottom:4px}
 .leg{font-size:13.5px;display:flex;flex-direction:column;gap:6px}
 .leg span{display:flex;align-items:center;gap:7px}
 .leg i{width:11px;height:11px;border-radius:3px;display:inline-block}
-.instRow{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f0f2f6;font-size:13.5px}
-.instRow:last-child{border-bottom:0}
-.instRow .lab{flex:0 0 240px;color:var(--ink2);line-height:1.4}
-.instRow .track{flex:1;height:9px;background:#eef1f5;border-radius:5px;overflow:hidden}
-.instRow .track i{display:block;height:100%;border-radius:5px}
-.instRow .amt{flex:0 0 92px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
-.instRow .st{flex:0 0 78px;text-align:right;font-size:11.5px}
+/* งวดงาน: การ์ดรายแถว มีจุดสถานะ ไม่มีแท่งเทียบมูลค่า (ไม่ให้ดูออกว่างวดไหนเงินเยอะ/น้อย) */
+.instRow{display:flex;align-items:center;gap:13px;padding:12px 13px;border:1px solid var(--line);border-radius:10px;
+  margin-bottom:7px;background:#fff;transition:border-color .15s}
+.instRow:hover{border-color:#c9d4e2}
+.instRow.paid{background:#f7fbf8;border-color:#d9ebdf}
+.instRow .dot{flex:0 0 auto;width:26px;height:26px;border-radius:99px;display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;background:#eef1f5;color:#8a97a8}
+.instRow.paid .dot{background:var(--green);color:#fff}
+.instRow.next .dot{background:#fff;border:2px solid var(--gold);color:var(--gold)}
+.instRow .lab{flex:1;min-width:0;line-height:1.45}
+.instRow .lab b{display:block;font-size:14px;color:var(--ink);font-weight:600}
+.instRow .lab span{display:block;font-size:11.5px;color:var(--muted);margin-top:1px}
+.instRow .right{flex:0 0 auto;text-align:right}
+.instRow .amt{font-size:14px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.instRow .st{font-size:11.5px;margin-top:2px}
+.instRow.paid .st{color:var(--green);font-weight:600}
+.instRow .st.wait{color:var(--muted)}
+/* งานเพิ่ม-ลด */
+.exw{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 0;border-bottom:1px dashed #e6eaf0;font-size:13.5px}
+.exw:last-child{border-bottom:0}
+.exw b{color:var(--ink2);font-weight:600}
+.exw span{font-weight:700;font-variant-numeric:tabular-nums}
+.exwSum{display:flex;justify-content:space-between;align-items:baseline;margin-top:11px;padding-top:11px;
+  border-top:2px solid var(--navy);font-size:14.5px;font-weight:700;color:var(--navy)}
 .finfoot{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.6}
 .slipLink{display:inline-block;margin-left:6px;font-size:11px;color:var(--navy);text-decoration:underline;cursor:pointer}
 .slipGroup{margin-bottom:14px}
@@ -147,69 +207,84 @@ ol.tasks li{margin-bottom:4px}
 .lb button{position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);border:0;color:#fff;font-size:26px;width:46px;height:64px;border-radius:8px;cursor:pointer}
 .lb .prev{left:12px} .lb .next{right:12px}
 .lb .x{position:fixed;top:14px;right:14px;transform:none;width:42px;height:42px;font-size:20px;border-radius:99px}
-/* ─── หน้า login: ภาพวาดบ้านราม 92 เต็มพื้นหลัง + การ์ดกระจกดำ ─── */
+/* ─── หน้า login: มินิมอลหรู + light leak (ไม่มีรูปภาพ ทั้งหมดเป็น CSS) ─── */
 #gate{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;
-  background:#0c1624 url('https://report.ruanganan.com/hero-art.jpg') center/cover no-repeat}
-/* ม่านไล่เฉดให้ภาพ art ยังโชว์ แต่การ์ด/ตัวหนังสืออ่านชัด */
-#gate::before{content:'';position:absolute;inset:0;
+  background:#080d15;overflow:hidden}
+/* ชั้นแสง: ลำแสงเฉียงนุ่มๆ หลายชั้น เคลื่อนช้ามาก */
+#gate::before{content:'';position:absolute;inset:-30%;pointer-events:none;
   background:
-    radial-gradient(ellipse 120% 90% at 50% 50%,rgba(10,18,32,.10) 30%,rgba(8,15,27,.62) 100%),
-    linear-gradient(180deg,rgba(8,15,27,.55) 0%,rgba(8,15,27,.08) 30%,rgba(8,15,27,.10) 62%,rgba(8,15,27,.72) 100%)}
+    radial-gradient(38% 26% at 18% 14%, rgba(226,186,116,.30), transparent 62%),
+    radial-gradient(32% 22% at 84% 26%, rgba(96,150,214,.22), transparent 64%),
+    radial-gradient(46% 30% at 62% 92%, rgba(150,116,200,.16), transparent 66%),
+    linear-gradient(112deg, transparent 34%, rgba(240,210,154,.11) 44%, rgba(240,210,154,.04) 50%, transparent 58%),
+    linear-gradient(112deg, transparent 60%, rgba(140,190,255,.07) 68%, transparent 76%);
+  filter:blur(28px);
+  animation:drift 26s ease-in-out infinite alternate}
+@keyframes drift{
+  0%{transform:translate3d(-2%,-1%,0) scale(1.04)}
+  100%{transform:translate3d(2.5%,2%,0) scale(1.12)}}
+/* ชั้นเนื้อฟิล์ม + ขอบมืด */
+#gate::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 78% 68% at 50% 46%, transparent 42%, rgba(3,7,13,.72) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.28'/%3E%3C/svg%3E");
+  mix-blend-mode:overlay;opacity:.5}
 /* โลโก้มุมซ้ายบน */
-#gate .chip{position:absolute;top:22px;left:24px;z-index:3;background:rgba(255,255,255,.94);border-radius:12px;padding:7px 10px;
-  box-shadow:0 4px 16px rgba(0,0,0,.35)}
-#gate .chip img{height:42px;display:block}
-/* คำโปรยมุมซ้ายล่าง (จอกว้างเท่านั้น) */
-#gate .caption{position:absolute;left:28px;bottom:26px;z-index:3;color:#fff;max-width:360px;display:none}
-@media(min-width:960px){#gate .caption{display:block}}
-#gate .caption .bar{width:34px;height:3px;background:linear-gradient(90deg,#f0d29a,#b8873b);border-radius:2px;margin-bottom:11px}
-#gate .caption h2{font-size:20px;font-weight:700;line-height:1.4;margin-bottom:5px;text-shadow:0 2px 12px rgba(0,0,0,.55)}
-#gate .caption p{font-size:12px;color:rgba(255,255,255,.82);line-height:1.65;text-shadow:0 1px 8px rgba(0,0,0,.6)}
-#gate .caption .credit{margin-top:9px;font-size:10.5px;letter-spacing:.08em;color:rgba(240,210,154,.85)}
-/* การ์ดกระจกดำตรงกลาง */
-#gate .stage{position:relative;z-index:2;width:min(430px,100%);
-  background:rgba(13,21,34,.84);backdrop-filter:blur(16px) saturate(1.1);-webkit-backdrop-filter:blur(16px) saturate(1.1);
-  border:1px solid rgba(255,255,255,.10);border-radius:22px;overflow:hidden;
-  box-shadow:0 34px 90px rgba(2,6,14,.6),inset 0 1px 0 rgba(255,255,255,.06);
-  animation:gateIn .55s cubic-bezier(.2,.8,.25,1) both}
-#gate .stage::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,transparent,#d4ac5e 30%,#f0d29a 50%,#d4ac5e 70%,transparent)}
-@keyframes gateIn{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}
-#gate .form{display:flex;flex-direction:column;align-items:center;text-align:center;padding:36px 34px 26px;color:#e8edf4}
-#gate .mark{width:60px;height:60px;border-radius:99px;background:rgba(212,172,94,.10);border:1px solid rgba(212,172,94,.32);
-  display:flex;align-items:center;justify-content:center;margin-bottom:14px}
-#gate .mark svg{width:28px;height:28px}
-#gate .co{font-size:10.5px;letter-spacing:.24em;color:#9aa9bf;text-transform:uppercase;margin-bottom:6px;font-weight:500}
-#gate h1{color:#f3f6fa;font-size:19px;font-weight:700;margin-bottom:7px}
-#gate .desc{font-size:12.5px;color:#9dabbf;line-height:1.7}
-#gate .rule{width:44px;height:2px;background:linear-gradient(90deg,#d4ac5e,#8f6a2b);border-radius:2px;margin:16px auto}
-#gate label{display:block;font-size:11.5px;color:#c0cad9;font-weight:600;letter-spacing:.05em;margin-bottom:11px}
-.pinBoxes{display:flex;gap:8px;justify-content:center;margin-bottom:12px}
-.pinBoxes input{width:44px;height:54px;text-align:center;font-size:23px;font-weight:700;color:#f4d9a8;
-  border:1.5px solid #2b3a53;border-radius:12px;font-family:inherit;background:rgba(16,26,42,.85);
-  transition:border-color .15s,box-shadow .15s,background .15s;caret-color:#d4ac5e}
-.pinBoxes input:focus{outline:none;border-color:#c69a49;background:#152238;box-shadow:0 0 0 3.5px rgba(198,154,73,.2)}
-.pinBoxes input.filled{border-color:#8f6f37;background:#182741}
-.pinBoxes.err input{border-color:#d66a5d;animation:shake .35s}
+#gate .chip{position:absolute;top:26px;left:28px;z-index:3;opacity:.92}
+#gate .chip img{height:44px;display:block;filter:brightness(0) invert(1) opacity(.86)}
+/* คำโปรยมุมซ้ายล่าง (จอกว้าง) */
+#gate .caption{position:absolute;left:30px;bottom:30px;z-index:3;color:#fff;max-width:330px;display:none}
+@media(min-width:1000px){#gate .caption{display:block}}
+#gate .caption .bar{width:30px;height:2px;background:linear-gradient(90deg,#f0d29a,rgba(240,210,154,0));border-radius:2px;margin-bottom:12px}
+#gate .caption h2{font-size:17px;font-weight:600;line-height:1.55;color:rgba(255,255,255,.9);letter-spacing:.01em}
+#gate .caption p{font-size:12px;color:rgba(255,255,255,.45);line-height:1.7;margin-top:7px}
+/* การ์ดกระจก */
+#gate .stage{position:relative;z-index:2;width:min(408px,100%);
+  background:linear-gradient(180deg,rgba(24,33,48,.72),rgba(14,20,31,.78));
+  backdrop-filter:blur(22px) saturate(1.15);-webkit-backdrop-filter:blur(22px) saturate(1.15);
+  border:1px solid rgba(255,255,255,.10);border-radius:24px;overflow:hidden;
+  box-shadow:0 40px 100px rgba(2,5,11,.62), inset 0 1px 0 rgba(255,255,255,.10);
+  animation:gateIn .6s cubic-bezier(.2,.8,.25,1) both}
+/* เส้นแสงบางๆ วิ่งบนขอบการ์ด */
+#gate .stage::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(240,210,154,.75) 42%,rgba(255,255,255,.5) 50%,rgba(240,210,154,.75) 58%,transparent)}
+@keyframes gateIn{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
+#gate .form{display:flex;flex-direction:column;align-items:center;text-align:center;padding:40px 36px 28px;color:#e9eef6}
+#gate .mark{width:56px;height:56px;border-radius:16px;margin-bottom:18px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(150deg,rgba(240,210,154,.16),rgba(240,210,154,.04));
+  border:1px solid rgba(240,210,154,.26);box-shadow:0 6px 20px rgba(0,0,0,.28)}
+#gate .mark svg{width:26px;height:26px}
+#gate .co{font-size:10px;letter-spacing:.3em;color:#7f8ea6;text-transform:uppercase;margin-bottom:9px;font-weight:500}
+#gate h1{color:#f5f8fc;font-size:19.5px;font-weight:600;margin-bottom:9px;letter-spacing:.005em}
+#gate .desc{font-size:12.5px;color:#8d9cb3;line-height:1.75;max-width:290px}
+#gate .rule{width:100%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.13),transparent);margin:22px 0 20px}
+#gate label{display:block;font-size:11px;color:#a9b6c8;font-weight:500;letter-spacing:.09em;margin-bottom:12px;text-transform:uppercase}
+.pinBoxes{display:flex;gap:9px;justify-content:center;margin-bottom:14px}
+.pinBoxes input{width:45px;height:56px;text-align:center;font-size:23px;font-weight:600;color:#f3ddb2;
+  border:1px solid rgba(255,255,255,.12);border-radius:14px;font-family:inherit;
+  background:rgba(255,255,255,.035);transition:all .18s ease;caret-color:#e2ba74}
+.pinBoxes input:focus{outline:none;border-color:rgba(226,186,116,.6);background:rgba(226,186,116,.07);
+  box-shadow:0 0 0 3px rgba(226,186,116,.13),0 4px 16px rgba(0,0,0,.24)}
+.pinBoxes input.filled{border-color:rgba(226,186,116,.34);background:rgba(226,186,116,.05)}
+.pinBoxes.err input{border-color:rgba(224,116,102,.65);animation:shake .35s}
 @keyframes shake{0%,100%{transform:none}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
-#gate .errmsg{color:#ef8b7e;font-size:12.5px;height:18px;margin-bottom:6px}
-#gate button{position:relative;background:linear-gradient(180deg,#d3a854,#a97e33);color:#161616;border:0;border-radius:12px;
-  padding:13px 0;width:100%;max-width:300px;font-family:inherit;font-size:15.5px;font-weight:700;cursor:pointer;
-  box-shadow:0 8px 24px rgba(198,154,73,.3);transition:transform .12s,box-shadow .12s,filter .12s;letter-spacing:.02em}
-#gate button:hover{filter:brightness(1.07);transform:translateY(-1px)}
+#gate .errmsg{color:#e8917f;font-size:12px;height:18px;margin-bottom:8px}
+#gate button{position:relative;overflow:hidden;background:linear-gradient(180deg,#e6c17f,#c39a4e);color:#1a1408;border:0;border-radius:14px;
+  padding:14px 0;width:100%;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:.01em;
+  box-shadow:0 10px 30px rgba(198,154,73,.24),inset 0 1px 0 rgba(255,255,255,.4);transition:all .18s ease}
+#gate button:hover{filter:brightness(1.05);transform:translateY(-1px);box-shadow:0 14px 34px rgba(198,154,73,.3),inset 0 1px 0 rgba(255,255,255,.45)}
 #gate button:active{transform:translateY(0)}
-#gate button:disabled{filter:grayscale(.3) brightness(.85);cursor:default;transform:none}
-#gate button .spin{display:inline-block;width:15px;height:15px;border:2.5px solid rgba(20,20,20,.35);border-top-color:#161616;
+#gate button:disabled{filter:grayscale(.35) brightness(.9);cursor:default;transform:none}
+#gate button .spin{display:inline-block;width:14px;height:14px;border:2.5px solid rgba(26,20,8,.3);border-top-color:#1a1408;
   border-radius:99px;vertical-align:-2px;margin-right:8px;animation:sp 1s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
-#gate .foot{margin-top:20px;padding-top:14px;border-top:1px solid rgba(255,255,255,.09);font-size:10.5px;color:#8593a8;line-height:1.75;width:100%}
+#gate .foot{margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,.07);font-size:10.5px;color:#6f7d92;line-height:1.8;width:100%}
 @media(max-width:640px){
-  #gate{padding:14px;align-items:flex-end;padding-bottom:max(20px,env(safe-area-inset-bottom))}
-  #gate .form{padding:26px 20px 20px}
-  #gate .chip{top:14px;left:14px}#gate .chip img{height:34px}
-  #gate .mark{width:50px;height:50px;margin-bottom:11px}#gate .mark svg{width:23px;height:23px}
-  #gate h1{font-size:17.5px}
-  .pinBoxes input{width:42px;height:52px}
+  #gate{padding:16px}
+  #gate .form{padding:32px 22px 22px}
+  #gate .chip{top:18px;left:18px}#gate .chip img{height:36px}
+  #gate h1{font-size:18px}
+  .pinBoxes{gap:7px}.pinBoxes input{width:42px;height:53px;font-size:21px}
 }
 footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
 .preparedby{text-align:center;margin-top:16px;padding-top:15px;border-top:1px solid var(--line)}
@@ -251,18 +326,17 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
     <div class="bar"></div>
     <h2>ทุกความคืบหน้าของบ้านคุณ<br>อยู่ในมือคุณ</h2>
     <p>ติดตามงานรายวัน ภาพหน้างานจริง และสถานะการเงิน<br>ตรวจสอบโดยผู้จัดการโครงการก่อนเผยแพร่ทุกฉบับ</p>
-    <div class="credit">ILLUSTRATION · โครงการรามคำแหง 92</div>
   </div>
   <div class="stage">
     <div class="form">
       <div class="mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#d4ac5e" stroke-width="1.8" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5M5.5 10v9h13v-9M10 19v-5h4v5"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#e6c17f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5M5.5 10v9h13v-9M10 19v-5h4v5"/></svg>
       </div>
-      <div class="co">Ruanganan Corporation Limited</div>
+      <div class="co">Ruanganan Corporation</div>
       <h1>ระบบรายงานความคืบหน้าโครงการ</h1>
       <div class="desc">กรุณากรอกรหัสประจำโครงการที่ได้รับจากผู้จัดการโครงการ</div>
       <div class="rule"></div>
-      <label>รหัสประจำโครงการ (6 หลัก)</label>
+      <label>รหัสประจำโครงการ</label>
       <div class="pinBoxes" id="pinBoxes">
         <input inputmode="numeric" autocomplete="one-time-code" maxlength="1">
         <input inputmode="numeric" maxlength="1"><input inputmode="numeric" maxlength="1">
@@ -283,14 +357,65 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
     <div class="sub" id="projSub"></div></div>
   </div></div>
   <div class="tabs">
-    <button class="tab on" id="tabD" onclick="showTab('d')">📅 รายวัน</button>
+    <button class="tab on" id="tabO" onclick="showTab('o')">🏠 ภาพรวม</button>
+    <button class="tab" id="tabD" onclick="showTab('d')">📅 รายวัน</button>
     <button class="tab" id="tabW" onclick="showTab('w')">📊 รายสัปดาห์</button>
     <button class="tab" id="tabF" onclick="showTab('f')">💳 สถานะการเงิน</button>
   </div>
 </header>
 
 <main>
-<div id="viewD">
+<div id="viewO">
+  <div class="hero">
+    <div class="ring"><svg id="ovRing" width="118" height="118" viewBox="0 0 118 118"></svg></div>
+    <div class="info">
+      <div class="lbl">ความคืบหน้าโครงการ</div>
+      <h3 id="ovTitle">—</h3>
+      <p id="ovLine">—</p>
+      <span class="badge" id="ovBadge">—</span>
+    </div>
+  </div>
+
+  <div class="ov">
+    <div class="ovc"><span class="ic">📅</span><b>วันที่มีรายงาน</b><div class="v" id="ovDays">—</div></div>
+    <div class="ovc"><span class="ic">👷</span><b>กำลังคนสะสม</b><div class="v" id="ovMan">—</div></div>
+    <div class="ovc"><span class="ic">📷</span><b>ภาพหน้างาน</b><div class="v" id="ovPh">—</div></div>
+    <div class="ovc"><span class="ic">🗓️</span><b>รายงานล่าสุด</b><div class="v" id="ovLast">—</div></div>
+  </div>
+
+  <section id="ovStepSec">
+    <h2>ขั้นตอนของโครงการ <em>งานเดินถึงขั้นไหนแล้ว</em></h2>
+    <div class="flow" id="ovFlow"></div>
+  </section>
+
+  <section>
+    <h2>กำลังคนเข้าทำงาน <em>รายเดือน</em></h2>
+    <div class="mbars" id="ovBars"></div>
+    <div class="mxl" id="ovBarsX"></div>
+  </section>
+
+  <section id="ovFinSec">
+    <h2>ความคืบหน้าการชำระเงิน <em>ตามงวดงานในสัญญา</em></h2>
+    <div class="kpi" style="grid-template-columns:repeat(3,1fr)">
+      <div class="k"><b>มูลค่าสัญญารวม</b><div class="v" id="ovFinTotal">—</div></div>
+      <div class="k"><b>ชำระแล้ว</b><div class="v" style="color:var(--green)" id="ovFinPaid">—</div></div>
+      <div class="k"><b>คงเหลือ</b><div class="v" style="color:var(--gold)" id="ovFinLeft">—</div></div>
+    </div>
+    <div style="margin-top:13px;height:10px;background:#eef1f5;border-radius:6px;overflow:hidden">
+      <i id="ovFinBar" style="display:block;height:100%;background:linear-gradient(90deg,#2f9e63,#1e8449);border-radius:6px;width:0"></i>
+    </div>
+    <div style="margin-top:7px;font-size:12px;color:var(--muted)" id="ovFinNote"></div>
+  </section>
+
+  <section>
+    <h2>อัปเดตล่าสุด <em>กดเพื่อดูรายงานฉบับเต็ม</em></h2>
+    <div id="ovUpd"></div>
+  </section>
+
+  <div class="preparedby"><div class="bar"></div><span class="lbl">จัดทำโดย</span><span class="nm">บริษัท เรืองอนันต์ คอร์ปอเรชั่น จำกัด</span></div>
+</div>
+
+<div id="viewD" style="display:none">
   <section>
     <div class="calhead">
       <b id="calTitle"></b>
@@ -397,6 +522,11 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
       <svg id="finDonut" width="150" height="150" viewBox="0 0 150 150"></svg>
       <div class="leg" id="finLeg"></div>
     </div>
+  </section>
+  <section id="finExtraSec" style="display:none">
+    <h2>งานเพิ่ม–ลด <em>นอกเหนืองวดงานตามสัญญา</em></h2>
+    <div id="finExtra"></div>
+    <div class="finfoot">รายการนี้สรุปเป็นยอดรวมของแต่ละหมวด — รายละเอียดแยกรายการอยู่ในเอกสารสรุปงานเพิ่ม-ลดที่บริษัทจัดส่งให้ท่านแยกต่างหาก</div>
   </section>
   <section>
     <h2>รายละเอียดงวดงาน <em id="finCount"></em></h2>
@@ -520,15 +650,103 @@ function onData(data){
   } catch(e){ console.error('render',e); $('daySec').style.display='none'; $('noDaily').style.display=''; }
   try { buildWeekly(); } catch(e){ console.error('buildWeekly',e); }
   try { buildFinance(); } catch(e){ console.error('buildFinance',e); }
+  try { buildOverview(); } catch(e){ console.error('buildOverview',e); }
+  showTab('o');   // ลูกค้าเปิดมาเจอหน้าภาพรวมก่อนเสมอ
 }
 
+// ---------- แท็บภาพรวม (dashboard) ----------
+function buildOverview(){
+  const keys=Object.keys(DATA.days).sort();
+  const ph=DATA.phases;
+
+  // % ความคืบหน้า: ขั้นที่เสร็จ = 1 คะแนน, กำลังทำ = ครึ่งคะแนน
+  let pct=null;
+  if(ph&&ph.length){
+    let sc=0; ph.forEach(function(v){ sc += (v===1?1:(v===2?0.5:0)); });
+    pct=Math.round(sc/ph.length*100);
+  }else if(DATA.billing&&DATA.billing.total){
+    pct=Math.round(DATA.billing.paid/DATA.billing.total*100);   // ไม่มี phases → ใช้สัดส่วนงวดที่ชำระแทน
+  }
+
+  // วงแหวน %
+  const R=50,C=2*Math.PI*R,val=(pct==null?0:pct);
+  $('ovRing').innerHTML=
+    '<circle cx="59" cy="59" r="'+R+'" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="9"/>'
+   +'<circle cx="59" cy="59" r="'+R+'" fill="none" stroke="#f0d29a" stroke-width="9" stroke-linecap="round"'
+   +' stroke-dasharray="'+(C*val/100)+' '+(C-C*val/100)+'" stroke-dashoffset="'+(C*0.25)+'"/>'
+   +'<text x="59" y="56" text-anchor="middle" font-size="27" font-weight="700" fill="#fff">'+(pct==null?'—':val+'%')+'</text>'
+   +'<text x="59" y="74" text-anchor="middle" font-size="10" fill="#bcd0e6">ความคืบหน้า</text>';
+
+  const pi=DATA.projectInfo||{};
+  $('ovTitle').textContent='โครงการ'+(pi.label||'');
+  $('ovLine').textContent=(pi.workType&&pi.workType!=='-')?pi.workType:'รายงานความคืบหน้าการก่อสร้าง';
+  const last=keys[keys.length-1];
+  $('ovBadge').textContent=last?(DATA.days[last].progress||'ดำเนินการตามแผน'):'ยังไม่มีรายงาน';
+
+  // KPI
+  const totMan=keys.reduce(function(a,k){return a+DATA.days[k].total},0);
+  const totPh=keys.reduce(function(a,k){return a+(DATA.days[k].photoUrls||[]).length},0);
+  $('ovDays').textContent=keys.length+' วัน';
+  $('ovMan').textContent=totMan.toLocaleString()+' คน-วัน';
+  $('ovPh').textContent=totPh.toLocaleString()+' ภาพ';
+  $('ovLast').textContent=last?DATA.days[last].short:'—';
+
+  // flow ขั้นตอน
+  if(ph&&ph.length){
+    $('ovStepSec').style.display='';
+    $('ovFlow').innerHTML=ph.map(function(st,i){
+      const cls=st===1?'done':(st===2?'cur':'');
+      const ic=st===1?'✓':(i+1);
+      const nm=(DATA.phaseNames[i]||'').replace('|','<br>');
+      return '<div class="fst '+cls+'"><div class="dot">'+ic+'</div><div class="nm">'+nm+'</div></div>';
+    }).join('');
+  }else{ $('ovStepSec').style.display='none'; }
+
+  // กำลังคนรายเดือน (6 เดือนล่าสุด)
+  const byM={};
+  keys.forEach(function(k){ const m=k.slice(0,7); byM[m]=(byM[m]||0)+DATA.days[k].total; });
+  const ms=Object.keys(byM).sort().slice(-6);
+  const mx=Math.max(1,...ms.map(function(m){return byM[m]}));
+  $('ovBars').innerHTML=ms.map(function(m){
+    return '<div class="mbar"><div class="n">'+byM[m]+'</div><div class="b" style="height:'+(byM[m]/mx*80)+'%"></div></div>';
+  }).join('');
+  $('ovBarsX').innerHTML=ms.map(function(m){
+    const d=toDate(m+'-01');
+    return '<div>'+TH_M[d.getMonth()].slice(0,4)+' '+String(d.getFullYear()+543).slice(-2)+'</div>';
+  }).join('');
+
+  // การเงิน
+  const b=DATA.billing;
+  if(b&&b.items&&b.items.length){
+    $('ovFinSec').style.display='';
+    const fp=b.total?(b.paid/b.total*100):0;
+    $('ovFinTotal').textContent=(b.total/1e6).toFixed(2)+' ล.บ.';
+    $('ovFinPaid').textContent=(b.paid/1e6).toFixed(2)+' ล.บ.';
+    $('ovFinLeft').textContent=((b.total-b.paid)/1e6).toFixed(2)+' ล.บ.';
+    $('ovFinBar').style.width=fp.toFixed(1)+'%';
+    const paidN=b.items.filter(function(i){return i.paid}).length;
+    $('ovFinNote').textContent='ชำระแล้ว '+paidN+' จาก '+b.items.length+' งวด ('+fp.toFixed(1)+'%)';
+  }else{ $('ovFinSec').style.display='none'; }
+
+  // อัปเดตล่าสุด 5 วัน
+  $('ovUpd').innerHTML=keys.slice(-5).reverse().map(function(k){
+    const d=DATA.days[k];
+    const first=(d.tasks&&d.tasks.length)?d.tasks[0]:'ไม่มีการบันทึกสรุปงาน';
+    const more=(d.tasks&&d.tasks.length>1)?(' · อีก '+(d.tasks.length-1)+' รายการ'):'';
+    return '<div class="upd" onclick="goDay(\''+k+'\')"><div class="d">'+esc(d.short)+'</div>'
+      +'<div class="t">'+esc(first)+'<small>'+d.total+' คน'+esc(more)+'</small></div></div>';
+  }).join('')||'<div class="nophoto">ยังไม่มีรายงานที่เผยแพร่</div>';
+}
+function goDay(k){ cur=k; showTab('d'); render(); buildCal(); }
+
 function showTab(t){
-  $('viewD').style.display=t==='d'?'':'none';
-  $('viewW').style.display=t==='w'?'':'none';
-  $('viewF').style.display=t==='f'?'':'none';
-  $('tabD').classList.toggle('on',t==='d');
-  $('tabW').classList.toggle('on',t==='w');
-  $('tabF').classList.toggle('on',t==='f');
+  ['o','d','w','f'].forEach(function(k){
+    const v={o:'viewO',d:'viewD',w:'viewW',f:'viewF'}[k];
+    const b={o:'tabO',d:'tabD',w:'tabW',f:'tabF'}[k];
+    $(v).style.display = (k===t) ? '' : 'none';
+    $(b).classList.toggle('on', k===t);
+  });
+  window.scrollTo(0,0);
 }
 
 // ---------- วันที่ ----------
@@ -773,16 +991,32 @@ function buildFinance(){
     <span><i style="background:#eef1f5;border:1px solid #dde4ec"></i>คงเหลือ ${((b.total-b.paid)/1e6).toFixed(2)} ล้านบาท</span>`;
 
   const slipsByInst=DATA.paymentSlips||{};
-  const maxAmt=Math.max(1,...b.items.map(i=>i.amount));
-  $('finList').innerHTML=b.items.map(i=>{
-    const w=(i.amount/maxAmt*100).toFixed(0);
-    const col=i.paid?'#1e8449':'#d9dfe6';
-    const st=i.paid?'<span style="color:#1e8449">ชำระแล้ว</span>':'<span style="color:#b8873b">รอดำเนินการ</span>';
+  // ⚠️ ตั้งใจไม่ใส่แท่งเทียบมูลค่าระหว่างงวดแล้ว — เดิมทำให้เห็นชัดว่างวดไหนเงินเยอะ/น้อย
+  // ตอนนี้เป็นการ์ดรายงวด: จุดสถานะ + ชื่อ + คำอธิบาย + ยอด + สถานะ อ่านง่ายกว่ามาก
+  const firstUnpaid=b.items.findIndex(function(i){return !i.paid});
+  $('finList').innerHTML=b.items.map(function(i,idx){
     const slips=slipsByInst[i.label]||[];
-    const last=slips[slips.length-1];
-    const slipLink=last?`<span class="slipLink" onclick="openLbUrl('${last.view}')">📎 ดูสลิป${slips.length>1?' ('+slips.length+')':''}</span>`:'';
-    return `<div class="instRow"><div class="lab"><b style="color:var(--ink);font-weight:600">${esc(i.label)}</b><br><span style="font-size:11.5px;color:var(--muted)">${esc(i.desc)}</span></div><div class="track"><i style="width:${w}%;background:${col}"></i></div><div class="amt">${i.amount.toLocaleString()} บ.</div><div class="st">${st}${slipLink}</div></div>`;
+    const lastSlip=slips[slips.length-1];
+    const slipLink=lastSlip?'<span class="slipLink" onclick="openLbUrl(\''+lastSlip.view+'\')">📎 ดูสลิป'+(slips.length>1?' ('+slips.length+')':'')+'</span>':'';
+    const cls=i.paid?'paid':(idx===firstUnpaid?'next':'');
+    const dot=i.paid?'✓':(idx+1);
+    const st=i.paid?'<div class="st">ชำระแล้ว</div>':'<div class="st wait">'+(idx===firstUnpaid?'งวดถัดไป':'ยังไม่ถึงกำหนด')+'</div>';
+    return '<div class="instRow '+cls+'"><div class="dot">'+dot+'</div>'
+      +'<div class="lab"><b>'+esc(i.label)+'</b><span>'+esc(i.desc)+'</span></div>'
+      +'<div class="right"><div class="amt">'+i.amount.toLocaleString()+' บ.</div>'+st+slipLink+'</div></div>';
   }).join('');
+
+  // ---- งานเพิ่ม–ลด (จากแท็บ "สรุป Cash flow") ----
+  const ex=DATA.extraWorks||[];
+  if(ex.length){
+    $('finExtraSec').style.display='';
+    const sum=ex.reduce(function(a,x){return a+x.amount},0);
+    const money=function(n){return n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})};
+    $('finExtra').innerHTML=ex.map(function(x){
+      return '<div class="exw"><b>'+esc(x.label)+'</b><span>'+money(x.amount)+' บ.</span></div>';
+    }).join('')
+    +'<div class="exwSum"><span>รวมงานเพิ่ม–ลดทั้งหมด</span><span>'+money(sum)+' บ.</span></div>';
+  }else{ $('finExtraSec').style.display='none'; }
 
   const due=b.items.find(i=>!i.paid);
   if(due){
