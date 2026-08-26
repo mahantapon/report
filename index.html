@@ -270,7 +270,10 @@ ol.tasks li{margin-bottom:4px}
 .mbars.weekly .mbar .b{background:linear-gradient(180deg,#d9a95e,#8f6a2c)}
 .mbar .n{font-size:11.5px;font-weight:700;margin-bottom:4px;color:var(--ink2)}
 .mxl{display:flex;gap:8px;margin-top:5px}
-.mxl div{flex:1;text-align:center;font-size:10.5px;color:var(--muted)}
+.mxl div{flex:1;text-align:center;font-size:10.5px;color:var(--muted);line-height:1.35;min-height:28px}
+/* ป้ายแกน X แยกเป็น 2 บรรทัดเสมอ — โหมดรายสัปดาห์ต้องใส่ช่วงวันที่ (17-23 ส.ค.) ซึ่งยาวกว่าเดิม
+   ถ้าปล่อยบรรทัดเดียวจะล้นทับกันตอนมี 8 แท่งบนจอมือถือ */
+.mxl div span{display:block}
 /* เมื่อมีแท่งน้อย (≤3) อย่ายืดเต็มแถว — จะดูโบ๋ว่างๆ ให้รวมกลุ่มไว้ตรงกลางแทน */
 .mbars.few{justify-content:center;gap:34px}
 .mbars.few .mbar{flex:0 0 68px}
@@ -463,6 +466,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
   .strip img{height:118px}
   .k .v{font-size:17px}
   .bars{height:96px}
+  .mxl div{font-size:9px;min-height:25px}
   .instRow{flex-wrap:wrap;row-gap:4px}
   .instRow .lab{flex:1 1 100%;font-size:12px}
   .instRow .track{flex:1 1 auto}
@@ -935,9 +939,15 @@ function renderBars(){
       return '<div class="mbar"><div class="n">'+buckets[x]+'</div><div class="b" style="height:'+(buckets[x]/mx*80)+'%"></div></div>';
     }).join('');
     $('ovBarsX').innerHTML=order.map(function(x){
-      if(barsMode==='w'){ const d=toDate(x); return '<div>'+String(d.getDate())+' '+TH_M_ABBR[d.getMonth()]+'</div>'; }
+      if(barsMode==='w'){
+        // ช่วงสัปดาห์ = จันทร์→อาทิตย์ ตรงกับที่หัวข้อแท็บ "รายสัปดาห์" ใช้อยู่ (mon.getDate()+6)
+        const mon=toDate(x), sun=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+6);
+        return mon.getMonth()===sun.getMonth()
+          ? '<div><span>'+mon.getDate()+'-'+sun.getDate()+'</span><span>'+TH_M_ABBR[mon.getMonth()]+'</span></div>'
+          : '<div><span>'+mon.getDate()+' '+TH_M_ABBR[mon.getMonth()]+'</span><span>- '+sun.getDate()+' '+TH_M_ABBR[sun.getMonth()]+'</span></div>';
+      }
       const d=toDate(x+'-01');
-      return '<div>'+TH_M_ABBR[d.getMonth()]+' '+String(d.getFullYear()+543).slice(-2)+'</div>';
+      return '<div><span>'+TH_M_ABBR[d.getMonth()]+' '+String(d.getFullYear()+543).slice(-2)+'</span></div>';
     }).join('');
   }else{
     $('ovBars').innerHTML='<div class="nophoto" style="width:100%;align-self:center">ยังไม่มีการบันทึกจำนวนกำลังคน</div>';
