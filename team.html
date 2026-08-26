@@ -11,15 +11,39 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>ทีมภายใน — รายงานความคืบหน้าโครงการ</title>
+<script>
+/* ⚠️ ต้องอยู่ก่อน <style> และรันแบบ sync — เซ็ต data-theme ก่อนหน้าเพนต์ครั้งแรก
+   กันจอกะพริบ (เข้าธีมมืดตามค่าตั้งต้นแป๊บนึงแล้วค่อยสลับเป็นสว่างทีหลัง) */
+(function(){
+  try{
+    var t = localStorage.getItem('team_theme');
+    if(!t) t = (window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+  }catch(e){}
+})();
+</script>
 <style>
-:root{--ink:#e8edf4;--muted:#93a1b5;--navy:#16324f;--gold:#d4ac5e;--gold-dk:#a97e33;--line:rgba(255,255,255,.09);--card:rgba(13,21,34,.88);
-  --ok:#57c98a;--warn:#f2b866;--bad:#ef8b7e}
+:root{--gold:#d4ac5e;--gold-dk:#a97e33;
+  --ink:#e8edf4;--heading:#f3f6fa;--accent:#f0d29a;--muted:#93a1b5;--faint:#7d8ba0;
+  --line:rgba(255,255,255,.09);--card:rgba(13,21,34,.88);
+  --input-bg:rgba(16,26,42,.85);--input-border:#2b3a53;--th-bg:rgba(255,255,255,.03);--track:rgba(255,255,255,.09);
+  --chip-border:rgba(255,255,255,.12);--page:#080d15;
+  --ok:#57c98a;--warn:#f2b866;--bad:#ef8b7e;--info:#a9b8ff;
+  color-scheme:dark}
+/* ธีมสว่าง — โทนเดียวกับหน้ารวมฝั่ง Apps Script (Hub.html) ให้สองหน้าดูเป็นชุดเดียวกัน */
+:root[data-theme="light"]{
+  --ink:#33445e;--heading:#16233a;--accent:#a97e33;--muted:#6b7c93;--faint:#8a95a6;
+  --line:#e2e6ec;--card:#ffffff;
+  --input-bg:#f4f5f7;--input-border:#d9dee6;--th-bg:rgba(0,0,0,.03);--track:rgba(0,0,0,.08);
+  --chip-border:rgba(0,0,0,.08);--page:#eef1f5;
+  --ok:#0f7b45;--warn:#b45309;--bad:#b91c1c;--info:#4338ca;
+  color-scheme:light}
 *{box-sizing:border-box;margin:0;padding:0}
 body{min-height:100vh;font-family:"IBM Plex Sans Thai","Sarabun",sans-serif;color:var(--ink);font-size:15px;line-height:1.6;
-  background:#080d15;overflow-x:hidden}
-/* พื้นหลังสไตล์เดียวกับหน้า login (ClientPortal.html #gate) — light leak หลายชั้น + เคลื่อนช้ามาก
-   ทั้งหมดเป็น CSS ล้วน ไม่ใช้รูปภาพ เลยเบากว่า hero-art.jpg เดิมเยอะ และหน้าตาเข้าธีมเดียวกับตอนกรอกรหัส */
-body::before{content:'';position:fixed;inset:-30%;z-index:0;pointer-events:none;
+  background:var(--page);overflow-x:hidden}
+/* พื้นหลังธีมมืด: สไตล์เดียวกับหน้า login (ClientPortal.html #gate) — light leak หลายชั้น + เคลื่อนช้ามาก
+   ทั้งหมดเป็น CSS ล้วน ไม่ใช้รูปภาพ / ธีมสว่าง: ปิดสองชั้นนี้ ใช้พื้นเรียบแทน (ดูด้านล่าง) */
+:root:not([data-theme="light"]) body::before{content:'';position:fixed;inset:-30%;z-index:0;pointer-events:none;
   background:
     radial-gradient(38% 26% at 18% 14%, rgba(226,186,116,.30), transparent 62%),
     radial-gradient(32% 22% at 84% 26%, rgba(96,150,214,.22), transparent 64%),
@@ -31,20 +55,32 @@ body::before{content:'';position:fixed;inset:-30%;z-index:0;pointer-events:none;
 @keyframes drift{
   0%{transform:translate3d(-2%,-1%,0) scale(1.04)}
   100%{transform:translate3d(2.5%,2%,0) scale(1.12)}}
-/* ชั้นเนื้อฟิล์ม (noise) + vignette มืดขอบ — ตัวเดียวกับ #gate::after ในหน้าลูกค้า */
-body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+/* ชั้นเนื้อฟิล์ม (noise) + vignette มืดขอบ — ตัวเดียวกับ #gate::after ในหน้าลูกค้า (ธีมมืดเท่านั้น) */
+:root:not([data-theme="light"]) body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   background:
     radial-gradient(ellipse 78% 68% at 50% 46%, transparent 42%, rgba(3,7,13,.72) 100%),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.28'/%3E%3C/svg%3E");
   mix-blend-mode:overlay;opacity:.5}
+/* ธีมสว่าง: พื้นเรียบนวลๆ แบบ Hub.html (แสงจางมุมบนสองจุด ไม่มี light leak/noise ของธีมมืด) */
+:root[data-theme="light"] body{
+  background:
+    radial-gradient(60% 420px at 18% 0,rgba(184,135,59,.06),transparent 70%),
+    radial-gradient(50% 380px at 100% 0,rgba(22,50,79,.05),transparent 70%),
+    var(--page)}
 .wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:26px 18px 70px}
 
 header{display:flex;align-items:center;gap:14px;margin-bottom:4px}
-.chip{background:rgba(255,255,255,.94);border-radius:11px;padding:6px 9px}
+.chip{background:rgba(255,255,255,.94);border:1px solid var(--chip-border);border-radius:11px;padding:6px 9px}
 .chip img{height:38px;display:block}
-h1{font-size:19px;font-weight:700;color:#f3f6fa}
+h1{font-size:19px;font-weight:700;color:var(--heading)}
 .sub{color:var(--muted);font-size:12.5px;margin:4px 0 20px}
-.sub b{color:#f0d29a;font-weight:600}
+.sub b{color:var(--accent);font-weight:600}
+/* ปุ่มสลับธีมสว่าง/มืด */
+.theme-toggle{margin-left:auto;flex:none;width:38px;height:38px;border-radius:11px;border:1px solid var(--line);
+  background:var(--card);color:var(--heading);font-size:16px;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:transform .15s}
+.theme-toggle:hover{transform:scale(1.06)}
+.theme-toggle:active{transform:scale(.92)}
 
 /* gate รหัสทีม */
 #gate{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:18px;
@@ -54,60 +90,60 @@ h1{font-size:19px;font-weight:700;color:#f3f6fa}
   box-shadow:0 30px 80px rgba(2,6,14,.6)}
 #gate .box::before{content:'';display:block;width:44px;height:3px;margin:0 auto 18px;border-radius:2px;
   background:linear-gradient(90deg,#d4ac5e,#8f6a2b)}
-#gate h2{font-size:18px;margin-bottom:6px}
+#gate h2{font-size:18px;margin-bottom:6px;color:var(--heading)}
 #gate p{font-size:12.5px;color:var(--muted);margin-bottom:18px}
-#gate input{width:100%;padding:12px 14px;font:inherit;font-size:15px;color:#f4d9a8;text-align:center;letter-spacing:.06em;
-  background:rgba(16,26,42,.85);border:1.5px solid #2b3a53;border-radius:11px;margin-bottom:10px}
+#gate input{width:100%;padding:12px 14px;font:inherit;font-size:15px;color:var(--accent);text-align:center;letter-spacing:.06em;
+  background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:11px;margin-bottom:10px}
 #gate input:focus{outline:none;border-color:#c69a49;box-shadow:0 0 0 3.5px rgba(198,154,73,.2)}
 #gate .err{color:var(--bad);font-size:12.5px;height:18px;margin-bottom:6px}
 #gate button{width:100%;padding:12px 0;font:inherit;font-size:15px;font-weight:700;color:#161616;border:0;border-radius:11px;
   cursor:pointer;background:linear-gradient(180deg,#d3a854,#a97e33);box-shadow:0 8px 22px rgba(198,154,73,.3)}
 #gate button:disabled{filter:grayscale(.3) brightness(.85)}
-#gate .note{margin-top:14px;font-size:10.5px;color:#7d8ba0}
+#gate .note{margin-top:14px;font-size:10.5px;color:var(--faint)}
 
 /* แถบสรุปภาพรวม */
 .sumbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:11px;margin-bottom:14px}
 .sum{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:12px 14px}
-.sum .n{font-size:22px;font-weight:700;line-height:1.15;color:#f3f6fa}
+.sum .n{font-size:22px;font-weight:700;line-height:1.15;color:var(--heading)}
 .sum .l{font-size:11px;color:var(--muted);margin-top:1px}
-.sum .s{font-size:10.5px;color:#7d8ba0;margin-top:3px}
+.sum .s{font-size:10.5px;color:var(--faint);margin-top:3px}
 .sum.ok .n{color:var(--ok)} .sum.warn .n{color:var(--warn)} .sum.bad .n{color:var(--bad)}
 
 /* ตารางเทียบ */
 .panel{background:var(--card);border:1px solid var(--line);border-radius:15px;overflow:hidden;margin-bottom:22px}
-.panel h3{font-size:13.5px;font-weight:700;padding:12px 15px;border-bottom:1px solid var(--line);color:#f0d29a}
+.panel h3{font-size:13.5px;font-weight:700;padding:12px 15px;border-bottom:1px solid var(--line);color:var(--accent)}
 .scroll{overflow-x:auto}
 table{border-collapse:collapse;width:100%;font-size:12.5px;min-width:720px}
 th,td{padding:9px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
-th{font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap;background:rgba(255,255,255,.03)}
+th{font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap;background:var(--th-bg)}
 tr:last-child td{border-bottom:0}
 td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-td.name{font-weight:600;color:#f3f6fa;white-space:nowrap}
-.dash{color:#5d6a7d}
+td.name{font-weight:600;color:var(--heading);white-space:nowrap}
+.dash{color:var(--faint)}
 .issuetxt{color:var(--warn);max-width:260px}
-.bar{position:relative;height:5px;border-radius:3px;background:rgba(255,255,255,.09);width:84px;margin:4px 0 0 auto}
+.bar{position:relative;height:5px;border-radius:3px;background:var(--track);width:84px;margin:4px 0 0 auto}
 .bar > i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--gold)}
 
 .tag{display:inline-block;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
 .tag.ok{background:rgba(87,201,138,.13);color:var(--ok)}
 .tag.wait{background:rgba(242,184,102,.13);color:var(--warn)}
 .tag.none{background:rgba(239,139,126,.13);color:var(--bad)}
-.tag.raw{background:rgba(129,150,255,.15);color:#a9b8ff}
+.tag.raw{background:rgba(129,150,255,.15);color:var(--info)}
 
 /* การ์ดโครงการ */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px}
 .card{background:var(--card);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   border:1px solid var(--line);border-radius:16px;padding:18px 18px 15px;display:flex;flex-direction:column;gap:11px}
-.card h2{font-size:16.5px;color:#f3f6fa;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.pin{font-family:ui-monospace,monospace;font-size:13px;letter-spacing:.14em;color:#f0d29a;
+.card h2{font-size:16.5px;color:var(--heading);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.pin{font-family:ui-monospace,monospace;font-size:13px;letter-spacing:.14em;color:var(--accent);
   background:rgba(212,172,94,.10);border:1px solid rgba(212,172,94,.3);border-radius:7px;padding:2px 9px;cursor:pointer}
 .meta{font-size:12.5px;color:var(--muted);line-height:1.7}
-.meta b{color:#cdd7e4;font-weight:600}
+.meta b{color:var(--ink);font-weight:600}
 .pinacts{display:flex;gap:10px;margin-top:2px}
 .mini{font:inherit;font-size:11.5px;font-weight:600;cursor:pointer;background:none;border:0;padding:0;
-  color:#e9cf9b;text-decoration:underline}
+  color:var(--accent);text-decoration:underline}
 .stats{display:flex;gap:16px;padding:9px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);flex-wrap:wrap}
-.stat .n{font-size:18px;font-weight:700;color:#f3f6fa;line-height:1.2}
+.stat .n{font-size:18px;font-weight:700;color:var(--heading);line-height:1.2}
 .stat .l{font-size:10.5px;color:var(--muted)}
 .flag{font-size:11.5px;color:var(--warn);background:rgba(242,184,102,.08);border:1px solid rgba(242,184,102,.25);
   border-radius:8px;padding:6px 10px;line-height:1.6}
@@ -115,10 +151,11 @@ td.name{font-weight:600;color:#f3f6fa;white-space:nowrap}
 .btn{font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;text-decoration:none;text-align:center;
   padding:8px 12px;border-radius:8px;border:1px solid var(--gold-dk);color:#161616;
   background:linear-gradient(180deg,#d3a854,#a97e33)}
-.btn.ghost{background:transparent;color:#e9cf9b;border-color:rgba(212,172,94,.45)}
+.btn.ghost{background:transparent;color:var(--accent);border-color:rgba(212,172,94,.45)}
 .btn:hover{filter:brightness(1.08)}
 .btn:disabled{filter:grayscale(.4) brightness(.8);cursor:default}
-.foot{margin-top:26px;text-align:center;font-size:11px;color:#7d8ba0;line-height:1.8}
+.foot{margin-top:26px;text-align:center;font-size:11px;color:var(--faint);line-height:1.8}
+.foot b{color:var(--accent)}
 .toast{position:fixed;left:50%;bottom:24px;z-index:60;transform:translateX(-50%) translateY(70px);
   background:#f0d29a;color:#161616;font-weight:600;padding:9px 18px;border-radius:9px;font-size:13px;opacity:0;transition:.25s;pointer-events:none}
 .toast.on{transform:translateX(-50%) translateY(0);opacity:1}
@@ -128,10 +165,10 @@ td.name{font-weight:600;color:#f3f6fa;white-space:nowrap}
   background:rgba(8,14,25,.6);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
 #modal.on{display:flex}
 #modal .box{width:min(380px,100%);background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 24px 20px}
-#modal h3{font-size:16px;margin-bottom:5px;color:#f3f6fa}
+#modal h3{font-size:16px;margin-bottom:5px;color:var(--heading)}
 #modal p{font-size:12px;color:var(--muted);margin-bottom:14px}
-#modal input{width:100%;padding:12px;font:inherit;font-size:18px;letter-spacing:.2em;text-align:center;color:#f4d9a8;
-  font-family:ui-monospace,monospace;background:rgba(16,26,42,.85);border:1.5px solid #2b3a53;border-radius:11px}
+#modal input{width:100%;padding:12px;font:inherit;font-size:18px;letter-spacing:.2em;text-align:center;color:var(--accent);
+  font-family:ui-monospace,monospace;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:11px}
 #modal input:focus{outline:none;border-color:#c69a49}
 #modal .err{color:var(--bad);font-size:12px;min-height:17px;margin:7px 0 2px}
 #modal .row{display:flex;gap:8px;margin-top:6px}
@@ -156,6 +193,7 @@ td.name{font-weight:600;color:#f3f6fa;white-space:nowrap}
     <div>
       <h1>หน้ารวมโครงการ — ทีมภายใน</h1>
     </div>
+    <button id="themeBtn" class="theme-toggle" onclick="toggleTheme()" title="สลับธีมสว่าง/มืด">🌙</button>
   </header>
   <div class="sub" id="stamp"></div>
   <div class="sumbar" id="sumbar"></div>
@@ -171,7 +209,7 @@ td.name{font-weight:600;color:#f3f6fa;white-space:nowrap}
   </div>
   <div class="grid" id="grid"></div>
   <div class="foot">
-    ลิงก์ลูกค้า: <b style="color:#e9cf9b">report.ruanganan.com</b> (ลิงก์เดียวทุกโครงการ ระบบแยกด้วย PIN)<br>
+    ลิงก์ลูกค้า: <b>report.ruanganan.com</b> (ลิงก์เดียวทุกโครงการ ระบบแยกด้วย PIN)<br>
     แตะกล่อง PIN เพื่อคัดลอก · "ข้อความส่งลูกค้า" คัดลอกลิงก์+รหัสพร้อมส่งใน LINE · เปลี่ยนรหัสแล้วรหัสเดิมใช้ไม่ได้ทันที
   </div>
 </div>
@@ -195,6 +233,21 @@ td.name{font-weight:600;color:#f3f6fa;white-space:nowrap}
 const API_URL = 'https://script.google.com/macros/s/AKfycbxo5iY4E9CazLb2sEkbR9XS4mkEUdoPAfYCsLAtR2IcqCMuEuQJGiab-ShKvSHfeVhC/exec';
 const $ = id => document.getElementById(id);
 let busy=false, TEAM_KEY='', DATA=null, cur={site:'',label:''};
+
+/* ---------- สลับธีมสว่าง/มืด ---------- */
+// ⚠️ ตัวเซ็ต data-theme จริงอยู่ใน <script> ที่หัวไฟล์ (รันก่อนเพนต์ กันจอกะพริบ)
+// ตรงนี้แค่ sync ไอคอนปุ่มให้ตรงกับธีมปัจจุบัน + จัดการตอนกดสลับ
+function syncThemeIcon(){
+  const t = document.documentElement.getAttribute('data-theme') || 'dark';
+  $('themeBtn').textContent = t === 'light' ? '☀️' : '🌙';
+}
+function toggleTheme(){
+  const next = (document.documentElement.getAttribute('data-theme') === 'light') ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  try{ localStorage.setItem('team_theme', next); }catch(e){}
+  syncThemeIcon();
+}
+syncThemeIcon();
 
 /* ---------- เรียก API (Content-Type: text/plain เพื่อเลี่ยง CORS preflight) ---------- */
 function api(body){
