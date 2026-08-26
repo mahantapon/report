@@ -1,0 +1,48 @@
+<!doctype html><html lang="th"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>กำลังเปิดรายงาน…</title>
+<meta name="robots" content="noindex,nofollow">
+<!--
+  r.html — ตัวย่อลิงก์หน้าตรวจ/แก้รายงาน (ทีมภายใน)
+  เหตุผลที่มีไฟล์นี้: URL ของ Apps Script ยาวมาก (deployment id 71 ตัวอักษร + ชื่อไทยที่ encode แล้ว)
+  ส่งเข้า LINE แล้วอ่านไม่รู้เรื่องและดูไม่เป็นทางการ — ไฟล์นี้รับพารามิเตอร์สั้นๆ แล้ว redirect ต่อ
+      report.ruanganan.com/r.html?s=rtw&d=2026-08-26&k=<teamkey>
+  ⚠️ ฝั่งเซิร์ฟเวอร์ยังตรวจรหัสทีมอีกชั้นเสมอ หน้านี้ไม่ได้ให้สิทธิ์อะไรเพิ่ม แค่พาไปให้ถูกที่
+-->
+<style>
+body{margin:0;height:100vh;display:flex;align-items:center;justify-content:center;
+  font-family:"IBM Plex Sans Thai","Sarabun",sans-serif;background:#0f1a2b;color:#e9eef7;text-align:center}
+.b{max-width:420px;padding:24px}
+.sp{width:34px;height:34px;margin:0 auto 16px;border:3px solid rgba(240,210,154,.25);
+  border-top-color:#f0d29a;border-radius:99px;animation:s 1s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+a{color:#f0d29a;word-break:break-all;font-size:13px}
+p{font-size:14px;color:#9fb0c6;line-height:1.7}
+</style></head><body>
+<div class="b">
+  <div class="sp"></div>
+  <p id="msg">กำลังเปิดรายงาน…</p>
+  <p id="fb" style="display:none"><a id="lnk" href="#">กดที่นี่ถ้าไม่เด้งอัตโนมัติ</a></p>
+</div>
+<script>
+var GAS = 'https://script.google.com/macros/s/AKfycbxo5iY4E9CazLb2sEkbR9XS4mkEUdoPAfYCsLAtR2IcqCMuEuQJGiab-ShKvSHfeVhC/exec';
+var q = new URLSearchParams(location.search);
+var s = q.get('s') || q.get('site') || '';
+var d = q.get('d') || q.get('date') || '';
+var k = q.get('k') || q.get('key') || '';
+if (!k) {
+  document.getElementById('msg').textContent = 'ลิงก์ไม่สมบูรณ์ — ไม่มีรหัสทีม กรุณาเปิดจากลิงก์ในกลุ่ม LINE อีกครั้ง';
+  document.querySelector('.sp').style.display = 'none';
+} else {
+  var url = GAS + '?view=review'
+          + (s ? '&s=' + encodeURIComponent(s) : '')
+          + (d ? '&d=' + encodeURIComponent(d) : '')
+          + '&key=' + encodeURIComponent(k);
+  var a = document.getElementById('lnk');
+  a.href = url;
+  // เผื่อ redirect โดนบล็อก (บางเบราว์เซอร์ในแอป LINE) ให้มีลิงก์สำรองให้กดเอง
+  setTimeout(function(){ document.getElementById('fb').style.display = 'block'; }, 2500);
+  location.replace(url);
+}
+</script>
+</body></html>
