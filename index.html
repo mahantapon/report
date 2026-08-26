@@ -196,6 +196,18 @@ ol.tasks li{margin-bottom:4px}
 .hero::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.06;
   background-image:repeating-linear-gradient(90deg,#fff 0,#fff 1px,transparent 1px,transparent 34px),
   repeating-linear-gradient(0deg,#fff 0,#fff 1px,transparent 1px,transparent 34px)}
+/* ลายเซ็นภาพนามธรรม "หลังคาบ้าน" ดัดแปลงจากเหลี่ยมโลโก้บริษัท — ใส่ในการ์ดเด่นทุกใบ (hero/fintotal/อัปเดตล่าสุด) ให้เป็นจุดจำที่ไม่เหมือนเว็บอื่น */
+.brandArt{position:absolute;top:0;right:0;bottom:0;width:56%;pointer-events:none;overflow:hidden;z-index:0;opacity:.9}
+.brandArt i{position:absolute;display:block;font-style:normal}
+.brandArt i:nth-child(1){width:62%;height:150%;top:-25%;right:-8%;
+  background:linear-gradient(148deg,rgba(255,255,255,.10),rgba(255,255,255,.015) 60%);
+  clip-path:polygon(38% 0,100% 16%,100% 100%,14% 100%,0 42%)}
+.brandArt i:nth-child(2){width:34%;height:96%;top:10%;right:14%;
+  background:linear-gradient(148deg,rgba(240,210,154,.28),rgba(240,210,154,.04) 65%);
+  clip-path:polygon(42% 0,100% 24%,100% 100%,18% 100%,0 46%)}
+.brandArt i:nth-child(3){width:16%;height:46%;top:16%;right:30%;
+  border:1.5px solid rgba(240,210,154,.4);border-radius:2px;
+  clip-path:polygon(42% 0,100% 24%,100% 100%,18% 100%,0 46%)}
 .hero .ring{position:relative;z-index:1;flex:0 0 auto}
 .hero .info{position:relative;z-index:1;flex:1;min-width:200px}
 .hero .info .lbl{font-size:11px;letter-spacing:.14em;color:#a8bcd4;text-transform:uppercase;margin-bottom:5px}
@@ -271,13 +283,22 @@ ol.tasks li{margin-bottom:4px}
 .mbars.few .mbar{flex:0 0 68px}
 .mxl.few{justify-content:center;gap:34px}
 .mxl.few div{flex:0 0 68px}
-/* รายการอัปเดตล่าสุด */
-.upd{display:flex;gap:11px;padding:10px 0;border-bottom:1px solid var(--soft);cursor:pointer}
+/* รายการอัปเดตล่าสุด — การ์ดทองรับสีจากวงแหวน % ให้เป็นจุดปิดหน้าที่มีน้ำหนัก ไม่ใช่กล่องขาวเรียบๆ */
+#ovUpdSec{background:linear-gradient(150deg,#2a2110,#3d3018 50%,#5c4519);border-color:transparent;position:relative;overflow:hidden}
+[data-theme="dark"] #ovUpdSec{background:linear-gradient(150deg,#191307,#241c0d 50%,#332809)}
+#ovUpdSec::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(45% 70% at 92% -6%,rgba(240,210,154,.22),transparent 65%)}
+#ovUpdSec h2{position:relative;color:#fff;border-left-color:#f0d29a}
+#ovUpdSec h2 em{color:#cbb27c}
+.upd{display:flex;gap:11px;padding:11px 0 11px 5px;border-bottom:1px solid rgba(255,255,255,.1);cursor:pointer;position:relative}
 .upd:last-child{border-bottom:0}
-.upd .d{flex:0 0 62px;font-size:12px;font-weight:700;color:var(--navyink)}
-.upd .t{flex:1;font-size:13.5px;color:var(--ink2);line-height:1.6}
-.upd .t small{display:block;color:var(--muted);font-size:11.5px;margin-top:1px}
-.upd:hover .t{color:var(--gold)}
+.upd .d{flex:0 0 62px;font-size:12px;font-weight:700;color:#f0d29a;position:relative;padding-left:15px}
+.upd .d::before{content:'';position:absolute;left:0;top:4px;width:7px;height:7px;border-radius:99px;background:#f0d29a;box-shadow:0 0 0 3px rgba(240,210,154,.2)}
+.upd .d::after{content:'';position:absolute;left:3px;top:15px;bottom:-15px;width:1px;background:rgba(255,255,255,.16)}
+.upd:last-child .d::after{display:none}
+.upd .t{flex:1;font-size:13.5px;color:#e9dcc0;line-height:1.6}
+.upd .t small{display:block;color:#b7a273;font-size:11.5px;margin-top:1px}
+.upd:hover .t{color:#fff}
 /* finance */
 /* โทนทอง/บรอนซ์เข้ม — ตั้งใจให้ต่างจาก .hero (กรมน้ำเงิน) ของแท็บภาพรวม กันสองหน้าดูซ้ำเป็นแผ่นเดียวกัน */
 .fintotal{background:linear-gradient(135deg,#5c4519,#8f6f21 55%,#b8873b);border-radius:14px;padding:20px 24px;
@@ -507,6 +528,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
 <main>
 <div id="viewO">
   <div class="hero">
+    <div class="brandArt"><i></i><i></i><i></i></div>
     <div class="ring"><svg id="ovRing" width="118" height="118" viewBox="0 0 118 118"></svg></div>
     <div class="info">
       <div class="lbl" id="ovPctLbl">ความคืบหน้าโครงการ</div>
@@ -543,7 +565,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
     <div class="mxl" id="ovBarsX"></div>
   </section>
 
-  <section>
+  <section id="ovUpdSec">
+    <div class="brandArt"><i></i><i></i><i></i></div>
     <h2>อัปเดตล่าสุด <em>กดเพื่อดูรายงานฉบับเต็ม</em></h2>
     <div id="ovUpd"></div>
   </section>
@@ -648,6 +671,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
 
 <div id="viewF" style="display:none">
   <section class="fintotal" id="finTotalSec" style="display:none">
+    <div class="brandArt"><i></i><i></i><i></i></div>
     <b>มูลค่าสัญญารวม</b>
     <div class="v" id="finTotalTop">—</div>
     <div class="u">ตามสัญญาก่อสร้าง</div>
