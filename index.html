@@ -189,31 +189,39 @@ ol.tasks li{margin-bottom:4px}
 .dt{border:1px solid var(--line);background:var(--card2);border-radius:99px;padding:6px 14px;font-family:inherit;font-size:12.5px;cursor:pointer;color:var(--ink2)}
 .dt.on{background:var(--navysolid);color:#fff;border-color:var(--navysolid)}
 /* ── แท็บภาพรวม (dashboard) ── */
-.hero{background:linear-gradient(135deg,#16324f,#1e4166 55%,#26527e);border-radius:14px;padding:22px 24px;color:#fff;
-  margin-bottom:13px;display:flex;align-items:center;gap:26px;flex-wrap:wrap;position:relative;overflow:hidden}
-.hero::after{content:'';position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(40% 60% at 88% 10%,rgba(240,210,154,.20),transparent 70%)}
-/* ลายเซ็นภาพนามธรรม "หลังคาบ้าน" ดัดแปลงจากเหลี่ยมโลโก้บริษัท — ใส่ในการ์ดเด่นทุกใบ (hero/fintotal/อัปเดตล่าสุด) ให้เป็นจุดจำที่ไม่เหมือนเว็บอื่น */
-.brandArt{position:absolute;top:0;right:0;bottom:0;width:56%;pointer-events:none;overflow:hidden;z-index:0;opacity:.9}
-.brandArt i{position:absolute;display:block;font-style:normal}
-.brandArt i:nth-child(1){width:62%;height:150%;top:-25%;right:-8%;
-  background:linear-gradient(148deg,rgba(255,255,255,.10),rgba(255,255,255,.015) 60%);
-  clip-path:polygon(38% 0,100% 16%,100% 100%,14% 100%,0 42%)}
-.brandArt i:nth-child(2){width:34%;height:96%;top:10%;right:14%;
-  background:linear-gradient(148deg,rgba(240,210,154,.28),rgba(240,210,154,.04) 65%);
-  clip-path:polygon(42% 0,100% 24%,100% 100%,18% 100%,0 46%)}
-.hero .ring{position:relative;z-index:1;flex:0 0 auto}
-.hero .info{position:relative;z-index:1;flex:1;min-width:200px}
-.hero .info .lbl{font-size:11px;letter-spacing:.14em;color:#a8bcd4;text-transform:uppercase;margin-bottom:5px}
-.hero .info h3{font-size:20px;font-weight:700;margin-bottom:6px}
-.hero .info p{font-size:12.5px;color:#c3d3e5;line-height:1.65}
-.hero .badge{display:inline-block;margin-top:9px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);
-  border-radius:99px;padding:4px 13px;font-size:12.5px;font-weight:600}
-.hero .contract{position:relative;z-index:1;flex:0 0 auto;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);
-  border-radius:12px;padding:14px 24px;text-align:center;min-width:168px}
-.hero .contract b{display:block;font-size:10.5px;letter-spacing:.1em;color:#a8bcd4;text-transform:uppercase;font-weight:600;margin-bottom:7px}
-.hero .contract .v{font-size:23px;font-weight:700;color:#fff;line-height:1.2}
-.hero .contract .u{font-size:11px;color:#9fb4cc;margin-top:3px}
+/* ── ปกรูปหน้างานจริง (แทนการ์ดกรมนาวีเดิม) ─────────────────────────
+   เหตุผล: สิ่งที่เจ้าของบ้านอยากเห็นที่สุดคือบ้านตัวเอง ไม่ใช่ตาราง
+   เดิมมีรูปวันละ ~28 ใบแต่ไปกองอยู่แถบเล็กๆ ในแท็บรายวัน — ดึงขึ้นมาเป็นพระเอก */
+.cover{position:relative;border-radius:14px;overflow:hidden;margin-bottom:13px;
+  min-height:362px;display:flex;align-items:flex-end;
+  background:linear-gradient(135deg,#16324f,#1e4166 55%,#26527e)}
+.cover>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 42%;display:block;
+  filter:brightness(1.1) saturate(1.04)}
+.cover .scrim{position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(9,14,22,.34) 0%,rgba(9,14,22,.03) 30%,rgba(9,14,22,.78) 76%,rgba(9,14,22,.95) 100%)}
+/* ไม่มีรูป → ใช้พื้นไล่สีกรมนาวีเดิม ไม่ให้หน้าโล่ง */
+.cover.nopic>img{display:none}
+.cover.nopic .scrim{background:radial-gradient(46% 70% at 84% 8%,rgba(240,210,154,.18),transparent 66%)}
+.cover .cvin{position:relative;z-index:2;width:100%;padding:26px 24px 22px;
+  display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.cover .cvl{flex:1;min-width:210px}
+.cover .cvl .day{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#f0d29a;font-weight:600;margin-bottom:9px}
+.cover .cvl h3{font-size:27px;font-weight:700;margin-bottom:6px;color:#fff;letter-spacing:-.02em;line-height:1.2}
+.cover .cvl p{font-size:13px;color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:9px}
+.cover .badge{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.22);
+  border-radius:99px;padding:4px 13px;font-size:12.5px;font-weight:600;color:#fff}
+/* กล่องกระจก: วงแหวน % + มูลค่าสัญญา (ตัวเลขสีทอง) */
+.cover .glass{flex:0 0 auto;display:flex;align-items:center;background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.19);border-radius:15px;
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);overflow:hidden}
+.cover .gring{padding:15px 21px;text-align:center}
+.cover .gring svg{display:block}
+.cover .gcap{font-size:10px;color:rgba(255,255,255,.62);margin-top:5px;max-width:118px;line-height:1.35}
+.cover .gmoney{padding:16px 24px 16px 21px;border-left:1px solid rgba(255,255,255,.18);min-width:186px}
+.cover .gmoney b{display:block;font-size:10px;letter-spacing:.15em;text-transform:uppercase;
+  color:rgba(255,255,255,.66);font-weight:600;margin-bottom:8px}
+.cover .gmoney .v{font-size:34px;font-weight:700;color:#f0d29a;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.cover .gmoney .u{font-size:11px;color:rgba(255,255,255,.55);margin-top:7px}
 .ov{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:13px}
 .ovc{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:15px 15px 13px;position:relative;overflow:hidden;
   transition:transform .15s,box-shadow .15s}
@@ -471,6 +479,19 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
   .k .v{font-size:17px}
   .bars{height:96px}
   .mxl div{font-size:9px;min-height:25px}
+  /* ปกบนมือถือ: เนื้อหาซ้อนกันสูงกว่าจอคอม ต้องย่อกล่องกระจกและเพิ่มม่านบัง ไม่งั้นตัวหนังสือทับรูปจนอ่านไม่ออก */
+  .cover{min-height:296px}
+  .cover .cvin{padding:20px 15px 17px;gap:15px}
+  .cover .cvl{min-width:0}
+  .cover .cvl h3{font-size:21px}
+  .cover .cvl p{font-size:12.5px}
+  .cover .glass{width:100%}
+  .cover .gring{padding:13px 14px;flex:0 0 auto}
+  .cover .gring svg{width:86px;height:86px}
+  .cover .gcap{font-size:9.5px;max-width:92px}
+  .cover .gmoney{flex:1;min-width:0;padding:13px 14px 13px 16px}
+  .cover .gmoney .v{font-size:26px}
+  .cover .scrim{background:linear-gradient(180deg,rgba(9,14,22,.5) 0%,rgba(9,14,22,.28) 20%,rgba(9,14,22,.86) 58%,rgba(9,14,22,.97) 100%)}
   .instRow{flex-wrap:wrap;row-gap:4px}
   .instRow .lab{flex:1 1 100%;font-size:12px}
   .instRow .track{flex:1 1 auto}
@@ -528,19 +549,27 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
 
 <main>
 <div id="viewO">
-  <div class="hero">
-    <div class="brandArt"><i></i><i></i></div>
-    <div class="ring"><svg id="ovRing" width="118" height="118" viewBox="0 0 118 118"></svg></div>
-    <div class="info">
-      <div class="lbl" id="ovPctLbl">ความคืบหน้าโครงการ</div>
-      <h3 id="ovTitle">—</h3>
-      <p id="ovLine">—</p>
-      <span class="badge" id="ovBadge">—</span>
-    </div>
-    <div class="contract" id="heroContract" style="display:none">
-      <b>มูลค่าสัญญารวม</b>
-      <div class="v" id="heroContractV">—</div>
-      <div class="u">ตามสัญญาก่อสร้าง</div>
+  <div class="cover nopic" id="ovCover">
+    <img id="ovCoverImg" alt="">
+    <div class="scrim"></div>
+    <div class="cvin">
+      <div class="cvl">
+        <div class="day" id="ovCoverDay"></div>
+        <h3 id="ovTitle">—</h3>
+        <p id="ovLine">—</p>
+        <span class="badge" id="ovBadge">—</span>
+      </div>
+      <div class="glass">
+        <div class="gring">
+          <svg id="ovRing" width="112" height="112" viewBox="0 0 118 118"></svg>
+          <div class="gcap" id="ovPctLbl">ความคืบหน้าโครงการ</div>
+        </div>
+        <div class="gmoney" id="heroContract" style="display:none">
+          <b>มูลค่าสัญญารวม</b>
+          <div class="v" id="heroContractV">—</div>
+          <div class="u">ตามสัญญาก่อสร้าง</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -552,7 +581,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
   </div>
 
   <section id="ovStepSec">
-    <h2>ขั้นตอนของโครงการ <em>งานเดินถึงขั้นไหนแล้ว</em></h2>
+    <h2>ขั้นตอนของโครงการ</h2>
     <div class="flow" id="ovFlow"></div>
   </section>
 
@@ -567,7 +596,6 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
   </section>
 
   <section id="ovUpdSec">
-    <div class="brandArt"><i></i><i></i></div>
     <h2>อัปเดตล่าสุด <em>กดเพื่อดูรายงานฉบับเต็ม</em></h2>
     <div id="ovUpd"></div>
   </section>
@@ -647,7 +675,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
     </div>
   </section>
   <section id="stepSec">
-    <h2>ขั้นตอนของโครงการ <em>ตอนนี้อยู่ขั้นไหน และเหลืออะไรบ้าง</em></h2>
+    <h2>ขั้นตอนของโครงการ</h2>
     <div class="steps" id="steps"></div>
   </section>
   <section>
@@ -672,7 +700,6 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
 
 <div id="viewF" style="display:none">
   <section class="fintotal" id="finTotalSec" style="display:none">
-    <div class="brandArt"><i></i><i></i></div>
     <b>มูลค่าสัญญารวม</b>
     <div class="v" id="finTotalTop">—</div>
     <div class="u">ตามสัญญาก่อสร้าง</div>
@@ -859,6 +886,24 @@ function buildOverview(){
   $('ovLine').textContent=(pi.workType&&pi.workType!=='-')?pi.workType:'รายงานความคืบหน้าการก่อสร้าง';
   const last=keys[keys.length-1];
   $('ovBadge').textContent=last?(DATA.days[last].progress||'ดำเนินการตามแผน'):'ยังไม่มีรายงาน';
+
+  // ── รูปปก: ใช้รูปแรกของ "วันล่าสุดที่มีรูป" ────────────────────────
+  // ⚠️ ต้องไล่ย้อนหา ไม่ใช่ดูแค่วันล่าสุด — บางวันเผยแพร่โดยไม่มีรูป หน้าปกจะโล่ง
+  let coverUrl='', coverDay='';
+  for(let i=keys.length-1;i>=0;i--){
+    const d=DATA.days[keys[i]], ph=(d.photoUrls||[]);
+    if(ph.length){ coverUrl=ph[0]; coverDay=d.label||''; break; }
+  }
+  const cov=$('ovCover'), covImg=$('ovCoverImg');
+  if(coverUrl){
+    covImg.src=coverUrl;
+    covImg.alt='ภาพหน้างานโครงการ'+(pi.label||'')+(coverDay?' '+coverDay:'');
+    cov.classList.remove('nopic');
+  }else{
+    covImg.removeAttribute('src');
+    cov.classList.add('nopic');
+  }
+  $('ovCoverDay').textContent = coverDay || (last?(DATA.days[last].label||''):'');
 
   // KPI
   const totMan=keys.reduce(function(a,k){return a+DATA.days[k].total},0);
