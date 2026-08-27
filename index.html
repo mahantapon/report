@@ -233,7 +233,7 @@ ol.tasks li{margin-bottom:4px}
 .olbl span{letter-spacing:0;text-transform:none;font-size:11.5px;color:var(--muted);font-weight:400}
 .ovcard{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
 /* ⚠️ ตาราง 3×3 ตายตัว = 9 ช่องพอดีเสมอ ไม่ว่าจะมีรูปกี่ใบ ไม่มีรูปโดดค้างแถวล่าง */
-.ovgal{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,minmax(112px,1fr));gap:6px;flex:1}
+.ovgal{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,minmax(112px,300px));gap:6px;flex:1}
 .ovgal a{position:relative;display:block;border-radius:6px;overflow:hidden;cursor:zoom-in;background:var(--card2)}
 .ovgal a:first-child{grid-column:span 2;grid-row:span 2}
 .ovgal img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease}
@@ -490,6 +490,10 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
 .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .tab{white-space:nowrap}
 @media(max-width:820px){
+  /* ⚠️ ภาพหน้างาน 3 ช่อง + การ์ดกำลังคน วางข้างกันบนจอแคบไม่ได้ ต้องซ้อนลงมา
+     ไม่งั้นรูปเหลือช่องละ ~64px และการ์ดกำลังคนกว้าง ~123px จนอ่านไม่ออก */
+  .ovbody{grid-template-columns:1fr;gap:18px}
+  .ovgal{grid-template-rows:repeat(3,minmax(96px,160px))}
   header{padding:20px 0 0}
   .hrow{gap:10px;height:auto;padding:10px 0;flex-wrap:wrap}
   .hrow img{height:26px}
