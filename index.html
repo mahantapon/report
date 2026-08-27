@@ -806,7 +806,17 @@ function toggleTheme(){
   applyTheme(next);
 }
 applyTheme((function(){ try{ return localStorage.getItem('rpt_theme'); }catch(e){ return null; } })() || 'dark');
-const API_URL = 'https://script.google.com/macros/s/AKfycbxo5iY4E9CazLb2sEkbR9XS4mkEUdoPAfYCsLAtR2IcqCMuEuQJGiab-ShKvSHfeVhC/exec';
+const API_CACHE = 'https://assistant.bestbest.work/rcache/';
+const API_URL   = 'https://script.google.com/macros/s/AKfycbxo5iY4E9CazLb2sEkbR9XS4mkEUdoPAfYCsLAtR2IcqCMuEuQJGiab-ShKvSHfeVhC/exec';
+// ยิงไปที่ตัวพักข้อมูลก่อน ถ้าติดต่อไม่ได้หรือตอบไม่ปกติ ค่อยถอยไปยิง Apps Script ตรง ๆ
+// ⚠️ ทางถอยนี้สำคัญ — เซิร์ฟเวอร์ตัวพักล่มต้องไม่ทำให้ลูกค้าเปิดเว็บไม่ได้ แค่ช้าลงเท่านั้น
+function apiPost(body){
+  const opt = { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+                body: JSON.stringify(body) };
+  return fetch(API_CACHE, opt)
+    .then(function(r){ if(!r.ok) throw new Error('cache '+r.status); return r.json(); })
+    .catch(function(){ return fetch(API_URL, opt).then(function(r){ return r.json(); }); });
+}
 let DATA = null, cur = '', lbList = [], lbIdx = 0;
 let calY = 0, calM = 0;      // เดือนที่ปฏิทินกำลังแสดง
 let wkAnchor = '';            // วันใดวันหนึ่งในสัปดาห์ที่แท็บรายสัปดาห์กำลังแสดง
@@ -830,12 +840,7 @@ function checkPin(){
   $('gateBtn').disabled=true;
   $('gateBtn').innerHTML='<span class="spin"></span>กำลังตรวจสอบ...';
   // PIN อย่างเดียวพอ — เซิร์ฟเวอร์หาเองว่าเป็นโครงการไหน (getClientDataByPin)
-  fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action: 'clientData', pin: pin }),
-  })
-  .then(function(r){ return r.json(); })
+  apiPost({ action: 'clientData', pin: pin })
   .then(function(data){
     if (data && data.error) throw new Error(data.error);
     store('client_pin', pin);

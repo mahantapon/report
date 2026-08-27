@@ -6,6 +6,9 @@ import re, sys, json
 
 SRC = "/Users/gearsecond/Desktop/apps-script-port/พร้อมวาง/ClientPortal.html"
 DST = "index.html"
+# ตัวพักข้อมูลบนเซิร์ฟเวอร์ของบริษัท — ลดเวลารอของลูกค้าจาก 2-8 วินาที เหลือ ~0.3 วินาที
+CACHE = "https://assistant.bestbest.work/rcache/"
+# Apps Script ตัวจริง — ใช้เป็นทางถอยเมื่อตัวพักล่ม (ช้าแต่ยังใช้งานได้ ไม่ทำให้ลูกค้าเปิดเว็บไม่ได้)
 API = ("https://script.google.com/macros/s/"
        "AKfycbxo5iY4E9CazLb2sEkbR9XS4mkEUdoPAfYCsLAtR2IcqCMuEuQJGiab-ShKvSHfeVhC/exec")
 COMPANY = "บริษัท เรืองอนันต์ คอร์ปอเรชั่น จำกัด"
@@ -26,12 +29,7 @@ old_call = """  google.script.run
     .withSuccessHandler(function(data){ store('client_pin',pin); onData(data); })
     .withFailureHandler(function(e){ pinFail(); })
     .getClientDataByPin(pin);"""
-new_call = """  fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action: 'clientData', pin: pin }),
-  })
-  .then(function(r){ return r.json(); })
+new_call = """  apiPost({ action: 'clientData', pin: pin })
   .then(function(data){
     if (data && data.error) throw new Error(data.error);
     store('client_pin', pin);
@@ -47,7 +45,19 @@ s = s.replace(old_call, new_call, 1)
 
 anchor = "let DATA = null, cur = '', lbList = [], lbIdx = 0;"
 assert s.count(anchor) == 1
-s = s.replace(anchor, "const API_URL = '%s';\n%s" % (API, anchor), 1)
+HELPER = """const API_CACHE = '%s';
+const API_URL   = '%s';
+// ยิงไปที่ตัวพักข้อมูลก่อน ถ้าติดต่อไม่ได้หรือตอบไม่ปกติ ค่อยถอยไปยิง Apps Script ตรง ๆ
+// ⚠️ ทางถอยนี้สำคัญ — เซิร์ฟเวอร์ตัวพักล่มต้องไม่ทำให้ลูกค้าเปิดเว็บไม่ได้ แค่ช้าลงเท่านั้น
+function apiPost(body){
+  const opt = { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+                body: JSON.stringify(body) };
+  return fetch(API_CACHE, opt)
+    .then(function(r){ if(!r.ok) throw new Error('cache '+r.status); return r.json(); })
+    .catch(function(){ return fetch(API_URL, opt).then(function(r){ return r.json(); }); });
+}
+""" % (CACHE, API)
+s = s.replace(anchor, HELPER + anchor, 1)
 
 open(DST, "w", encoding="utf-8").write(s)
 print("สร้าง index.html แล้ว (%d KB) · แทน companyName %d จุด" % (len(s)//1024, n))
