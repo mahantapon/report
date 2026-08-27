@@ -60,7 +60,7 @@ header{background:var(--bg);color:var(--ink);position:sticky;top:0;z-index:40;
 @keyframes hdrIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 .hrow img{height:30px;width:auto;display:block;flex:0 0 auto}
 /* โลโก้ที่ใช้เป็นตัวอักษรสีขาว — โหมดสว่างต้องกลับสีให้เป็นกรมนาวี ไม่งั้นจมพื้นขาว */
-:root:not([data-theme="dark"]) .hrow img{filter:brightness(0) saturate(100%) invert(13%) sepia(21%) saturate(1600%) hue-rotate(178deg) brightness(96%)}
+/* โลโก้ใช้สีต้นฉบับ (ทอง) ทั้งหน้าสว่างและหน้ามืด — ห้ามย้อมสีทับ */
 .hrow .proj{font-size:13.5px;font-weight:600;color:var(--ink);margin-right:auto;white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis;max-width:230px}
 .themeBtn{flex:0 0 auto;width:38px;height:38px;border-radius:99px;border:1px solid var(--line);
@@ -75,6 +75,8 @@ header{background:var(--bg);color:var(--ink);position:sticky;top:0;z-index:40;
 .tab.on{background:var(--gold);color:#fff;font-weight:600}
 .tab:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 main{max-width:1180px;margin:0 auto;padding:0 24px 70px}
+/* แท็บอื่นเริ่มด้วยการ์ดทันที ถ้าไม่เว้นจะชิดแถบเมนูจนดูอึดอัด — ภาพรวมยกเว้นเพราะรูปปกตั้งใจชนขอบ */
+#viewD,#viewW,#viewF{padding-top:20px}
 section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-bottom:13px;
   box-shadow:0 1px 2px rgba(22,35,58,.03);transition:box-shadow .2s}
 section:hover{box-shadow:0 4px 14px rgba(22,35,58,.06)}
@@ -219,14 +221,19 @@ ol.tasks li{margin-bottom:4px}
 .cover .gmoney .u{font-size:11px;color:rgba(255,255,255,.55);margin-top:7px}
 .ov{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:13px}
 /* ── หน้าภาพรวม: สองคอลัมน์ รูปหน้างาน | งานที่ทำ+กำลังคน ── */
-.ovbody{display:grid;grid-template-columns:1.62fr 1fr;gap:24px;margin-bottom:13px}
-.ovside{display:flex;flex-direction:column;gap:20px}
+.ovbody{display:grid;grid-template-columns:1.62fr 1fr;gap:24px;margin-bottom:13px;align-items:stretch}
+/* ⚠️ แกลเลอรีต้องยืดสูงตามคอลัมน์ขวา ไม่งั้นสองฝั่งจบไม่เท่ากัน ดูเอียง
+   .ovmain เป็น flex column เพื่อให้ .ovgal (flex:1) กินความสูงที่เหลือ แล้วแถว 1fr ค่อยหารกันเอง */
+.ovmain{display:flex;flex-direction:column;min-width:0}
+.ovside{display:flex;flex-direction:column;gap:20px;min-width:0}
+.ovside>div:last-child{display:flex;flex-direction:column;flex:1}
+.ovside>div:last-child .ovcard{flex:1}
 .olbl{font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--gold);font-weight:700;
   margin-bottom:12px;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
 .olbl span{letter-spacing:0;text-transform:none;font-size:11.5px;color:var(--muted);font-weight:400}
 .ovcard{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
 /* ⚠️ ตาราง 3×3 ตายตัว = 9 ช่องพอดีเสมอ ไม่ว่าจะมีรูปกี่ใบ ไม่มีรูปโดดค้างแถวล่าง */
-.ovgal{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,124px);gap:6px}
+.ovgal{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,minmax(112px,1fr));gap:6px;flex:1}
 .ovgal a{position:relative;display:block;border-radius:6px;overflow:hidden;cursor:zoom-in;background:var(--card2)}
 .ovgal a:first-child{grid-column:span 2;grid-row:span 2}
 .ovgal img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease}
@@ -599,34 +606,6 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
     </div>
   </div>
 
-  <section id="ovStepSec">
-    <h2>🏗 ขั้นตอนของโครงการ <span id="ovStepSrc"></span></h2>
-    <div class="flow" id="ovFlow"></div>
-  </section>
-
-  <!-- สองคอลัมน์: รูปหน้างานวันล่าสุด | งานที่ทำ + กำลังคน -->
-  <div class="ovbody" id="ovBody">
-    <div>
-      <p class="olbl">📸 ภาพหน้างานวันล่าสุด <span id="ovGalNote"></span></p>
-      <div class="ovgal" id="ovGal"></div>
-    </div>
-    <div class="ovside">
-      <div>
-        <p class="olbl">🧾 งานที่ทำวันล่าสุด <span id="ovTaskNote"></span></p>
-        <div class="ovcard" id="ovTasks"></div>
-      </div>
-      <div>
-        <p class="olbl">👷 กำลังคนวันล่าสุด <span id="ovCrewNote"></span></p>
-        <div class="ovcard" id="ovCrew"></div>
-      </div>
-    </div>
-  </div>
-
-  <section id="ovUpdSec">
-    <h2>🗓 อัปเดตล่าสุด <em>กดเพื่อดูรายงานฉบับเต็ม</em></h2>
-    <div id="ovUpd"></div>
-  </section>
-
   <div class="ov">
     <div class="ovc"><span class="ic">📅</span><b>วันที่มีรายงาน</b><div class="v" id="ovDays">—</div></div>
     <div class="ovc"><span class="ic">👷</span><b>กำลังคนสะสม</b><div class="v" id="ovMan">—</div></div>
@@ -634,14 +613,42 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
     <div class="ovc"><span class="ic">🗓️</span><b>รายงานล่าสุด</b><div class="v" id="ovLast">—</div></div>
   </div>
 
+  <section id="ovStepSec">
+    <h2>🏗 ขั้นตอนของโครงการ <span id="ovStepSrc"></span></h2>
+    <div class="flow" id="ovFlow"></div>
+  </section>
+
+  <!-- สองคอลัมน์: รูปหน้างานวันล่าสุด | งานที่ทำ + กำลังคน -->
+  <div class="ovbody" id="ovBody">
+    <div class="ovmain">
+      <p class="olbl">📸 ภาพหน้างานล่าสุด <span id="ovGalNote"></span></p>
+      <div class="ovgal" id="ovGal"></div>
+    </div>
+    <div class="ovside">
+      <div>
+        <p class="olbl">🧾 งานที่ทำล่าสุด <span id="ovTaskNote"></span></p>
+        <div class="ovcard" id="ovTasks"></div>
+      </div>
+      <div>
+        <p class="olbl">👷 กำลังคนล่าสุด <span id="ovCrewNote"></span></p>
+        <div class="ovcard" id="ovCrew"></div>
+      </div>
+    </div>
+  </div>
+
   <section>
     <h2>📊 กำลังคนเข้าทำงาน <em>ดูย้อนหลังได้ทั้งรายเดือนและรายสัปดาห์</em></h2>
     <div class="mbarshead">
-      <button class="dt on" id="ovBarsMonBtn" onclick="setBarsMode('m')">รายเดือน</button>
-      <button class="dt" id="ovBarsWkBtn" onclick="setBarsMode('w')">รายสัปดาห์</button>
+      <button class="dt on" id="ovBarsWkBtn" onclick="setBarsMode('w')">รายสัปดาห์</button>
+      <button class="dt" id="ovBarsMonBtn" onclick="setBarsMode('m')">รายเดือน</button>
     </div>
     <div class="mbars" id="ovBars"></div>
     <div class="mxl" id="ovBarsX"></div>
+  </section>
+
+  <section id="ovUpdSec">
+    <h2>🗓 อัปเดตล่าสุด <em>กดเพื่อดูรายงานฉบับเต็ม</em></h2>
+    <div id="ovUpd"></div>
   </section>
 
   <div class="preparedby"><div class="bar"></div><span class="lbl">จัดทำโดย</span><span class="nm">บริษัท เรืองอนันต์ คอร์ปอเรชั่น จำกัด</span></div>
@@ -991,8 +998,8 @@ function buildOverview(){
 
   // กำลังคนเข้าทำงาน — เก็บ keys ไว้ให้ renderBars() ใช้สลับรายเดือน/รายสัปดาห์ได้
   BARS_KEYS=keys;
-  barsMode='m';
-  $('ovBarsMonBtn').classList.add('on'); $('ovBarsWkBtn').classList.remove('on');
+  barsMode='w';   // เปิดมาให้เห็นรายสัปดาห์ก่อน — ละเอียดกว่าและตรงกับจังหวะที่ลูกค้าติดตามงาน
+  $('ovBarsWkBtn').classList.add('on'); $('ovBarsMonBtn').classList.remove('on');
   renderBars();
 
   // การเงิน — ยอดสัญญารวมย้ายไปโชว์เด่นๆ ในการ์ดบนสุดแทน (ตัดชำระแล้ว/คงเหลือออก ไม่ให้ดูเหมือนบิลละเอียด)
