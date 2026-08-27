@@ -217,8 +217,8 @@ td.name{font-weight:600;color:var(--heading);white-space:nowrap}
 <div id="modal">
   <div class="box">
     <h3 id="mTitle">เปลี่ยนรหัสลูกค้า</h3>
-    <p>ตัวเลข 6 หลัก · ห้ามซ้ำกับโครงการอื่น · รหัสเดิมจะใช้ไม่ได้ทันทีที่บันทึก</p>
-    <input id="mPin" type="text" inputmode="numeric" maxlength="6" placeholder="######">
+    <p>ตัวเลข 8 หลัก = วันเดือนปีเกิดลูกค้า (ววดดปปปป · ใส่เป็น ค.ศ. หรือ พ.ศ. ก็ได้ เช่น 01011980) · ห้ามซ้ำกับโครงการอื่น · รหัสเดิมจะใช้ไม่ได้ทันทีที่บันทึก</p>
+    <input id="mPin" type="text" inputmode="numeric" maxlength="8" placeholder="ววดดปปปป">
     <div class="err" id="mErr"></div>
     <div class="row">
       <button class="btn ghost" id="mCancel">ยกเลิก</button>
@@ -363,7 +363,8 @@ $('mSave').onclick=savePin;
 
 function savePin(){
   const pin=$('mPin').value.trim(), btn=$('mSave');
-  if(!/^\d{6}$/.test(pin)){ $('mErr').textContent='ต้องเป็นตัวเลข 6 หลัก'; return; }
+  const bad=pinFormatError(pin);
+  if(bad){ $('mErr').textContent=bad; return; }
   btn.disabled=true; btn.textContent='กำลังบันทึก...';
   api({action:'setPin',site:cur.site,pin:pin,key:TEAM_KEY})
     .then(res=>{
@@ -436,5 +437,20 @@ function toast(msg){
   $('toast').textContent=msg; $('toast').classList.add('on');
   clearTimeout(toastT); toastT=setTimeout(function(){$('toast').classList.remove('on')},2400);
 }
+// ตรวจรูปแบบรหัส (วันเดือนปีเกิด พ.ศ.) ฝั่งหน้าเว็บ — เซิร์ฟเวอร์ยังตรวจซ้ำอีกชั้นเสมอ
+function pinFormatError(pin){
+  if(!/^\d{8}$/.test(pin)) return 'ต้องเป็นตัวเลข 8 หลัก (วันเดือนปีเกิด เช่น 01011980)';
+  const dd=+pin.slice(0,2), mm=+pin.slice(2,4), yy=+pin.slice(4,8);
+  if(mm<1||mm>12) return 'เดือนไม่ถูกต้อง (หลักที่ 3-4 ต้องเป็น 01-12)';
+  // รับทั้ง ค.ศ. และ พ.ศ. — สองช่วงไม่ทับกันเลยไม่กำกวม และห้ามแปลงให้เอง
+  let ce;
+  if(yy>=1900&&yy<=2100) ce=yy;
+  else if(yy>=2400&&yy<=2600) ce=yy-543;
+  else return 'ปีไม่ถูกต้อง (ต้องเป็น ค.ศ. 1900-2100 หรือ พ.ศ. 2400-2600)';
+  const d=new Date(ce,mm-1,dd);
+  if(d.getFullYear()!==ce||d.getMonth()!==mm-1||d.getDate()!==dd) return 'ไม่มีวันที่นี้อยู่จริง กรุณาตรวจสอบอีกครั้ง';
+  return '';
+}
+
 </script>
 </body></html>

@@ -435,8 +435,11 @@ ol.tasks li{margin-bottom:4px}
 #gate .desc{font-size:12.5px;color:#8d9cb3;line-height:1.75;max-width:290px}
 #gate .rule{width:100%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.13),transparent);margin:22px 0 20px}
 #gate label{display:block;font-size:11px;color:#a9b6c8;font-weight:500;letter-spacing:.09em;margin-bottom:12px;text-transform:uppercase}
-.pinBoxes{display:flex;gap:9px;justify-content:center;margin-bottom:14px}
-.pinBoxes input{width:45px;height:56px;text-align:center;font-size:23px;font-weight:600;color:#f3ddb2;
+#gate label .pinhint{display:block;margin-top:5px;font-size:11px;color:#7e8da3;letter-spacing:.02em;text-transform:none;font-weight:400}
+.pinBoxes{display:flex;gap:6px;justify-content:center;margin-bottom:14px}
+/* คั่นกลุ่ม วว | ดด | ปปปป ให้ตากวาดเห็นเป็นวันที่ ไม่ใช่เลข 8 ตัวรวด */
+.pinBoxes input.gap{margin-inline-start:11px}
+.pinBoxes input{width:38px;height:52px;text-align:center;font-size:21px;font-weight:600;color:#f3ddb2;
   border:1px solid rgba(255,255,255,.12);border-radius:14px;font-family:inherit;
   background:rgba(255,255,255,.035);transition:all .18s ease;caret-color:#e2ba74}
 .pinBoxes input:focus{outline:none;border-color:rgba(226,186,116,.6);background:rgba(226,186,116,.07);
@@ -460,7 +463,10 @@ ol.tasks li{margin-bottom:4px}
   #gate .form{padding:32px 22px 22px}
   #gate .mark{width:112px}
   #gate h1{font-size:18px}
-  .pinBoxes{gap:7px}.pinBoxes input{width:42px;height:53px;font-size:21px}
+  /* จอ 375px: 8 ช่อง + ระยะคั่น 2 จุด ต้องไม่เกินความกว้างฟอร์ม ไม่งั้นล้นออกนอกกรอบ */
+  .pinBoxes{gap:4px}
+  .pinBoxes input{width:32px;height:46px;font-size:18px;border-radius:11px}
+  .pinBoxes input.gap{margin-inline-start:8px}
 }
 footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
 .preparedby{text-align:center;margin-top:16px;padding-top:15px;border-top:1px solid var(--line)}
@@ -554,15 +560,11 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
       </div>
       <!-- ตัดบรรทัด "Ruanganan Corporation" ออก — โลโก้ตัวใหม่มีชื่อบริษัทอยู่ในภาพแล้ว ไม่ต้องเขียนซ้ำ -->
       <h1>ระบบรายงานความคืบหน้าโครงการ</h1>
-      <div class="desc">กรุณากรอกรหัสประจำโครงการที่ได้รับจากผู้จัดการโครงการ</div>
+      <div class="desc">กรุณากรอกรหัส 8 หลักที่ได้รับจากผู้จัดการโครงการ</div>
       <div class="rule"></div>
-      <label>รหัสประจำโครงการ</label>
-      <div class="pinBoxes" id="pinBoxes">
-        <input inputmode="numeric" autocomplete="one-time-code" maxlength="1">
-        <input inputmode="numeric" maxlength="1"><input inputmode="numeric" maxlength="1">
-        <input inputmode="numeric" maxlength="1"><input inputmode="numeric" maxlength="1">
-        <input inputmode="numeric" maxlength="1">
-      </div>
+      <label>รหัสประจำโครงการ <span class="pinhint">วัน/เดือน/ปีเกิด · เช่น 01011980</span></label>
+      <!-- ช่องรหัสสร้างด้วย JS ตาม PIN_LEN — อย่า hardcode จำนวนช่องไว้ตรงนี้ -->
+      <div class="pinBoxes" id="pinBoxes"></div>
       <div class="errmsg" id="pinerr"></div>
       <button id="gateBtn" onclick="checkPin()">เข้าสู่รายงาน</button>
       <div class="foot">บริษัท เรืองอนันต์ คอร์ปอเรชั่น จำกัด<br>ข้อมูลผ่านการตรวจสอบก่อนเผยแพร่ทุกฉบับ</div>
@@ -815,10 +817,13 @@ $('logoHeader').src = $('logoGate').src;
 function store(k,v){try{sessionStorage[k]=v}catch(e){}}
 function recall(k){try{return sessionStorage[k]}catch(e){return null}}
 
+// รหัสลูกค้า = วันเดือนปีเกิด 8 หลัก (ววดดปปปป) แบบเดียวกับธนาคาร — รับทั้ง ค.ศ. และ พ.ศ.
+// ⚠️ ตัวเลขนี้ต้องตรงกับ PIN_LEN_ ใน Code.gs เสมอ
+const PIN_LEN=8;
 let pinBusy=false;
 function checkPin(){
   const pin=getPin();
-  if(pin.length<6 || pinBusy) return;
+  if(pin.length<PIN_LEN || pinBusy) return;
   pinBusy=true;
   $('pinerr').textContent='';
   $('pinBoxes').classList.remove('err');
@@ -850,7 +855,17 @@ function pinFail(msg){
   $('pinerr').textContent=msg||'รหัสไม่ถูกต้อง กรุณาตรวจสอบและลองใหม่อีกครั้ง';
   setPin(''); pinEls[0].focus();
 }
-// ---------- ช่องรหัส 6 ช่อง ----------
+// ---------- ช่องรหัส ----------
+// จัดกลุ่ม วว | ดด | ปปปป ด้วยคลาส gap เพื่อให้กรอกวันเกิดได้ถูกช่องโดยไม่ต้องนับหลัก
+(function buildPinBoxes(){
+  let html='';
+  for(let i=0;i<PIN_LEN;i++){
+    const gap=(i===2||i===4)?' gap':'';
+    html+='<input class="pb'+gap+'" inputmode="numeric" maxlength="1"'
+        + (i===0?' autocomplete="one-time-code"':'') + '>';
+  }
+  document.getElementById('pinBoxes').innerHTML=html;
+})();
 const pinEls=[].slice.call(document.querySelectorAll('#pinBoxes input'));
 function getPin(){ return pinEls.map(function(i){return i.value}).join(''); }
 function setPin(v){ pinEls.forEach(function(i,n){ i.value=(v||'')[n]||''; i.classList.toggle('filled',!!i.value); }); }
@@ -859,17 +874,17 @@ pinEls.forEach(function(el,idx){
     el.value=el.value.replace(/\D/g,'').slice(-1);   // รับเฉพาะตัวเลข ตัวล่าสุด
     el.classList.toggle('filled',!!el.value);
     $('pinBoxes').classList.remove('err');
-    if(el.value && idx<5) pinEls[idx+1].focus();
-    if(getPin().length===6) checkPin();               // ครบ 6 หลัก = เข้าเลย ไม่ต้องกดปุ่ม
+    if(el.value && idx<PIN_LEN-1) pinEls[idx+1].focus();
+    if(getPin().length===PIN_LEN) checkPin();         // ครบทุกหลัก = เข้าเลย ไม่ต้องกดปุ่ม
   });
   el.addEventListener('keydown',function(e){
     if(e.key==='Backspace' && !el.value && idx>0){ pinEls[idx-1].focus(); pinEls[idx-1].value=''; pinEls[idx-1].classList.remove('filled'); e.preventDefault(); }
     if(e.key==='Enter') checkPin();
   });
-  el.addEventListener('paste',function(e){            // วางรหัสทีเดียวทั้ง 6 หลักได้
+  el.addEventListener('paste',function(e){            // วางรหัสทีเดียวทั้งชุดได้
     e.preventDefault();
-    const t=(e.clipboardData.getData('text')||'').replace(/\D/g,'').slice(0,6);
-    if(t){ setPin(t); pinEls[Math.min(t.length,5)].focus(); if(t.length===6) checkPin(); }
+    const t=(e.clipboardData.getData('text')||'').replace(/\D/g,'').slice(0,PIN_LEN);
+    if(t){ setPin(t); pinEls[Math.min(t.length,PIN_LEN-1)].focus(); if(t.length===PIN_LEN) checkPin(); }
   });
 });
 (function autoLogin(){
