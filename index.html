@@ -218,6 +218,36 @@ ol.tasks li{margin-bottom:4px}
 .cover .gmoney .v{font-size:34px;font-weight:700;color:#f0d29a;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
 .cover .gmoney .u{font-size:11px;color:rgba(255,255,255,.55);margin-top:7px}
 .ov{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:13px}
+/* ── หน้าภาพรวม: สองคอลัมน์ รูปหน้างาน | งานที่ทำ+กำลังคน ── */
+.ovbody{display:grid;grid-template-columns:1.62fr 1fr;gap:24px;margin-bottom:13px}
+.ovside{display:flex;flex-direction:column;gap:20px}
+.olbl{font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--gold);font-weight:700;
+  margin-bottom:12px;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.olbl span{letter-spacing:0;text-transform:none;font-size:11.5px;color:var(--muted);font-weight:400}
+.ovcard{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+/* ⚠️ ตาราง 3×3 ตายตัว = 9 ช่องพอดีเสมอ ไม่ว่าจะมีรูปกี่ใบ ไม่มีรูปโดดค้างแถวล่าง */
+.ovgal{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,124px);gap:6px}
+.ovgal a{position:relative;display:block;border-radius:6px;overflow:hidden;cursor:zoom-in;background:var(--card2)}
+.ovgal a:first-child{grid-column:span 2;grid-row:span 2}
+.ovgal img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease}
+.ovgal a:hover img{transform:scale(1.05)}
+.ovgal .more{display:flex;align-items:center;justify-content:center;background:var(--card)}
+.ovgal .more img{position:absolute;inset:0;opacity:.28}
+.ovgal .more .mt{position:relative;text-align:center;pointer-events:none}
+.ovgal .more .mn{font-size:21px;font-weight:700;color:var(--ink)}
+.ovgal .more .mc{font-size:11px;color:var(--muted);margin-top:2px}
+.ovtk{display:grid;grid-template-columns:auto 1fr;gap:11px;padding:9px 0;border-bottom:1px solid var(--line);
+  font-size:13.5px;color:var(--ink2);line-height:1.5}
+.ovtk:last-child{border-bottom:0}
+.ovtk i{width:5px;height:5px;border-radius:99px;background:var(--gold);margin-top:8px;flex:0 0 auto}
+.ovcr{display:flex;align-items:center;gap:11px;font-size:13px;margin-bottom:9px}
+.ovcr .nm2{flex:1;color:var(--ink2)}
+.ovcr .bar2{flex:0 0 76px;height:4px;background:var(--soft);border-radius:4px;overflow:hidden}
+.ovcr .bar2 i{display:block;height:100%;background:var(--gold);border-radius:4px}
+.ovcr .v2{flex:0 0 28px;text-align:right;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.ovcrtot{display:flex;justify-content:space-between;margin-top:12px;padding-top:11px;border-top:1px solid var(--line);
+  font-size:13.5px;color:var(--ink2)}
+.ovcrtot b{color:var(--gold);font-size:16px}
 .ovc{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:15px 15px 13px;position:relative;overflow:hidden;
   transition:transform .15s,box-shadow .15s}
 .ovc:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(22,35,58,.09)}
@@ -290,15 +320,14 @@ ol.tasks li{margin-bottom:4px}
   background:radial-gradient(45% 70% at 92% -6%,rgba(240,210,154,.22),transparent 65%)}
 #ovUpdSec h2{position:relative;color:#fff;border-left-color:#f0d29a}
 #ovUpdSec h2 em{color:#cbb27c}
-.upd{display:flex;gap:11px;padding:11px 0 11px 5px;border-bottom:1px solid rgba(255,255,255,.1);cursor:pointer;position:relative}
-.upd:last-child{border-bottom:0}
-.upd .d{flex:0 0 62px;font-size:12px;font-weight:700;color:#f0d29a;position:relative;padding-left:15px}
-.upd .d::before{content:'';position:absolute;left:0;top:4px;width:7px;height:7px;border-radius:99px;background:#f0d29a;box-shadow:0 0 0 3px rgba(240,210,154,.2)}
-.upd .d::after{content:'';position:absolute;left:3px;top:15px;bottom:-15px;width:1px;background:rgba(255,255,255,.16)}
-.upd:last-child .d::after{display:none}
-.upd .t{flex:1;font-size:13.5px;color:#e9dcc0;line-height:1.6}
-.upd .t small{display:block;color:#b7a273;font-size:11.5px;margin-top:1px}
-.upd:hover .t{color:#fff}
+/* การ์ดเรียงกัน 3 ใบ ตาม mockup (เดิมเป็นลิสต์แนวตั้ง) */
+#ovUpd{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.upd{background:rgba(255,255,255,.05);border-radius:10px;padding:15px 17px;border-left:3px solid #f0d29a;
+  cursor:pointer;transition:background .18s}
+.upd:hover{background:rgba(255,255,255,.1)}
+.upd .d{font-size:12px;font-weight:700;color:#f0d29a;margin-bottom:7px}
+.upd .t{font-size:13.5px;color:#e9dcc0;line-height:1.55}
+.upd .t small{display:block;color:#b7a273;font-size:11.5px;margin-top:7px}
 /* finance */
 /* โทนทอง/บรอนซ์เข้ม — ตั้งใจให้ต่างจาก .hero (กรมน้ำเงิน) ของแท็บภาพรวม กันสองหน้าดูซ้ำเป็นแผ่นเดียวกัน */
 .fintotal{background:linear-gradient(135deg,#5c4519,#8f6f21 55%,#b8873b);border-radius:14px;padding:20px 24px;
@@ -569,6 +598,34 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
     </div>
   </div>
 
+  <section id="ovStepSec">
+    <h2>🏗 ขั้นตอนของโครงการ</h2>
+    <div class="flow" id="ovFlow"></div>
+  </section>
+
+  <!-- สองคอลัมน์: รูปหน้างานวันล่าสุด | งานที่ทำ + กำลังคน -->
+  <div class="ovbody" id="ovBody">
+    <div>
+      <p class="olbl">📸 ภาพหน้างานวันล่าสุด <span id="ovGalNote"></span></p>
+      <div class="ovgal" id="ovGal"></div>
+    </div>
+    <div class="ovside">
+      <div>
+        <p class="olbl">🧾 งานที่ทำวันล่าสุด <span id="ovTaskNote"></span></p>
+        <div class="ovcard" id="ovTasks"></div>
+      </div>
+      <div>
+        <p class="olbl">👷 กำลังคนวันล่าสุด <span id="ovCrewNote"></span></p>
+        <div class="ovcard" id="ovCrew"></div>
+      </div>
+    </div>
+  </div>
+
+  <section id="ovUpdSec">
+    <h2>🗓 อัปเดตล่าสุด <em>กดเพื่อดูรายงานฉบับเต็ม</em></h2>
+    <div id="ovUpd"></div>
+  </section>
+
   <div class="ov">
     <div class="ovc"><span class="ic">📅</span><b>วันที่มีรายงาน</b><div class="v" id="ovDays">—</div></div>
     <div class="ovc"><span class="ic">👷</span><b>กำลังคนสะสม</b><div class="v" id="ovMan">—</div></div>
@@ -576,24 +633,14 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
     <div class="ovc"><span class="ic">🗓️</span><b>รายงานล่าสุด</b><div class="v" id="ovLast">—</div></div>
   </div>
 
-  <section id="ovStepSec">
-    <h2>ขั้นตอนของโครงการ</h2>
-    <div class="flow" id="ovFlow"></div>
-  </section>
-
   <section>
-    <h2>กำลังคนเข้าทำงาน <em>ดูย้อนหลังได้ทั้งรายเดือนและรายสัปดาห์</em></h2>
+    <h2>📊 กำลังคนเข้าทำงาน <em>ดูย้อนหลังได้ทั้งรายเดือนและรายสัปดาห์</em></h2>
     <div class="mbarshead">
       <button class="dt on" id="ovBarsMonBtn" onclick="setBarsMode('m')">รายเดือน</button>
       <button class="dt" id="ovBarsWkBtn" onclick="setBarsMode('w')">รายสัปดาห์</button>
     </div>
     <div class="mbars" id="ovBars"></div>
     <div class="mxl" id="ovBarsX"></div>
-  </section>
-
-  <section id="ovUpdSec">
-    <h2>อัปเดตล่าสุด <em>กดเพื่อดูรายงานฉบับเต็ม</em></h2>
-    <div id="ovUpd"></div>
   </section>
 
   <div class="preparedby"><div class="bar"></div><span class="lbl">จัดทำโดย</span><span class="nm">บริษัท เรืองอนันต์ คอร์ปอเรชั่น จำกัด</span></div>
@@ -855,14 +902,17 @@ function buildOverview(){
 
   // % ความคืบหน้า: ขั้นที่เสร็จ = 1 คะแนน, กำลังทำ = ครึ่งคะแนน
   // ⚠️ ต้องบอกให้ชัดว่า % นี้วัดจากอะไร ไม่งั้นลูกค้าเข้าใจผิดว่างานก่อสร้างเดินไปเท่านี้
-  let pct=null, pctFrom='';
+  // ⛔ กฎเหล็ก: วงแหวนนี้คือ "ความคืบหน้างานก่อสร้าง" เท่านั้น
+  //    ห้ามเอา % การชำระเงินมาแสดงแทนเด็ดขาด แม้โครงการนั้นยังไม่ได้ตั้ง phases
+  //    (ของเดิม fallback ไปใช้ paid/total ทำให้ลูกค้าเห็น 62% แล้วเข้าใจว่างานเดินไป 62%
+  //     ทั้งที่เป็นยอดเงินที่จ่ายไป — เข้าใจผิดคนละเรื่องและเสี่ยงเรื่องข้อพิพาท)
+  //    ไม่ได้ตั้ง phases → แสดง "—" ไปตรงๆ ดีกว่าแสดงตัวเลขที่ผิดความหมาย
+  let pct=null;
   if(ph&&ph.length){
     let sc=0; ph.forEach(function(v){ sc += (v===1?1:(v===2?0.5:0)); });
-    pct=Math.round(sc/ph.length*100); pctFrom='งานก่อสร้าง';
-  }else if(DATA.billing&&DATA.billing.total){
-    pct=Math.round(DATA.billing.paid/DATA.billing.total*100);
-    pctFrom='การชำระเงิน';   // โครงการที่ยังไม่ได้ระบุขั้นตอน → วัดจากงวดที่ชำระแทน
+    pct=Math.round(sc/ph.length*100);
   }
+  const pctFrom='งานก่อสร้าง';
 
   // วงแหวน %
   const R=50,C=2*Math.PI*R,val=(pct==null?0:pct);
@@ -871,10 +921,10 @@ function buildOverview(){
    +'<circle cx="59" cy="59" r="'+R+'" fill="none" stroke="#f0d29a" stroke-width="9" stroke-linecap="round"'
    +' stroke-dasharray="'+(C*val/100)+' '+(C-C*val/100)+'" stroke-dashoffset="'+(C*0.25)+'"/>'
    +'<text x="59" y="56" text-anchor="middle" font-size="27" font-weight="700" fill="#fff">'+(pct==null?'—':val+'%')+'</text>'
-   +'<text x="59" y="74" text-anchor="middle" font-size="9" fill="#bcd0e6">'+(pctFrom||'ความคืบหน้า')+'</text>';
+   +'<text x="59" y="74" text-anchor="middle" font-size="9" fill="#bcd0e6">'+(pct==null?'ยังไม่ระบุ':pctFrom)+'</text>';
 
-  $('ovPctLbl').textContent = pctFrom==='การชำระเงิน'
-    ? 'ความคืบหน้าการชำระเงินตามงวดงาน'
+  $('ovPctLbl').textContent = (pct==null)
+    ? 'ยังไม่ได้ตั้งขั้นตอนของโครงการนี้'
     : 'ความคืบหน้างานก่อสร้าง';
 
   const pi=DATA.projectInfo||{};
@@ -943,14 +993,86 @@ function buildOverview(){
     $('heroContractV').textContent=(b.total/1e6).toFixed(2)+' ล.บ.';
   }else{ $('heroContract').style.display='none'; }
 
-  // อัปเดตล่าสุด 5 วัน
-  $('ovUpd').innerHTML=keys.slice(-5).reverse().map(function(k){
+  // อัปเดตล่าสุด — การ์ด 3 ใบเรียงกัน
+  $('ovUpd').innerHTML=keys.slice(-3).reverse().map(function(k){
     const d=DATA.days[k];
     const first=(d.tasks&&d.tasks.length)?d.tasks[0]:'ไม่มีการบันทึกสรุปงาน';
     const more=(d.tasks&&d.tasks.length>1)?(' · อีก '+(d.tasks.length-1)+' รายการ'):'';
-    return '<div class="upd" onclick="goDay(\''+k+'\')"><div class="d">'+esc(d.short)+'</div>'
-      +'<div class="t">'+esc(first)+'<small>'+d.total+' คน'+esc(more)+'</small></div></div>';
+    const nph=(d.photoUrls||[]).length;
+    return '<div class="upd" onclick="goDay(\''+k+'\')"><div class="d">'+esc(d.label||d.short)+'</div>'
+      +'<div class="t">'+esc(first)
+      +'<small>👷 '+d.total+' คน'+(nph?' · 📸 '+nph+' ภาพ':'')+esc(more)+'</small></div></div>';
   }).join('')||'<div class="nophoto">ยังไม่มีรายงานที่เผยแพร่</div>';
+
+  // ── รูปหน้างาน / งานที่ทำ / กำลังคน ของวันล่าสุดที่มีข้อมูล ──────────
+  buildOvToday_(keys);
+}
+
+/**
+ * เติมสามบล็อกบนหน้าภาพรวมจาก "วันล่าสุดที่มีรูป" (ถ้าไม่มีรูปเลยใช้วันล่าสุดที่มีรายงาน)
+ * ⚠️ แกลเลอรีล็อกไว้ 6 ช่อง = ตาราง 3×3 พอดีเสมอ (ใบใหญ่กิน 4 ช่อง + เล็ก 4 + ไทล์ดูทั้งหมด 1)
+ *    ถ้าปล่อยไหลอิสระจะเหลือรูปโดดค้างแถวล่างเวลาจำนวนไม่ลงตัว
+ */
+function buildOvToday_(keys){
+  let dayKey='', d=null;
+  for(let i=keys.length-1;i>=0;i--){
+    const x=DATA.days[keys[i]];
+    if((x.photoUrls||[]).length){ dayKey=keys[i]; d=x; break; }
+  }
+  if(!d && keys.length){ dayKey=keys[keys.length-1]; d=DATA.days[dayKey]; }
+  const body=$('ovBody');
+  if(!d){ if(body) body.style.display='none'; return; }
+  if(body) body.style.display='';
+
+  const when=d.label||d.short||'';
+  const ph=d.photoUrls||[];
+
+  // แกลเลอรี
+  $('ovGalNote').textContent = ph.length ? (when+' · '+ph.length+' ภาพ') : when;
+  if(ph.length){
+    const show=ph.slice(0,6), rest=ph.length-show.length;
+    $('ovGal').innerHTML=show.map(function(u,i){
+      const isLast = (i===show.length-1) && rest>0;
+      if(isLast){
+        return '<a class="more" onclick="goDay(\''+dayKey+'\')">'
+          +'<img loading="lazy" src="'+u+'" alt="">'
+          +'<span class="mt"><span class="mn">+'+rest+'</span><span class="mc">ดูภาพทั้งหมด</span></span></a>';
+      }
+      return '<a onclick="ovLb('+i+')"><img loading="lazy" src="'+u+'" alt="ภาพหน้างาน '+esc(when)+' รูปที่ '+(i+1)+'"></a>';
+    }).join('');
+    OV_PH=ph;
+  }else{
+    $('ovGal').innerHTML='<div class="nophoto" style="grid-column:1/-1">ยังไม่มีภาพประกอบของวันล่าสุด</div>';
+    OV_PH=[];
+  }
+
+  // งานที่ทำ
+  const tk=d.tasks||[];
+  $('ovTaskNote').textContent = tk.length ? (tk.length+' รายการ') : '';
+  $('ovTasks').innerHTML = tk.length
+    ? tk.map(function(t){ return '<div class="ovtk"><i></i><span>'+esc(t)+'</span></div>'; }).join('')
+    : '<div class="ovtk"><i></i><span>ไม่มีการบันทึกสรุปงาน</span></div>';
+
+  // กำลังคน
+  const lab=d.labour||{}, rows=Object.keys(lab).filter(function(k2){return lab[k2]>0});
+  $('ovCrewNote').textContent = 'รวม '+(d.total||0)+' คน';
+  const mx=Math.max(1,...rows.map(function(k2){return lab[k2]}));
+  $('ovCrew').innerHTML = (rows.length
+    ? rows.sort(function(a,b){return lab[b]-lab[a]}).map(function(k2){
+        return '<div class="ovcr"><span class="nm2">'+esc(k2)+'</span>'
+          +'<span class="bar2"><i style="width:'+(lab[k2]/mx*100)+'%"></i></span>'
+          +'<span class="v2">'+lab[k2]+'</span></div>';
+      }).join('')
+    : '<div class="ovcr"><span class="nm2">ไม่มีบุคลากรเข้าปฏิบัติงาน</span></div>')
+    + '<div class="ovcrtot"><span>รวมบุคลากร</span><b>'+(d.total||0)+' คน</b></div>';
+}
+let OV_PH=[];
+/** เปิดไลท์บ็อกซ์จากแกลเลอรีหน้าภาพรวม (ใช้ชุดรูปของตัวเอง ไม่ไปทับ lbList ของแท็บรายวัน) */
+function ovLb(i){
+  lbList=OV_PH.slice(); lbIdx=i;
+  $('lbimg').src=OV_PH[i];
+  $('lbcap').textContent='รูปที่ '+(i+1)+' / '+OV_PH.length;
+  $('lb').classList.add('on');
 }
 function goDay(k){ cur=k; showTab('d'); render(); buildCal(); }
 
