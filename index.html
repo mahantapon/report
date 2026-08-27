@@ -951,12 +951,23 @@ function buildOverview(){
   const last=keys[keys.length-1];
   $('ovBadge').textContent=last?(DATA.days[last].progress||'ดำเนินการตามแผน'):'ยังไม่มีรายงาน';
 
-  // ── รูปปก: ใช้รูปแรกของ "วันล่าสุดที่มีรูป" ────────────────────────
+  // ── รูปปก ─────────────────────────────────────────────────────────
+  // 1) ถ้าทีมตั้งรูปปกไว้ (coverPhotoId) ใช้ใบนั้น — หาวันที่ของรูปมาแสดงด้วยถ้าเจอ
+  // 2) ไม่ได้ตั้ง → ใช้รูปแรกของ "วันล่าสุดที่มีรูป"
   // ⚠️ ต้องไล่ย้อนหา ไม่ใช่ดูแค่วันล่าสุด — บางวันเผยแพร่โดยไม่มีรูป หน้าปกจะโล่ง
   let coverUrl='', coverDay='';
-  for(let i=keys.length-1;i>=0;i--){
-    const d=DATA.days[keys[i]], ph=(d.photoUrls||[]);
-    if(ph.length){ coverUrl=ph[0]; coverDay=d.label||''; break; }
+  if(DATA.coverPhotoId){
+    coverUrl='https://drive.google.com/thumbnail?id='+DATA.coverPhotoId+'&sz=w1200';
+    for(let i=keys.length-1;i>=0;i--){
+      const d=DATA.days[keys[i]];
+      if((d.photoUrls||[]).some(u=>u.indexOf(DATA.coverPhotoId)!==-1)){ coverDay=d.label||''; break; }
+    }
+  }
+  if(!coverUrl){
+    for(let i=keys.length-1;i>=0;i--){
+      const d=DATA.days[keys[i]], ph=(d.photoUrls||[]);
+      if(ph.length){ coverUrl=ph[0]; coverDay=d.label||''; break; }
+    }
   }
   const cov=$('ovCover'), covImg=$('ovCoverImg');
   if(coverUrl){
