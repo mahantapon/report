@@ -375,6 +375,18 @@ ol.tasks li{margin-bottom:4px}
   border-top:2px solid var(--navyink);font-size:14.5px;font-weight:700;color:var(--navyink)}
 .finfoot{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.6}
 .slipLink{display:inline-block;margin-left:6px;font-size:11px;color:var(--navyink);text-decoration:underline;cursor:pointer}
+.docRow{display:flex;align-items:center;gap:11px;padding:9px 4px;border-bottom:1px solid var(--line)}
+.docRow:last-child{border-bottom:0}
+.docIc{font-size:19px;flex:0 0 auto}
+.docNm{flex:1;min-width:0}
+.docNm b{display:block;font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.docNm span{font-size:11px;color:var(--muted)}
+.docBtn{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink2);
+  border-radius:8px;padding:5px 12px;font-size:12px;font-family:inherit;cursor:pointer}
+.docBtn:hover{border-color:var(--gold)}
+.docBtn.dl{background:var(--navyink);border-color:var(--navyink);color:#fff}
+.slipGroup.hl{animation:docflash 1.6s ease}
+@keyframes docflash{0%,60%{background:rgba(198,154,73,.12)}100%{background:transparent}}
 .slipGroup{margin-bottom:14px}
 .slipGroupTitle{font-size:13.5px;font-weight:700;color:var(--ink2);margin-bottom:6px}
 .lb{position:fixed;inset:0;background:rgba(10,18,30,.93);display:none;z-index:200;align-items:center;justify-content:center;flex-direction:column}
@@ -776,7 +788,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
     <div class="finfoot">รายการนี้สรุปเป็นยอดรวมของแต่ละหมวด — รายละเอียดแยกรายการอยู่ในเอกสารสรุปงานเพิ่ม-ลดที่บริษัทจัดส่งให้ท่านแยกต่างหาก</div>
   </section>
   <section>
-    <h2>หลักฐานการชำระเงิน <em>กดที่รูปเพื่อขยาย</em></h2>
+    <h2>📂 เอกสารการเงินรายงวด <em>สลิปโอน · ใบกำกับภาษี · ใบเสร็จ — ดูหรือดาวน์โหลดได้</em></h2>
     <div id="slipGallery"></div>
   </section>
 </div>
@@ -824,6 +836,8 @@ let wkAnchor = '';            // วันใดวันหนึ่งใน�
 // โลโก้ฝังไว้แค่จุดเดียว (#logoGate) เพื่อลดขนาดหน้า — ก๊อป src มาใส่โลโก้หัวข้อด้วย JS
 $('logoHeader').src = $('logoGate').src;
 
+// ที่อยู่เว็บแอปสำหรับยิงขอไฟล์เอกสารการเงิน (action docFile)
+const DOC_API = 'https://script.google.com/macros/s/AKfycbxo5iY4E9CazLb2sEkbR9XS4mkEUdoPAfYCsLAtR2IcqCMuEuQJGiab-ShKvSHfeVhC/exec';
 function store(k,v){try{sessionStorage[k]=v}catch(e){}}
 function recall(k){try{return sessionStorage[k]}catch(e){return null}}
 
@@ -1472,8 +1486,7 @@ function buildFinance(){
   const firstUnpaid=b.items.findIndex(function(i){return !i.paid});
   $('finList').innerHTML=b.items.map(function(i,idx){
     const slips=slipsByInst[i.label]||[];
-    const lastSlip=slips[slips.length-1];
-    const slipLink=lastSlip?'<span class="slipLink" onclick="openLbUrl(\''+lastSlip.view+'\')">📎 ดูสลิป'+(slips.length>1?' ('+slips.length+')':'')+'</span>':'';
+    const slipLink=slips.length?'<span class="slipLink" onclick="jumpToDocs(\''+encodeURIComponent(i.label)+'\')">📎 เอกสาร '+slips.length+' ไฟล์</span>':'';
     const cls=i.paid?'paid':(idx===firstUnpaid?'next':'');
     const dot=i.paid?'✓':(idx+1);
     const st=i.paid?'<div class="st">ชำระแล้ว</div>':'<div class="st wait">'+(idx===firstUnpaid?'งวดถัดไป':'ยังไม่ถึงกำหนด')+'</div>';
@@ -1508,7 +1521,7 @@ function buildFinance(){
 function buildSlipGallery(slipsByInst){
   const groups=Object.keys(slipsByInst||{});
   if(!groups.length){
-    $('slipGallery').innerHTML='<div class="nophoto">ยังไม่มีเอกสารหลักฐานการชำระเงินในระบบ</div>';
+    $('slipGallery').innerHTML='<div class="nophoto">ยังไม่มีเอกสารการเงินของโครงการนี้ในระบบ</div>';
     return;
   }
   // เรียงตามลำดับงวดใน billing (ไม่ใช่ตามชื่อไฟล์) เพื่อให้ลำดับตรงกับตารางด้านบน
@@ -1517,13 +1530,71 @@ function buildSlipGallery(slipsByInst){
     const ia=order.indexOf(a), ib=order.indexOf(b);
     return (ia<0?9999:ia)-(ib<0?9999:ib);
   });
+  const IC={slip:'💸',tax:'🧾',receipt:'📑',wht:'📋',other:'📄'};
+  const TY={slip:'สลิปโอน',tax:'ใบกำกับภาษี',receipt:'ใบเสร็จรับเงิน',wht:'หนังสือหัก ณ ที่จ่าย',other:'เอกสาร'};
+  const sz=n=>!n?'':(n>1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n/1024))+' KB');
   $('slipGallery').innerHTML=groups.map(g=>{
-    const slips=slipsByInst[g];
-    const thumbs=slips.map(s=>`<img src="${s.thumb}" title="${esc(s.name)}" onclick="openLbUrl('${s.view}')">`).join('');
-    return `<div class="slipGroup"><div class="slipGroupTitle">${esc(g)}
-      <span style="font-weight:400;color:var(--muted);font-size:11.5px">· ${slips.length} ไฟล์</span></div>
-      <div class="strip">${thumbs}</div></div>`;
+    const docs=slipsByInst[g];
+    const rows=docs.map(s=>{
+      // ข้อมูลเก่าในแคชอาจยังไม่มี id — โชว์ชื่อได้แต่ยังกดไม่ได้ รอแคชหมดอายุเอง
+      const btns=s.id?('<button class="docBtn" onclick="openDoc(\''+s.id+'\',this)">ดู</button>'
+        +'<button class="docBtn dl" onclick="downloadDoc(\''+s.id+'\',this)">ดาวน์โหลด</button>'):'';
+      return '<div class="docRow"><span class="docIc">'+(IC[s.type]||'📄')+'</span>'
+        +'<div class="docNm"><b>'+esc(s.name)+'</b><span>'+(TY[s.type]||'เอกสาร')
+        +(s.size?' · '+sz(s.size):'')+'</span></div>'+btns+'</div>';
+    }).join('');
+    return '<div class="slipGroup" data-doclabel="'+encodeURIComponent(g)+'">'
+      +'<div class="slipGroupTitle">'+esc(g)
+      +' <span style="font-weight:400;color:var(--muted);font-size:11.5px">· '+docs.length+' ไฟล์</span></div>'
+      +rows+'</div>';
   }).join('');
+}
+
+// ── เปิด/ดาวน์โหลดเอกสารการเงิน ─────────────────────────────────────────
+// ไฟล์ใน Drive "ไม่ได้แชร์สาธารณะ" (ต่างจากรูปหน้างาน) เพราะใบกำกับภาษีอ่อนไหวกว่า
+// ทุกคลิกยิงไปที่ประตูตรวจ: PIN ต้องถูก และไฟล์ต้องเป็นของโครงการนั้นจริง ถึงจะได้ไฟล์กลับมา
+function fetchDocBlob(id){
+  const pin=recall('client_pin')||getPin();
+  return fetch(DOC_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({action:'docFile',pin:pin,id:id})})
+  .then(function(r){return r.json()})
+  .then(function(d){
+    if(d.error) throw new Error(d.error);
+    const bin=atob(d.data), arr=new Uint8Array(bin.length);
+    for(let k=0;k<bin.length;k++) arr[k]=bin.charCodeAt(k);
+    return {blob:new Blob([arr],{type:d.mime||'application/octet-stream'}),name:d.name,mime:d.mime||''};
+  });
+}
+function docBusyBtn(btn,on,txt){ if(!btn)return; btn.disabled=on; btn.textContent=on?'กำลังโหลด…':txt; }
+function openDoc(id,btn){
+  docBusyBtn(btn,true,'ดู');
+  fetchDocBlob(id).then(function(f){
+    docBusyBtn(btn,false,'ดู');
+    const url=URL.createObjectURL(f.blob);
+    if(f.mime.indexOf('image/')===0){ openLbUrl(url); }
+    else{
+      // PDF/อื่น ๆ: เปิดแท็บใหม่ ถ้าเบราว์เซอร์บล็อกป๊อปอัป ถอยไปดาวน์โหลดแทน
+      const w=window.open(url,'_blank');
+      if(!w) saveBlob(f);
+    }
+  }).catch(function(e){ docBusyBtn(btn,false,'ดู'); alert('เปิดเอกสารไม่สำเร็จ: '+e.message); });
+}
+function downloadDoc(id,btn){
+  docBusyBtn(btn,true,'ดาวน์โหลด');
+  fetchDocBlob(id).then(function(f){ docBusyBtn(btn,false,'ดาวน์โหลด'); saveBlob(f); })
+  .catch(function(e){ docBusyBtn(btn,false,'ดาวน์โหลด'); alert('ดาวน์โหลดไม่สำเร็จ: '+e.message); });
+}
+function saveBlob(f){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(f.blob); a.download=f.name||'document';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ a.remove(); },2000);
+}
+function jumpToDocs(encLabel){
+  const el=document.querySelector('.slipGroup[data-doclabel="'+encLabel+'"]');
+  if(!el) return;
+  el.scrollIntoView({behavior:'smooth',block:'center'});
+  el.classList.remove('hl'); void el.offsetWidth; el.classList.add('hl');
 }
 
 // ---------- ไลท์บ็อกซ์ ----------

@@ -23,6 +23,11 @@ s = open(SRC, encoding="utf-8").read()
 s = s.replace("<?!= logoDataUri ?>", LOGO)
 n = s.count("<?!= companyName ?>")
 s = s.replace("<?!= companyName ?>", COMPANY)
+# DOC_API: หน้า static ยิงตรงเข้า Apps Script (ไม่ผ่านตัวพัก — ไฟล์เอกสารห้ามแคช)
+doc_old = "const DOC_API = '<?!= webAppUrl ?>';"
+assert s.count(doc_old) == 1, "หา DOC_API scriptlet ไม่เจอ"
+s = s.replace(doc_old, "const DOC_API = '%s';" % API, 1)
+
 assert "<?!=" not in s and "<?" not in s.replace("<?xml", ""), "ยังมี template tag ค้าง"
 
 old_call = """  google.script.run
@@ -42,6 +47,7 @@ new_call = """  apiPost({ action: 'clientData', pin: pin })
   });"""
 assert s.count(old_call) == 1, "หา google.script.run ไม่เจอ"
 s = s.replace(old_call, new_call, 1)
+
 
 anchor = "let DATA = null, cur = '', lbList = [], lbIdx = 0;"
 assert s.count(anchor) == 1
