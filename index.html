@@ -979,10 +979,9 @@ function buildOverview(){
    +'<text x="59" y="56" text-anchor="middle" font-size="27" font-weight="700" fill="#fff">'+(pct==null?'—':val+'%')+'</text>'
    +'<text x="59" y="74" text-anchor="middle" font-size="9" fill="#bcd0e6">'+(pct==null?'ยังไม่ระบุ':pctFrom)+'</text>';
 
-  $('ovPctLbl').textContent = (pct==null)
-    ? 'ยังไม่ได้ตั้งขั้นตอนของโครงการนี้'
-    : (fromMango ? ('ความคืบหน้าจริง'+(DATA.mangoUpdated?' · อัปเดต '+fmtThaiShort(DATA.mangoUpdated):''))
-      : (fromPlan ? 'ความคืบหน้าตามแผนงาน' : 'ความคืบหน้างานก่อสร้าง'));
+  // บรรทัดใต้วงแหวน: แสดงเฉพาะตอนยังไม่มีข้อมูล — ถ้ามี % แล้ว ในวงแหวนบอกครบแล้ว ไม่ต้องเขียนซ้ำ
+  $('ovPctLbl').textContent = (pct==null) ? 'ยังไม่ได้ตั้งขั้นตอนของโครงการนี้' : '';
+  $('ovPctLbl').style.display = (pct==null) ? '' : 'none';
 
   const pi=DATA.projectInfo||{};
   $('ovTitle').textContent='โครงการ'+(pi.label||'');
