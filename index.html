@@ -385,6 +385,9 @@ ol.tasks li{margin-bottom:4px}
   border-radius:8px;padding:5px 12px;font-size:12px;font-family:inherit;cursor:pointer}
 .docBtn:hover{border-color:var(--gold)}
 .docBtn.dl{background:var(--navyink);border-color:var(--navyink);color:#fff}
+.devnote{border:1.5px dashed var(--line);border-radius:10px;padding:22px 20px;text-align:center;background:var(--card2)}
+.devnote{font-size:15px;font-weight:700;color:var(--gold)}
+.devnote span{display:block;margin-top:7px;font-size:12.5px;font-weight:400;color:var(--muted);line-height:1.7}
 .slipGroup.hl{animation:docflash 1.6s ease}
 @keyframes docflash{0%,60%{background:rgba(198,154,73,.12)}100%{background:transparent}}
 .slipGroup{margin-bottom:14px}
@@ -563,7 +566,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
   <div class="caption">
     <div class="bar"></div>
     <h2>ทุกความคืบหน้าของบ้านคุณ<br>อยู่ในมือคุณ</h2>
-    <p>ติดตามงานรายวัน ภาพหน้างานจริง และสถานะการเงิน<br>ตรวจสอบโดยผู้จัดการโครงการก่อนเผยแพร่ทุกฉบับ</p>
+    <p>ติดตามงานรายวัน ภาพหน้างานจริง และรายละเอียดงวดงาน<br>ตรวจสอบโดยผู้จัดการโครงการก่อนเผยแพร่ทุกฉบับ</p>
   </div>
   <div class="stage">
     <div class="form">
@@ -579,7 +582,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
       <div class="pinBoxes" id="pinBoxes"></div>
       <div class="errmsg" id="pinerr"></div>
       <button id="gateBtn" onclick="checkPin()">เข้าสู่รายงาน</button>
-      <div class="foot">บริษัท เรืองอนันต์ คอร์ปอเรชั่น จำกัด (RUANGANAN CORPORATION LIMITED)<br>เอกสารจัดทำผ่านระบบอิเล็กทรอนิกส์ จึงไม่มีลายมือชื่อ</div>
+      <div class="foot">บริษัท เรืองอนันต์ คอร์ปอเรชั่น จำกัด (เบสโฮม)<br>เอกสารจัดทำผ่านระบบอิเล็กทรอนิกส์ จึงไม่มีลายมือชื่อ</div>
     </div>
   </div>
 </div>
@@ -592,7 +595,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
       <button class="tab on" id="tabO" onclick="showTab('o')">🏠 ภาพรวม</button>
       <button class="tab" id="tabD" onclick="showTab('d')">📅 รายวัน</button>
       <button class="tab" id="tabW" onclick="showTab('w')">📊 รายสัปดาห์</button>
-      <button class="tab" id="tabF" onclick="showTab('f')">💳 สถานะการเงิน</button>
+      <button class="tab" id="tabF" onclick="showTab('f')">💳 รายละเอียดงวดงาน</button>
     </div>
     <button class="themeBtn" id="themeBtn" onclick="toggleTheme()" aria-label="สลับโหมดสว่าง/มืด">🌙</button>
   </div></div>
@@ -669,7 +672,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
     <div id="ovUpd"></div>
   </section>
 
-  <div class="preparedby"><div class="bar"></div><span class="lbl">จัดทำโดย</span><span class="nm">บริษัท เรืองอนันต์ คอร์ปอเรชั่น จำกัด (RUANGANAN CORPORATION LIMITED)</span></div>
+  <div class="preparedby"><div class="bar"></div><span class="lbl">จัดทำโดย</span><span class="nm">บริษัท เรืองอนันต์ คอร์ปอเรชั่น จำกัด (เบสโฮม)</span></div>
 </div>
 
 <div id="viewD" style="display:none">
@@ -716,7 +719,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
       </div>
     </div>
     <div class="prog"><span class="badge" id="progBadge"></span><span id="progNote"></span></div>
-    <div class="preparedby"><div class="bar"></div><span class="lbl">จัดทำโดย</span><span class="nm">บริษัท เรืองอนันต์ คอร์ปอเรชั่น จำกัด (RUANGANAN CORPORATION LIMITED)</span></div>
+    <div class="preparedby"><div class="bar"></div><span class="lbl">จัดทำโดย</span><span class="nm">บริษัท เรืองอนันต์ คอร์ปอเรชั่น จำกัด (เบสโฮม)</span></div>
   </section>
   <section id="noDaily" style="display:none">
     <h2>ยังไม่มีรายงานที่เผยแพร่</h2>
@@ -794,7 +797,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
 </div>
 </main>
 
-<footer>บริษัท เรืองอนันต์ คอร์ปอเรชั่น จำกัด (RUANGANAN CORPORATION LIMITED)<br>ขอบคุณที่ไว้วางใจให้เราดูแลบ้านของคุณ · เอกสารจัดทำผ่านระบบอิเล็กทรอนิกส์ จึงไม่มีลายมือชื่อ</footer>
+<footer>บริษัท เรืองอนันต์ คอร์ปอเรชั่น จำกัด (เบสโฮม)<br>ขอบคุณที่ไว้วางใจให้เราดูแลบ้านของคุณ · เอกสารจัดทำผ่านระบบอิเล็กทรอนิกส์ จึงไม่มีลายมือชื่อ</footer>
 
 <div class="lb" id="lb" onclick="if(event.target===this)closeLb()">
   <button class="x" onclick="closeLb()">✕</button>
@@ -1486,7 +1489,7 @@ function buildFinance(){
   const firstUnpaid=b.items.findIndex(function(i){return !i.paid});
   $('finList').innerHTML=b.items.map(function(i,idx){
     const slips=slipsByInst[i.label]||[];
-    const slipLink=slips.length?'<span class="slipLink" onclick="jumpToDocs(\''+encodeURIComponent(i.label)+'\')">📎 เอกสาร '+slips.length+' ไฟล์</span>':'';
+    const slipLink='';  // 🚧 ซ่อนป้ายเอกสารชั่วคราว ระหว่างพัฒนาส่วนดาวน์โหลด
     const cls=i.paid?'paid':(idx===firstUnpaid?'next':'');
     const dot=i.paid?'✓':(idx+1);
     const st=i.paid?'<div class="st">ชำระแล้ว</div>':'<div class="st wait">'+(idx===firstUnpaid?'งวดถัดไป':'ยังไม่ถึงกำหนด')+'</div>';
@@ -1519,35 +1522,11 @@ function buildFinance(){
 }
 
 function buildSlipGallery(slipsByInst){
-  const groups=Object.keys(slipsByInst||{});
-  if(!groups.length){
-    $('slipGallery').innerHTML='<div class="nophoto">ยังไม่มีเอกสารการเงินของโครงการนี้ในระบบ</div>';
-    return;
-  }
-  // เรียงตามลำดับงวดใน billing (ไม่ใช่ตามชื่อไฟล์) เพื่อให้ลำดับตรงกับตารางด้านบน
-  const order=(DATA.billing.items||[]).map(i=>i.label);
-  groups.sort((a,b)=>{
-    const ia=order.indexOf(a), ib=order.indexOf(b);
-    return (ia<0?9999:ia)-(ib<0?9999:ib);
-  });
-  const IC={slip:'💸',tax:'🧾',receipt:'📑',wht:'📋',other:'📄'};
-  const TY={slip:'สลิปโอน',tax:'ใบกำกับภาษี',receipt:'ใบเสร็จรับเงิน',wht:'หนังสือหัก ณ ที่จ่าย',other:'เอกสาร'};
-  const sz=n=>!n?'':(n>1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n/1024))+' KB');
-  $('slipGallery').innerHTML=groups.map(g=>{
-    const docs=slipsByInst[g];
-    const rows=docs.map(s=>{
-      // ข้อมูลเก่าในแคชอาจยังไม่มี id — โชว์ชื่อได้แต่ยังกดไม่ได้ รอแคชหมดอายุเอง
-      const btns=s.id?('<button class="docBtn" onclick="openDoc(\''+s.id+'\',this)">ดู</button>'
-        +'<button class="docBtn dl" onclick="downloadDoc(\''+s.id+'\',this)">ดาวน์โหลด</button>'):'';
-      return '<div class="docRow"><span class="docIc">'+(IC[s.type]||'📄')+'</span>'
-        +'<div class="docNm"><b>'+esc(s.name)+'</b><span>'+(TY[s.type]||'เอกสาร')
-        +(s.size?' · '+sz(s.size):'')+'</span></div>'+btns+'</div>';
-    }).join('');
-    return '<div class="slipGroup" data-doclabel="'+encodeURIComponent(g)+'">'
-      +'<div class="slipGroupTitle">'+esc(g)
-      +' <span style="font-weight:400;color:var(--muted);font-size:11.5px">· '+docs.length+' ไฟล์</span></div>'
-      +rows+'</div>';
-  }).join('');
+  // 🚧 ส่วนดาวน์โหลดเอกสารการเงินรายงวดอยู่ระหว่างพัฒนา — แสดง placeholder ไว้ก่อน
+  //    ตัวจับคู่ไฟล์/ปุ่มดาวน์โหลดของเดิมอยู่ในประวัติ git (v61) เอากลับมาได้เมื่อพร้อม
+  $('slipGallery').innerHTML='<div class="devnote">🚧 อยู่ระหว่างพัฒนาระบบ'
+    +'<span>ส่วนดาวน์โหลดเอกสารการเงินรายงวด (สลิปโอน · ใบกำกับภาษี · ใบเสร็จ) '
+    +'อยู่ระหว่างจัดทำ คาดว่าจะเปิดให้บริการเร็ว ๆ นี้ ขออภัยในความไม่สะดวก</span></div>';
 }
 
 // ── เปิด/ดาวน์โหลดเอกสารการเงิน ─────────────────────────────────────────
