@@ -1302,10 +1302,10 @@ function render(){
   $('progBadge').textContent='✓ ความก้าวหน้า: '+(d.progress||'ดำเนินการตามแผน');
   // ⚠️ ของเดิมเขียนตายว่า "เป็นไปตามแผน ไม่มีส่วนต่าง" ทุกกรณี ขัดกับป้ายที่เขียนว่า "ช้ากว่าแผน"
   $('progNote').textContent = behind_
-    ? 'ความคืบหน้าจริง (Actual) ช้ากว่าแผน (Planned) — ทีมงานกำลังเร่งปรับแผนให้ทันกำหนด'
+    ? 'งานเดินช้ากว่าแผนเล็กน้อย ทีมงานกำลังเร่งให้ทันกำหนด'
     : ahead_
-      ? 'ความคืบหน้าจริง (Actual) เร็วกว่าแผน (Planned)'
-      : 'ความคืบหน้าจริง (Actual) เป็นไปตามแผน (Planned) — ไม่มีส่วนต่างที่ต้องรายงาน';
+      ? 'งานเดินหน้าได้เร็วกว่าแผนที่วางไว้'
+      : 'งานเป็นไปตามแผนที่วางไว้ทุกประการ';
   const progBox_=document.querySelector('.prog');
   if(progBox_) progBox_.classList.toggle('warn', behind_);
   $('progBadge').style.background = behind_ ? 'var(--amber)' : 'var(--green)';
