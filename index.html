@@ -956,16 +956,19 @@ function buildOverview(){
   //    (ของเดิม fallback ไปใช้ paid/total ทำให้ลูกค้าเห็น 62% แล้วเข้าใจว่างานเดินไป 62%
   //     ทั้งที่เป็นยอดเงินที่จ่ายไป — เข้าใจผิดคนละเรื่องและเสี่ยงเรื่องข้อพิพาท)
   //    ไม่ได้ตั้ง phases → แสดง "—" ไปตรงๆ ดีกว่าแสดงตัวเลขที่ผิดความหมาย
+  // ลำดับ: ความคืบหน้าจริงจาก Mango > คำนวณตามแผนจาก Gantt > ไม่มี
+  //   Mango = % ที่ทีมอัปเดตหน้างานจริงในแอป Mango Plan → "ความคืบหน้าจริง"
+  //   Gantt = คำนวณจากวันที่ในแผนเทียบวันนี้ → "ตามแผนงาน"
+  const fromMango = (typeof DATA.mangoPct==='number');
   let pct=null;
-  if(ph&&ph.length){
+  if(fromMango){
+    pct=Math.round(DATA.mangoPct);
+  }else if(ph&&ph.length){
     let sc=0; ph.forEach(function(v){ sc += (v===1?1:(v===2?0.5:0)); });
     pct=Math.round(sc/ph.length*100);
   }
-  // ⚠️ ป้ายต้องตรงกับที่มาของตัวเลข
-  //    'plan' = คำนวณจากวันที่ในแผนงาน (Gantt) เทียบกับวันนี้ → เป็น "ตามแผน" ไม่ใช่ของจริงหน้างาน
-  //    ถ้าเขียนลอย ๆ ว่า "ความคืบหน้างานก่อสร้าง" ลูกค้าจะเข้าใจว่าวัดจากหน้างานจริง แล้วเป็นเรื่องตอนงานล่าช้า
-  const fromPlan = DATA.phasesFrom==='plan';
-  const pctFrom = fromPlan ? 'ตามแผนงาน' : 'งานก่อสร้าง';
+  const fromPlan = !fromMango && DATA.phasesFrom==='plan';
+  const pctFrom = fromMango ? 'ความคืบหน้าจริง' : (fromPlan ? 'ตามแผนงาน' : 'งานก่อสร้าง');
 
   // วงแหวน %
   const R=50,C=2*Math.PI*R,val=(pct==null?0:pct);
@@ -978,7 +981,8 @@ function buildOverview(){
 
   $('ovPctLbl').textContent = (pct==null)
     ? 'ยังไม่ได้ตั้งขั้นตอนของโครงการนี้'
-    : (fromPlan ? 'ความคืบหน้าตามแผนงาน' : 'ความคืบหน้างานก่อสร้าง');
+    : (fromMango ? ('ความคืบหน้าจริง'+(DATA.mangoUpdated?' · อัปเดต '+fmtThaiShort(DATA.mangoUpdated):''))
+      : (fromPlan ? 'ความคืบหน้าตามแผนงาน' : 'ความคืบหน้างานก่อสร้าง'));
 
   const pi=DATA.projectInfo||{};
   $('ovTitle').textContent='โครงการ'+(pi.label||'');
@@ -1211,6 +1215,11 @@ const TH_M=['มกราคม','กุมภาพันธ์','มีนา�
 // ต้องใช้ตัวย่อทางการนี้เท่านั้น (ชุดเดียวกับ TH_MONTHS_SHORT ฝั่งเซิร์ฟเวอร์ใน Code.gs)
 const TH_M_ABBR=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 function iso(y,m,d){return y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0')}
+// 'YYYY-MM-DD' → '23 ก.ค. 2569' (พ.ศ.) สำหรับป้ายวันอัปเดตจาก Mango
+function fmtThaiShort(isoStr){
+  try{const p=String(isoStr).split('-');const d=+p[2],m=+p[1]-1,y=+p[0]+543;
+    return d+' '+TH_M_ABBR[m]+' '+y;}catch(e){return isoStr;}
+}
 function toDate(s){const p=s.split('-');return new Date(+p[0],+p[1]-1,+p[2])}
 
 /** แปลง DATA.holidays (จาก Config.gs) เป็น map: 'YYYY-MM-DD' -> {label,type} — type 'custom' ทับ 'company' ถ้าชนวันเดียวกัน */
