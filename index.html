@@ -370,6 +370,7 @@ ol.tasks li{margin-bottom:4px}
 .exw{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
 .exw:last-child{border-bottom:0}
 .exw b{color:var(--ink2);font-weight:600}
+.exw b small{display:block;font-weight:400;color:var(--muted);font-size:11.5px;margin-top:2px}
 .exw span{font-weight:700;font-variant-numeric:tabular-nums}
 .exwSum{display:flex;justify-content:space-between;align-items:baseline;margin-top:11px;padding-top:11px;
   border-top:2px solid var(--navyink);font-size:14.5px;font-weight:700;color:var(--navyink)}
@@ -1444,7 +1445,7 @@ function buildWeekly(){
     if(h_) return `<div class="bar"><div class="n" style="color:var(--holiday);font-size:9.5px">วันหยุด</div><div class="b na" style="height:8%;opacity:.5"></div></div>`;
     return `<div class="bar"><div class="n" style="color:#c0392b;font-size:10px">ไม่มีรายงาน</div><div class="b na" style="height:8%"></div></div>`;
   }).join('');
-  const DOW=['จั','อั','พุ','พฤ','ศุ','เส','อา'];
+  const DOW=['จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์','อาทิตย์'];
   $('wkXl').innerHTML=keys.map((k,i)=>{
     const d=toDate(k);
     return `<div>${DOW[i]}<br>${d.getDate()} ${TH_M_ABBR[d.getMonth()]}</div>`;
@@ -1513,7 +1514,8 @@ function buildFinance(){
     const sum=ex.reduce(function(a,x){return a+x.amount},0);
     const money=function(n){return n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})};
     $('finExtra').innerHTML=ex.map(function(x){
-      return '<div class="exw"><b>'+esc(x.label)+'</b><span>'+money(x.amount)+' บ.</span></div>';
+      const dt=x.detail?'<small>'+esc(x.detail)+'</small>':'';
+      return '<div class="exw"><b>'+esc(x.label)+dt+'</b><span>'+money(x.amount)+' บ.</span></div>';
     }).join('')
     +'<div class="exwSum"><span>รวมงานเพิ่ม–ลดทั้งหมด</span><span>'+money(sum)+' บ.</span></div>';
   }else{ $('finExtraSec').style.display='none'; }
