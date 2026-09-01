@@ -173,7 +173,31 @@ td.name{font-weight:600;color:var(--heading);white-space:nowrap}
 #modal .err{color:var(--bad);font-size:12px;min-height:17px;margin:7px 0 2px}
 #modal .row{display:flex;gap:8px;margin-top:6px}
 #modal .row .btn{flex:1}
-@media(max-width:640px){.wrap{padding:18px 12px 60px}.grid{grid-template-columns:1fr}}
+/* ── modal จัดการวันหยุด ── */
+#holModal{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;padding:18px;
+  background:rgba(8,14,25,.6);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+#holModal.on{display:flex}
+.hbox{width:min(620px,100%);max-height:88vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 24px}
+.hhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.hhead h3{font-size:17px;color:var(--heading)}
+.hx{background:none;border:0;color:var(--muted);font-size:20px;cursor:pointer;line-height:1}
+.hsub{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6}
+.hrow{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:6px}
+.hrow label{display:flex;flex-direction:column;gap:5px;font-size:11.5px;color:var(--muted);font-weight:600}
+.hrow select,.hrow input{padding:9px 11px;font:inherit;font-size:13px;color:var(--ink);
+  background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:9px}
+.hrow select:focus,.hrow input:focus{outline:none;border-color:#c69a49}
+.herr{color:var(--bad);font-size:12px;min-height:16px;margin:4px 0}
+.hlist{border-top:1px solid var(--line);margin-top:10px}
+.hitem{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid var(--line);font-size:13.5px}
+.hitem .hd{flex:0 0 auto;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums;min-width:96px}
+.hitem .hl{flex:1;color:var(--ink)}
+.hitem .hsc{flex:0 0 auto;font-size:11px;color:var(--muted);background:var(--th-bg);padding:2px 9px;border-radius:99px}
+.hitem .hdel{flex:0 0 auto;background:none;border:0;color:var(--bad);cursor:pointer;font-size:12.5px;font-weight:600}
+.hempty{padding:22px 0;text-align:center;color:var(--muted);font-size:13px}
+.hnote{font-size:11.5px;color:var(--faint);line-height:1.7;margin-top:14px}
+@media(max-width:640px){.wrap{padding:18px 12px 60px}.grid{grid-template-columns:1fr}
+  .hrow label{flex:1 1 100%}.hrow .btn{flex:1 1 100%}}
 </style></head><body>
 
 <div id="gate">
@@ -208,6 +232,9 @@ td.name{font-weight:600;color:var(--heading);white-space:nowrap}
     </table></div>
   </div>
   <div class="grid" id="grid"></div>
+  <div style="text-align:center;margin:6px 0 20px">
+    <button class="btn ghost" onclick="openHoliday()" style="display:inline-flex;gap:7px;padding:10px 20px">📅 จัดการวันหยุด</button>
+  </div>
   <div class="foot">
     ลิงก์ลูกค้า: <b>report.ruanganan.com</b> (ลิงก์เดียวทุกโครงการ ระบบแยกด้วย PIN)<br>
     แตะกล่อง PIN เพื่อคัดลอก · "ข้อความส่งลูกค้า" คัดลอกลิงก์+รหัสพร้อมส่งใน LINE · เปลี่ยนรหัสแล้วรหัสเดิมใช้ไม่ได้ทันที
@@ -224,6 +251,31 @@ td.name{font-weight:600;color:var(--heading);white-space:nowrap}
       <button class="btn ghost" id="mCancel">ยกเลิก</button>
       <button class="btn" id="mSave">บันทึกรหัสใหม่</button>
     </div>
+  </div>
+</div>
+
+<div id="holModal">
+  <div class="hbox">
+    <div class="hhead">
+      <h3>📅 จัดการวันหยุด</h3>
+      <button class="hx" onclick="closeHoliday()">✕</button>
+    </div>
+    <p class="hsub">วันหยุดจะขึ้นในปฏิทินฝั่งลูกค้า (แท็บรายวัน) และไม่ถูกนับเป็น "ไม่มีรายงาน" · ลูกค้าดูได้แต่แก้ไม่ได้</p>
+    <div class="hrow">
+      <label>ขอบเขต
+        <select id="hScope"></select>
+      </label>
+      <label>วันที่
+        <input type="date" id="hDate">
+      </label>
+      <label style="flex:1.4">ชื่อวันหยุด
+        <input type="text" id="hLabel" placeholder="เช่น นิติสั่งหยุดงาน / วันหยุดพิเศษ">
+      </label>
+      <button class="btn" id="hAdd" onclick="addHoliday()" style="align-self:flex-end;min-width:96px">เพิ่ม</button>
+    </div>
+    <div class="herr" id="hErr"></div>
+    <div class="hlist" id="hList"></div>
+    <p class="hnote">💡 "ทุกโครงการ" = วันหยุดที่มีผลทุกไซต์ (เช่น วันหยุดบริษัทที่เพิ่มระหว่างปี) · เลือกชื่อโครงการ = วันหยุดเฉพาะไซต์นั้น (เช่น นิติสั่งหยุด)<br>วันหยุดนักขัตฤกษ์หลักตั้งไว้ในระบบแล้ว ไม่ต้องเพิ่มซ้ำ</p>
   </div>
 </div>
 
@@ -275,6 +327,59 @@ $('key').addEventListener('keydown',e=>{if(e.key==='Enter')unlock()});
 (function auto(){try{const k=localStorage.getItem('team_key');if(k){$('key').value=k;unlock();}}catch(e){}})();
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+/* ─────────── จัดการวันหยุด ─────────── */
+let HOL={};
+function openHoliday(){
+  const m=$('holModal'); m.classList.add('on');
+  $('hErr').textContent=''; $('hDate').value=''; $('hLabel').value='';
+  // เติมตัวเลือกขอบเขต (ทุกโครงการ + รายไซต์)
+  api({action:'listHolidays',key:TEAM_KEY}).then(function(d){
+    HOL=d.holidays||{};
+    const opts=['<option value="ALL">ทุกโครงการ</option>']
+      .concat((d.projects||[]).map(function(p){return '<option value="'+esc(p.site)+'">'+esc(p.label)+'</option>'}));
+    $('hScope').innerHTML=opts.join('');
+    drawHol();
+  }).catch(function(e){ $('hErr').textContent='โหลดวันหยุดไม่ได้: '+e.message; });
+}
+function closeHoliday(){ $('holModal').classList.remove('on'); }
+function scopeLabel(sc){
+  if(sc==='ALL') return 'ทุกโครงการ';
+  const o=[...$('hScope').options].filter(function(x){return x.value===sc})[0];
+  return o?o.textContent:sc;
+}
+function thDate(iso){
+  const M=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const p=String(iso).split('-'); return +p[2]+' '+M[+p[1]-1]+' '+(+p[0]+543);
+}
+function drawHol(){
+  // รวมทุกขอบเขตเป็นรายการเดียว เรียงตามวันที่
+  const rows=[];
+  Object.keys(HOL).forEach(function(sc){ (HOL[sc]||[]).forEach(function(h){ rows.push({sc:sc,date:h.date,label:h.label}); }); });
+  rows.sort(function(a,b){ return a.date<b.date?-1:1; });
+  if(!rows.length){ $('hList').innerHTML='<div class="hempty">ยังไม่มีวันหยุดที่เพิ่มเอง (นักขัตฤกษ์หลักตั้งไว้ในระบบแล้ว)</div>'; return; }
+  $('hList').innerHTML=rows.map(function(r){
+    return '<div class="hitem"><span class="hd">'+thDate(r.date)+'</span>'
+      +'<span class="hl">'+esc(r.label)+'</span>'
+      +'<span class="hsc">'+esc(scopeLabel(r.sc))+'</span>'
+      +'<button class="hdel" onclick="delHoliday(\''+esc(r.sc)+'\',\''+r.date+'\')">ลบ</button></div>';
+  }).join('');
+}
+function addHoliday(){
+  const scope=$('hScope').value, date=$('hDate').value, label=$('hLabel').value.trim();
+  if(!date){ $('hErr').textContent='กรุณาเลือกวันที่'; return; }
+  if(!label){ $('hErr').textContent='กรุณาใส่ชื่อวันหยุด'; return; }
+  $('hErr').textContent=''; $('hAdd').disabled=true; $('hAdd').textContent='...';
+  api({action:'addHoliday',key:TEAM_KEY,scope:scope,date:date,label:label}).then(function(d){
+    HOL=d.holidays||{}; $('hAdd').disabled=false; $('hAdd').textContent='เพิ่ม';
+    $('hDate').value=''; $('hLabel').value=''; drawHol();
+  }).catch(function(e){ $('hAdd').disabled=false; $('hAdd').textContent='เพิ่ม'; $('hErr').textContent=e.message; });
+}
+function delHoliday(scope,date){
+  api({action:'removeHoliday',key:TEAM_KEY,scope:scope,date:date}).then(function(d){
+    HOL=d.holidays||{}; drawHol();
+  }).catch(function(e){ $('hErr').textContent=e.message; });
+}
 function money(n){return String(Math.round(Number(n)||0)).replace(/\B(?=(\d{3})+(?!\d))/g,',')}
 
 function statusTag(p){
