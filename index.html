@@ -1506,18 +1506,7 @@ function buildFinance(){
   const fromMango=b.from==='mango';
   $('finCount').textContent=b.items.length+' งวด ตามสัญญาก่อสร้าง'+(fromMango?' · ข้อมูลจากระบบบัญชี':'');
 
-  // ── แถบสรุปยอด (เฉพาะข้อมูลจาก Mango ที่มียอดรับจริง) ──
-  if(fromMango && typeof b.received==='number'){
-    const remain=Math.max(0,b.contractAmount-b.received);
-    const m=function(n){return Math.round(n).toLocaleString()};
-    $('finRecon').style.display='';
-    $('finRecon').innerHTML=
-       '<div class="rc"><b>มูลค่าสัญญารวม</b><span>'+m(b.contractAmount)+' บ.</span></div>'
-      +'<div class="rc ok"><b>รับชำระแล้ว</b><span>'+m(b.received)+' บ. <em>('+b.receivedPct+'%)</em></span></div>'
-      +'<div class="rc"><b>คงเหลือ</b><span>'+m(remain)+' บ.</span></div>'
-      +'<div class="rcbar"><i style="width:'+Math.min(100,b.receivedPct)+'%"></i></div>';
-  }else{ $('finRecon').style.display='none'; }
-
+  // แถบสรุปยอดรับชำระ — เอาออกตามที่เก้าสั่ง (ไม่แสดงยอดรับชำระให้ลูกค้าเห็น)
   const slipsByInst=DATA.paymentSlips||{};
   const ST={paid:{c:'paid',t:'รับชำระแล้ว',cls:'st'},certified:{c:'next',t:'รับรองแล้ว รอเก็บเงิน',cls:'st cert'},pending:{c:'',t:'ยังไม่ถึงกำหนด',cls:'st wait'}};
   const firstUnpaid=b.items.findIndex(function(i){return !i.paid});
