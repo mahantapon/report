@@ -791,6 +791,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
   </section>
   <section>
     <h2>รายละเอียดงวดงาน <em id="finCount"></em></h2>
+    <div id="finRecon" class="finrecon" style="display:none"></div>
     <div id="finList"></div>
     <div class="finfoot">หมายเหตุ: รายการนี้จัดทำขึ้นเพื่อความสะดวกในการติดตามของท่านลูกค้า ไม่ถือเป็นใบแจ้งหนี้หรือเอกสารทางบัญชี — บริษัทจะจัดส่งใบแจ้งเบิกงวดงานอย่างเป็นทางการแยกต่างหากทุกครั้งก่อนถึงกำหนด</div>
   </section>
@@ -1545,7 +1546,7 @@ function buildFinance(){
 
   const due=b.items.find(i=>!i.paid);
   if(due){
-    $('finNoticeTitle').textContent=`งวดถัดไปที่จะถึงกำหนด: ${due.label} — ${due.desc}`;
+    $('finNoticeTitle').textContent=`งวดถัดไปที่จะถึงกำหนด: ${due.label}`+(due.desc?` — ${due.desc}`:'');
     $('finNoticeBody').textContent=`บริษัทขอเรียนแจ้งเพื่อทราบว่า ${due.label} (มูลค่า ${due.amount.toLocaleString()} บาท) กำลังจะเข้าสู่ขอบเขตงานตามสัญญา บริษัทจะจัดส่งใบแจ้งเบิกอย่างเป็นทางการให้ท่านล่วงหน้าตามรอบที่กำหนดต่อไป`;
   }else{
     $('finNoticeTitle').textContent='ชำระครบทุกงวดแล้ว';
