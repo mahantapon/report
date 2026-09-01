@@ -1513,7 +1513,7 @@ function buildFinance(){
   $('finList').innerHTML=b.items.map(function(i,idx){
     // งวดจาก Mango มี status 3 ระดับ · งวดจากชีตมีแค่ paid true/false
     const s = i.status ? (ST[i.status]||ST.pending) : (i.paid?ST.paid:{c:(idx===firstUnpaid?'next':''),t:(idx===firstUnpaid?'งวดถัดไป':'ยังไม่ถึงกำหนด'),cls:(idx===firstUnpaid?'st wait':'st wait')});
-    const dot=i.paid?'✓':(idx+1);
+    const dot=i.paid?'✓':(i.periodNo||idx+1);
     const split=(i.paidCount>1)?'<span class="splitc">แบ่งชำระ '+i.paidCount+' ครั้ง</span>':'';
     return '<div class="instRow '+s.c+'"><div class="dot">'+dot+'</div>'
       +'<div class="lab"><b>'+esc(i.label)+'</b><span>'+esc(i.desc)+split+'</span></div>'
