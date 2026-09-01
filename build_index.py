@@ -71,11 +71,14 @@ s = s.replace(anchor, HELPER + anchor, 1)
 import os
 assert s.count("/*__HIDE_TABS__*/") == 1, "หา placeholder HIDE_TABS ไม่เจอ"
 
+target = (sys.argv[1] if len(sys.argv) > 1 else "both").lower()
 prod = s.replace("/*__HIDE_TABS__*/", "'f'")   # เว็บจริง: ซ่อนงวดงาน
-open(DST, "w", encoding="utf-8").write(prod)
-
 demo = s.replace("/*__HIDE_TABS__*/", "")      # เดโม: โชว์ครบ
 os.makedirs("demo", exist_ok=True)
-open("demo/index.html", "w", encoding="utf-8").write(demo)
-
-print("สร้าง index.html (เว็บจริง ซ่อนงวดงาน) + demo/index.html (โชว์ครบ) · %d KB · companyName %d จุด" % (len(prod)//1024, n))
+done = []
+if target in ("both", "demo"):
+    open("demo/index.html", "w", encoding="utf-8").write(demo); done.append("demo/index.html (โชว์ครบ)")
+if target in ("both", "prod", "promote"):
+    open(DST, "w", encoding="utf-8").write(prod); done.append("index.html (เว็บจริง ซ่อนงวดงาน)")
+print("สร้าง %s · %d KB · companyName %d จุด" % (" + ".join(done), len(prod)//1024, n))
+print("  วิธีใช้: build_index.py demo = อัปเฉพาะเดโม (เว็บจริงไม่ขยับ) · build_index.py prod = ยกขึ้นเว็บจริง · (ว่าง)=ทั้งคู่")
