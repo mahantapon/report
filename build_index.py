@@ -65,5 +65,17 @@ function apiPost(body){
 """ % (CACHE, API)
 s = s.replace(anchor, HELPER + anchor, 1)
 
-open(DST, "w", encoding="utf-8").write(s)
-print("สร้าง index.html แล้ว (%d KB) · แทน companyName %d จุด" % (len(s)//1024, n))
+# ── สร้าง 2 เวอร์ชันจากเทมเพลตเดียว ──
+#   index.html      = เว็บจริง ซ่อนแท็บ "รายละเอียดงวดงาน" (หลังบ้านยังไม่นิ่ง) เหลือ ภาพรวม/รายวัน/รายสัปดาห์
+#   demo/index.html = เดโม โชว์ครบทุกแท็บ (report.ruanganan.com/demo) ไว้ทดลองก่อนยกขึ้นเว็บจริง
+import os
+assert s.count("/*__HIDE_TABS__*/") == 1, "หา placeholder HIDE_TABS ไม่เจอ"
+
+prod = s.replace("/*__HIDE_TABS__*/", "'f'")   # เว็บจริง: ซ่อนงวดงาน
+open(DST, "w", encoding="utf-8").write(prod)
+
+demo = s.replace("/*__HIDE_TABS__*/", "")      # เดโม: โชว์ครบ
+os.makedirs("demo", exist_ok=True)
+open("demo/index.html", "w", encoding="utf-8").write(demo)
+
+print("สร้าง index.html (เว็บจริง ซ่อนงวดงาน) + demo/index.html (โชว์ครบ) · %d KB · companyName %d จุด" % (len(prod)//1024, n))

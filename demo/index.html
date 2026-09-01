@@ -847,7 +847,7 @@ function apiPost(body){
     .catch(function(){ return fetch(API_URL, opt).then(function(r){ return r.json(); }); });
 }
 let DATA = null, cur = '', lbList = [], lbIdx = 0;
-const HIDE_TABS = ['f'];   // เว็บจริงซ่อน 'f' (งวดงาน) · เดโมโชว์ครบ
+const HIDE_TABS = [];   // เว็บจริงซ่อน 'f' (งวดงาน) · เดโมโชว์ครบ
 let calY = 0, calM = 0;      // เดือนที่ปฏิทินกำลังแสดง
 let wkAnchor = '';            // วันใดวันหนึ่งในสัปดาห์ที่แท็บรายสัปดาห์กำลังแสดง
 
