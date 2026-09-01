@@ -350,6 +350,17 @@ ol.tasks li{margin-bottom:4px}
 .notice b{color:#7a5c1e}
 .notice p{font-size:13.5px;color:#5c4a20;margin-top:2px;line-height:1.6}
 /* งวดงาน: การ์ดรายแถว มีจุดสถานะ ไม่มีแท่งเทียบมูลค่า (ไม่ให้ดูออกว่างวดไหนเงินเยอะ/น้อย) — ยอดรวม/สัดส่วนการชำระ ตัดออกแล้วตามคำขอลูกค้า เหลือแค่รายงวด */
+/* แถบสรุปยอด (reconcile) + สถานะรับรอง */
+.finrecon{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;position:relative}
+.finrecon .rc{background:var(--card2);border:1px solid var(--line);border-radius:11px;padding:13px 15px}
+.finrecon .rc b{display:block;font-size:11px;color:var(--muted);font-weight:500;margin-bottom:5px}
+.finrecon .rc span{font-size:17px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.finrecon .rc.ok span{color:var(--green)}
+.finrecon .rc em{font-size:12px;font-weight:600;font-style:normal;color:var(--muted)}
+.finrecon .rcbar{grid-column:1/-1;height:7px;background:var(--soft);border-radius:99px;overflow:hidden}
+.finrecon .rcbar i{display:block;height:100%;background:linear-gradient(90deg,#1e8449,#4fb87a);border-radius:99px}
+.st.cert{color:#b8873b}
+.splitc{display:inline-block;margin-left:8px;font-size:10.5px;background:rgba(184,135,59,.14);color:var(--gold);padding:1px 8px;border-radius:99px;vertical-align:1px}
 .instRow{display:flex;align-items:center;gap:13px;padding:12px 13px;border:1px solid var(--line);border-radius:10px;
   margin-bottom:7px;background:var(--card);transition:border-color .15s}
 .instRow:hover{border-color:#c9d4e2}
@@ -553,6 +564,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
   .cover .gmoney{flex:1;min-width:0;padding:13px 14px 13px 16px}
   .cover .gmoney .v{font-size:26px}
   .cover .scrim{background:linear-gradient(180deg,rgba(9,14,22,.5) 0%,rgba(9,14,22,.28) 20%,rgba(9,14,22,.86) 58%,rgba(9,14,22,.97) 100%)}
+  .finrecon{grid-template-columns:1fr 1fr}
   .instRow{flex-wrap:wrap;row-gap:4px}
   .instRow .lab{flex:1 1 100%;font-size:12px}
   .instRow .track{flex:1 1 auto}
@@ -1490,21 +1502,32 @@ function buildFinance(){
     $('finNoticeBody').textContent='เมื่อผูกข้อมูลแล้ว รายละเอียดงวดงานจะแสดงที่นี่';
     return;
   }
-  $('finCount').textContent=b.items.length+' งวด ตามสัญญาก่อสร้าง';
+  const fromMango=b.from==='mango';
+  $('finCount').textContent=b.items.length+' งวด ตามสัญญาก่อสร้าง'+(fromMango?' · ข้อมูลจากระบบบัญชี':'');
+
+  // ── แถบสรุปยอด (เฉพาะข้อมูลจาก Mango ที่มียอดรับจริง) ──
+  if(fromMango && typeof b.received==='number'){
+    const remain=Math.max(0,b.contractAmount-b.received);
+    const m=function(n){return Math.round(n).toLocaleString()};
+    $('finRecon').style.display='';
+    $('finRecon').innerHTML=
+       '<div class="rc"><b>มูลค่าสัญญารวม</b><span>'+m(b.contractAmount)+' บ.</span></div>'
+      +'<div class="rc ok"><b>รับชำระแล้ว</b><span>'+m(b.received)+' บ. <em>('+b.receivedPct+'%)</em></span></div>'
+      +'<div class="rc"><b>คงเหลือ</b><span>'+m(remain)+' บ.</span></div>'
+      +'<div class="rcbar"><i style="width:'+Math.min(100,b.receivedPct)+'%"></i></div>';
+  }else{ $('finRecon').style.display='none'; }
 
   const slipsByInst=DATA.paymentSlips||{};
-  // ⚠️ ตั้งใจไม่ใส่แท่งเทียบมูลค่าระหว่างงวดแล้ว — เดิมทำให้เห็นชัดว่างวดไหนเงินเยอะ/น้อย
-  // ตอนนี้เป็นการ์ดรายงวด: จุดสถานะ + ชื่อ + คำอธิบาย + ยอด + สถานะ อ่านง่ายกว่ามาก
+  const ST={paid:{c:'paid',t:'รับชำระแล้ว',cls:'st'},certified:{c:'next',t:'รับรองแล้ว รอเก็บเงิน',cls:'st cert'},pending:{c:'',t:'ยังไม่ถึงกำหนด',cls:'st wait'}};
   const firstUnpaid=b.items.findIndex(function(i){return !i.paid});
   $('finList').innerHTML=b.items.map(function(i,idx){
-    const slips=slipsByInst[i.label]||[];
-    const slipLink='';  // 🚧 ซ่อนป้ายเอกสารชั่วคราว ระหว่างพัฒนาส่วนดาวน์โหลด
-    const cls=i.paid?'paid':(idx===firstUnpaid?'next':'');
+    // งวดจาก Mango มี status 3 ระดับ · งวดจากชีตมีแค่ paid true/false
+    const s = i.status ? (ST[i.status]||ST.pending) : (i.paid?ST.paid:{c:(idx===firstUnpaid?'next':''),t:(idx===firstUnpaid?'งวดถัดไป':'ยังไม่ถึงกำหนด'),cls:(idx===firstUnpaid?'st wait':'st wait')});
     const dot=i.paid?'✓':(idx+1);
-    const st=i.paid?'<div class="st">ชำระแล้ว</div>':'<div class="st wait">'+(idx===firstUnpaid?'งวดถัดไป':'ยังไม่ถึงกำหนด')+'</div>';
-    return '<div class="instRow '+cls+'"><div class="dot">'+dot+'</div>'
-      +'<div class="lab"><b>'+esc(i.label)+'</b><span>'+esc(i.desc)+'</span></div>'
-      +'<div class="right"><div class="amt">'+i.amount.toLocaleString()+' บ.</div>'+st+slipLink+'</div></div>';
+    const split=(i.paidCount>1)?'<span class="splitc">แบ่งชำระ '+i.paidCount+' ครั้ง</span>':'';
+    return '<div class="instRow '+s.c+'"><div class="dot">'+dot+'</div>'
+      +'<div class="lab"><b>'+esc(i.label)+'</b><span>'+esc(i.desc)+split+'</span></div>'
+      +'<div class="right"><div class="amt">'+i.amount.toLocaleString()+' บ.</div><div class="'+s.cls+'">'+s.t+'</div></div></div>';
   }).join('');
 
   // ---- งานเพิ่ม–ลด (จากแท็บ "สรุป Cash flow") ----
