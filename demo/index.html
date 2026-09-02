@@ -63,6 +63,7 @@ header{background:var(--bg);color:var(--ink);position:sticky;top:0;z-index:40;
 /* โลโก้ใช้สีต้นฉบับ (ทอง) ทั้งหน้าสว่างและหน้ามืด — ห้ามย้อมสีทับ */
 .hrow .proj{font-size:13.5px;font-weight:600;color:var(--ink);margin-right:auto;white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis;max-width:230px}
+.hdrBtns{display:flex;gap:8px;flex:0 0 auto;align-items:center}
 .themeBtn{flex:0 0 auto;width:38px;height:38px;border-radius:99px;border:1px solid var(--line);
   background:var(--soft);color:var(--ink);font-size:16px;cursor:pointer;font-family:inherit;
   display:flex;align-items:center;justify-content:center;transition:border-color .2s,transform .15s}
@@ -530,7 +531,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
   header{padding:20px 0 0}
   .hrow{gap:10px;height:auto;padding:10px 0;flex-wrap:wrap}
   .hrow img{height:26px}
-  .hrow .proj{max-width:none;flex:1 1 auto;font-size:13px}
+  .hrow .proj{max-width:none;flex:1 1 auto;font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis}
   /* แท็บ 4 อันใส่ไม่พอในแถวเดียวบนจอ 375px → ให้ตกลงมาแถวล่างแล้วเลื่อนแนวนอนได้ */
   .tabs{order:3;flex:1 1 100%;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
   .tabs::-webkit-scrollbar{display:none}
@@ -610,8 +611,10 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
       <button class="tab" id="tabW" onclick="showTab('w')">📊 รายสัปดาห์</button>
       <button class="tab" id="tabF" onclick="showTab('f')">💳 รายละเอียดงวดงาน</button>
     </div>
-    <button class="themeBtn" id="logoutBtn" onclick="logout()" aria-label="ออกจากระบบ" title="ออกจากระบบ">🚪</button>
-    <button class="themeBtn" id="themeBtn" onclick="toggleTheme()" aria-label="สลับโหมดสว่าง/มืด">🌙</button>
+    <div class="hdrBtns">
+      <button class="themeBtn" id="logoutBtn" onclick="logout()" aria-label="ออกจากระบบ" title="ออกจากระบบ">🚪</button>
+      <button class="themeBtn" id="themeBtn" onclick="toggleTheme()" aria-label="สลับโหมดสว่าง/มืด">🌙</button>
+    </div>
   </div></div>
 </header>
 
