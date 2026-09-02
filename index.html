@@ -715,7 +715,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
     <div id="calHolList" class="calhollist"></div>
     <div class="dailyNote">
       <span class="ic">📌</span>
-      <span>รายงานประจำวันของโครงการเริ่มบันทึกในระบบตั้งแต่ <b>วันที่ 1 เมษายน 2569</b> เป็นต้นไป — หากต้องการข้อมูลช่วงก่อนหน้านี้ ทีมงานยินดีจัดส่งให้ ติดต่อแอดมินได้เลย</span>
+      <span>รายงานประจำวันของโครงการเริ่มบันทึกในระบบตั้งแต่ <b>วันที่ 1 มิถุนายน 2569</b> เป็นต้นไป — หากต้องการข้อมูลช่วงก่อนหน้านี้ ทีมงานยินดีจัดส่งให้ ติดต่อแอดมินได้เลย</span>
     </div>
   </section>
   <section id="daySec">
@@ -861,6 +861,7 @@ function apiPost(body){
 }
 let DATA = null, cur = '', lbList = [], lbIdx = 0;
 const HIDE_TABS = ['f'];   // เว็บจริงซ่อน 'f' (งวดงาน) · เดโมโชว์ครบ
+const REPORT_CUTOFF = '2026-06-01';   // รายงานก่อนวันนี้ (1 มิ.ย. 2569) ไม่ให้ลูกค้าเปิด — ระบบเริ่มบันทึกจริงจากวันนี้
 let calY = 0, calM = 0;      // เดือนที่ปฏิทินกำลังแสดง
 let wkAnchor = '';            // วันใดวันหนึ่งในสัปดาห์ที่แท็บรายสัปดาห์กำลังแสดง
 
@@ -949,6 +950,10 @@ pinEls.forEach(function(el,idx){
 
 function onData(data){
   DATA=data;
+  // ตัดรายงานก่อนวันเริ่มระบบออก — ลูกค้าเปิดดูวันก่อนหน้าไม่ได้ (ปฏิทินไม่ขึ้น/ภาพรวมไม่นับ)
+  if(REPORT_CUTOFF && DATA && DATA.days){
+    Object.keys(DATA.days).forEach(function(k){ if(k < REPORT_CUTOFF) delete DATA.days[k]; });
+  }
   $('gate').style.display='none';
 
   // เติมชื่อโครงการบนหัวเว็บ (หน้า gate ตั้งใจไม่บอกชื่อโครงการ — รู้ได้หลัง PIN ผ่านเท่านั้น)
