@@ -610,6 +610,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
       <button class="tab" id="tabW" onclick="showTab('w')">📊 รายสัปดาห์</button>
       <button class="tab" id="tabF" onclick="showTab('f')">💳 รายละเอียดงวดงาน</button>
     </div>
+    <button class="themeBtn" id="logoutBtn" onclick="logout()" aria-label="ออกจากระบบ" title="ออกจากระบบ">🚪</button>
     <button class="themeBtn" id="themeBtn" onclick="toggleTheme()" aria-label="สลับโหมดสว่าง/มืด">🌙</button>
   </div></div>
 </header>
@@ -857,6 +858,11 @@ $('logoHeader').src = $('logoGate').src;
 // ที่อยู่เว็บแอปสำหรับยิงขอไฟล์เอกสารการเงิน (action docFile)
 const DOC_API = 'https://script.google.com/macros/s/AKfycbxo5iY4E9CazLb2sEkbR9XS4mkEUdoPAfYCsLAtR2IcqCMuEuQJGiab-ShKvSHfeVhC/exec';
 function store(k,v){try{sessionStorage[k]=v}catch(e){}}
+// ออกจากระบบ: ล้างรหัสที่จำไว้ แล้วโหลดหน้าใหม่ให้กลับไปหน้าใส่ PIN
+function logout(){
+  try{ sessionStorage.removeItem('client_pin'); }catch(e){}
+  location.reload();
+}
 function recall(k){try{return sessionStorage[k]}catch(e){return null}}
 
 // รหัสลูกค้า = วันเดือนปีเกิด 8 หลัก (ววดดปปปป) แบบเดียวกับธนาคาร — รับทั้ง ค.ศ. และ พ.ศ.
@@ -1619,5 +1625,21 @@ document.addEventListener('keydown',e=>{
   if(e.key==='ArrowRight')stepLb(1);
   if(e.key==='Escape')closeLb();
 });
+
+// ปัดนิ้วบนมือถือเพื่อเปลี่ยนรูปในไลท์บ็อกซ์ (ปัดซ้าย=รูปถัดไป ปัดขวา=ก่อนหน้า)
+(function(){
+  const lb=$('lb'); if(!lb) return;
+  let x0=null,y0=null,t0=0;
+  lb.addEventListener('touchstart',function(e){
+    const t=e.changedTouches[0]; x0=t.clientX; y0=t.clientY; t0=e.timeStamp;
+  },{passive:true});
+  lb.addEventListener('touchend',function(e){
+    if(x0===null) return;
+    const t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0;
+    // ปัดแนวนอนชัดเจน (>45px) และไม่ใช่การเลื่อนแนวตั้ง
+    if(Math.abs(dx)>45 && Math.abs(dx)>Math.abs(dy)*1.4) stepLb(dx<0?1:-1);
+    x0=y0=null;
+  },{passive:true});
+})();
 </script>
 </body></html>
