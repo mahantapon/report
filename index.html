@@ -1098,9 +1098,11 @@ function buildOverview(){
 
   // การเงิน — ยอดสัญญารวมย้ายไปโชว์เด่นๆ ในการ์ดบนสุดแทน (ตัดชำระแล้ว/คงเหลือออก ไม่ให้ดูเหมือนบิลละเอียด)
   const b=DATA.billing;
-  if(b&&b.total){
+  // มูลค่าสัญญา = เฉพาะสัญญาก่อสร้างหลัก ไม่รวมงานเพิ่ม-ลด (contractTotal) — ถ้าไม่มีค่อยใช้ total เดิม
+  const contractV = b ? (b.contractTotal!=null ? b.contractTotal : b.total) : 0;
+  if(b&&contractV){
     $('heroContract').style.display='';
-    $('heroContractV').textContent=(b.total/1e6).toFixed(2)+' ล.บ.';
+    $('heroContractV').textContent=(contractV/1e6).toFixed(2)+' ล.บ.';
   }else{ $('heroContract').style.display='none'; }
 
   // อัปเดตล่าสุด — การ์ด 3 ใบเรียงกัน
