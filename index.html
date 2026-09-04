@@ -1035,7 +1035,7 @@ function buildOverview(){
   // ⚠️ ต้องไล่ย้อนหา ไม่ใช่ดูแค่วันล่าสุด — บางวันเผยแพร่โดยไม่มีรูป หน้าปกจะโล่ง
   let coverUrl='', coverDay='';
   if(DATA.coverPhotoId){
-    coverUrl='https://drive.google.com/thumbnail?id='+DATA.coverPhotoId+'&sz=w1600';
+    coverUrl='https://lh3.googleusercontent.com/d/'+DATA.coverPhotoId+'=w1600';
     for(let i=keys.length-1;i>=0;i--){
       const d=DATA.days[keys[i]];
       if((d.photoUrls||[]).some(u=>u.indexOf(DATA.coverPhotoId)!==-1)){ coverDay=d.label||''; break; }
@@ -1050,7 +1050,7 @@ function buildOverview(){
   const cov=$('ovCover'), covImg=$('ovCoverImg');
   if(coverUrl){
     // ปกแสดงเต็มจอ (~1900px) — ดึง w1600 เสมอ ไม่ใช้ w600 ของรูปย่อ(ph[0]) ที่จะเบลอเมื่อยืด
-    covImg.src=coverUrl.replace(/sz=w\d+/, 'sz=w1600');
+    covImg.src=coverUrl.replace(/=w\d+/, '=w1600');
     covImg.alt='ภาพหน้างานโครงการ'+(pi.label||'')+(coverDay?' '+coverDay:'');
     cov.classList.remove('nopic');
   }else{
