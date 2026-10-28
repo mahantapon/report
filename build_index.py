@@ -4,7 +4,7 @@
 ใช้ทุกครั้งที่แก้ ClientPortal.html จะได้ไม่ต้องแก้สองที่ให้ตรงกันเอง"""
 import re, sys, json
 
-SRC = "/Users/gearsecond/Desktop/apps-script-port/พร้อมวาง/ClientPortal.html"
+SRC = "/Users/gearsecond/Desktop/02 ระบบรายงาน-BaanProgress/ระบบรายงานเรืองอนันต์/apps-script-port/พร้อมวาง/ClientPortal.html"
 DST = "index.html"
 # ตัวพักข้อมูลบนเซิร์ฟเวอร์ของบริษัท — ลดเวลารอของลูกค้าจาก 2-8 วินาที เหลือ ~0.3 วินาที
 CACHE = "https://assistant.bestbest.work/rcache/"
@@ -67,18 +67,22 @@ s = s.replace(anchor, HELPER + anchor, 1)
 
 # ── สร้าง 2 เวอร์ชันจากเทมเพลตเดียว ──
 #   index.html      = เว็บจริง ซ่อนแท็บ "รายละเอียดงวดงาน" (หลังบ้านยังไม่นิ่ง) เหลือ ภาพรวม/รายวัน/รายสัปดาห์
+#                     + ปิดวงแหวน % และขั้นตอนของโครงการทุกไซต์ (เก้าสั่ง 28 ต.ค. 2569)
 #   demo/index.html = เดโม โชว์ครบทุกแท็บ (report.ruanganan.com/demo) ไว้ทดลองก่อนยกขึ้นเว็บจริง
 import os
 assert s.count("/*__HIDE_TABS__*/") == 1, "หา placeholder HIDE_TABS ไม่เจอ"
+assert s.count("/*__HIDE_PROGRESS__*/false") == 1, "หา placeholder HIDE_PROGRESS ไม่เจอ"
 
 target = (sys.argv[1] if len(sys.argv) > 1 else "both").lower()
-prod = s.replace("/*__HIDE_TABS__*/", "'f'")   # เว็บจริง: ซ่อนงวดงาน
-demo = s.replace("/*__HIDE_TABS__*/", "")      # เดโม: โชว์ครบ
+prod = (s.replace("/*__HIDE_TABS__*/", "'f'")               # เว็บจริง: ซ่อนงวดงาน
+         .replace("/*__HIDE_PROGRESS__*/false", "true"))     #          + ปิด progress
+demo = (s.replace("/*__HIDE_TABS__*/", "")                  # เดโม: โชว์ครบ
+         .replace("/*__HIDE_PROGRESS__*/false", "false"))
 os.makedirs("demo", exist_ok=True)
 done = []
 if target in ("both", "demo"):
     open("demo/index.html", "w", encoding="utf-8").write(demo); done.append("demo/index.html (โชว์ครบ)")
 if target in ("both", "prod", "promote"):
-    open(DST, "w", encoding="utf-8").write(prod); done.append("index.html (เว็บจริง ซ่อนงวดงาน)")
+    open(DST, "w", encoding="utf-8").write(prod); done.append("index.html (เว็บจริง ซ่อนงวดงาน+progress)")
 print("สร้าง %s · %d KB · companyName %d จุด" % (" + ".join(done), len(prod)//1024, n))
 print("  วิธีใช้: build_index.py demo = อัปเฉพาะเดโม (เว็บจริงไม่ขยับ) · build_index.py prod = ยกขึ้นเว็บจริง · (ว่าง)=ทั้งคู่")

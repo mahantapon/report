@@ -221,6 +221,7 @@ ol.tasks li{margin-bottom:4px}
 .cover .gring svg{display:block}
 .cover .gcap{font-size:10px;color:rgba(255,255,255,.62);margin-top:5px;max-width:118px;line-height:1.35}
 .cover .gmoney{padding:16px 24px 16px 21px;border-left:1px solid rgba(255,255,255,.18);min-width:186px}
+.cover .glass.noring .gmoney{border-left:0}   /* ปิดวงแหวนแล้ว เส้นคั่นจะไปซ้อนขอบกล่อง */
 .cover .gmoney b{display:block;font-size:10px;letter-spacing:.15em;text-transform:uppercase;
   color:rgba(255,255,255,.66);font-weight:600;margin-bottom:8px}
 .cover .gmoney .v{font-size:34px;font-weight:700;color:#f0d29a;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
@@ -635,8 +636,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 0 30px}
         <p id="ovLine">—</p>
         <span class="badge" id="ovBadge">—</span>
       </div>
-      <div class="glass">
-        <div class="gring">
+      <div class="glass" id="ovGlass">
+        <div class="gring" id="ovRingWrap">
           <svg id="ovRing" width="112" height="112" viewBox="0 0 118 118"></svg>
           <div class="gcap" id="ovPctLbl">ความคืบหน้าโครงการ</div>
         </div>
@@ -861,6 +862,9 @@ function apiPost(body){
 }
 let DATA = null, cur = '', lbList = [], lbIdx = 0;
 const HIDE_TABS = ['f'];   // เว็บจริงซ่อน 'f' (งวดงาน) · เดโมโชว์ครบ
+// เว็บจริงปิดวงแหวน % + ขั้นตอนของโครงการ (ภาพรวม/รายสัปดาห์) ทุกไซต์ · เดโมโชว์ครบ
+// เก้าสั่ง 28 ต.ค. 2569 — % ตามแผน/Mango ยังไม่ตรงหน้างานจริง ไม่ให้ลูกค้าเห็นจนกว่าจะพร้อม
+const HIDE_PROGRESS = true;
 const REPORT_CUTOFF = '2026-06-01';   // รายงานก่อนวันนี้ (1 มิ.ย. 2569) ไม่ให้ลูกค้าเปิด — ระบบเริ่มบันทึกจริงจากวันนี้
 let calY = 0, calM = 0;      // เดือนที่ปฏิทินกำลังแสดง
 let wkAnchor = '';            // วันใดวันหนึ่งในสัปดาห์ที่แท็บรายสัปดาห์กำลังแสดง
@@ -1008,18 +1012,25 @@ function buildOverview(){
   const fromPlan = !fromMango && DATA.phasesFrom==='plan';
   const pctFrom = fromMango ? 'ความคืบหน้าจริง' : (fromPlan ? 'ตามแผนงาน' : 'งานก่อสร้าง');
 
-  // วงแหวน %
-  const R=50,C=2*Math.PI*R,val=(pct==null?0:pct);
-  $('ovRing').innerHTML=
-    '<circle cx="59" cy="59" r="'+R+'" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="9"/>'
-   +'<circle cx="59" cy="59" r="'+R+'" fill="none" stroke="#f0d29a" stroke-width="9" stroke-linecap="round"'
-   +' stroke-dasharray="'+(C*val/100)+' '+(C-C*val/100)+'" stroke-dashoffset="'+(C*0.25)+'"/>'
-   +'<text x="59" y="56" text-anchor="middle" font-size="27" font-weight="700" fill="#fff">'+(pct==null?'—':val+'%')+'</text>'
-   +'<text x="59" y="74" text-anchor="middle" font-size="9" fill="#bcd0e6">'+(pct==null?'ยังไม่ระบุ':pctFrom)+'</text>';
+  // วงแหวน % — ปิดทั้งวงเฉพาะไซต์ที่ตั้ง hideRing ไว้ หรือเว็บจริงที่ปิด progress ทั้งหมด (ต่างจาก pct==null ที่แค่โชว์ "—")
+  const ringOff = DATA.hideRing || HIDE_PROGRESS;
+  $('ovGlass').classList.toggle('noring', ringOff);
+  if(ringOff){
+    $('ovRingWrap').style.display='none';
+  }else{
+    $('ovRingWrap').style.display='';
+    const R=50,C=2*Math.PI*R,val=(pct==null?0:pct);
+    $('ovRing').innerHTML=
+      '<circle cx="59" cy="59" r="'+R+'" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="9"/>'
+     +'<circle cx="59" cy="59" r="'+R+'" fill="none" stroke="#f0d29a" stroke-width="9" stroke-linecap="round"'
+     +' stroke-dasharray="'+(C*val/100)+' '+(C-C*val/100)+'" stroke-dashoffset="'+(C*0.25)+'"/>'
+     +'<text x="59" y="56" text-anchor="middle" font-size="27" font-weight="700" fill="#fff">'+(pct==null?'—':val+'%')+'</text>'
+     +'<text x="59" y="74" text-anchor="middle" font-size="9" fill="#bcd0e6">'+(pct==null?'ยังไม่ระบุ':pctFrom)+'</text>';
 
-  // บรรทัดใต้วงแหวน: แสดงเฉพาะตอนยังไม่มีข้อมูล — ถ้ามี % แล้ว ในวงแหวนบอกครบแล้ว ไม่ต้องเขียนซ้ำ
-  $('ovPctLbl').textContent = (pct==null) ? 'ยังไม่ได้ตั้งขั้นตอนของโครงการนี้' : '';
-  $('ovPctLbl').style.display = (pct==null) ? '' : 'none';
+    // บรรทัดใต้วงแหวน: แสดงเฉพาะตอนยังไม่มีข้อมูล — ถ้ามี % แล้ว ในวงแหวนบอกครบแล้ว ไม่ต้องเขียนซ้ำ
+    $('ovPctLbl').textContent = (pct==null) ? 'ยังไม่ได้ตั้งขั้นตอนของโครงการนี้' : '';
+    $('ovPctLbl').style.display = (pct==null) ? '' : 'none';
+  }
 
   const pi=DATA.projectInfo||{};
   $('ovTitle').textContent='โครงการ'+(pi.label||'');
@@ -1071,7 +1082,7 @@ function buildOverview(){
   // ⚠️ ถ้าข้อมูล phases มีสถานะ "กำลังทำ" (2) มากกว่า 1 ขั้น (เช่น [..,2,2,..])
   // ให้ยกเด่นเฉพาะขั้น "กำลังทำ" ตัวสุดท้าย (ตัวที่คืบหน้าไปไกลสุด) ตัวก่อนหน้าถือว่าใกล้เสร็จแล้ว โชว์เป็น "เสร็จแล้ว" แทน
   // ไม่งั้นจะมีป้าย "ตอนนี้" ขึ้นซ้อนกัน 2 อัน ดูเหมือนหน้าพัง
-  if(ph&&ph.length){
+  if(!HIDE_PROGRESS && ph&&ph.length){
     $('ovStepSec').style.display='';
     $('ovStepSrc').textContent = fromPlan ? 'ตามแผนงานที่ตกลงในสัญญา' : '';
     let lastCur=-1;
@@ -1104,6 +1115,8 @@ function buildOverview(){
     $('heroContract').style.display='';
     $('heroContractV').textContent=(contractV/1e6).toFixed(2)+' ล.บ.';
   }else{ $('heroContract').style.display='none'; }
+  // ไม่มีทั้งวงแหวนและมูลค่าสัญญา → ซ่อนกล่องกระจกทั้งใบ ไม่ให้เหลือกรอบเปล่าบนปก
+  $('ovGlass').style.display = (ringOff && !(b&&contractV)) ? 'none' : '';
 
   // อัปเดตล่าสุด — การ์ด 3 ใบเรียงกัน
   $('ovUpd').innerHTML=keys.slice(-3).reverse().map(function(k){
@@ -1456,7 +1469,7 @@ function buildWeekly(){
 
   // ---- ขั้นตอนของโครงการ ----
   // phases เป็น null = ยังไม่ได้ระบุใน Config.gs → ซ่อนทั้งบล็อก ไม่เดาให้ลูกค้าเข้าใจผิด
-  if(DATA.phases && DATA.phases.length){
+  if(!HIDE_PROGRESS && DATA.phases && DATA.phases.length){
     $('stepSec').style.display='';
     // ⚠️ เหตุผลเดียวกับ .fst ในแท็บภาพรวม: ถ้ามี 2 ขั้นสถานะ "กำลังทำ" (2) ติดกัน
     // ให้เด่นแค่ขั้นล่าสุดพอ ไม่งั้นมีจุดทอง "กำลังทำ" ขึ้นพร้อมกันหลายจุด ดูเหมือนข้อมูลผิด
