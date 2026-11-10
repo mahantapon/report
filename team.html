@@ -427,10 +427,13 @@ const FILTERS={
   none:     {label:'ยังไม่มีรายงานวันนี้', test:function(p){return p.todayStatus!=='published'&&p.todayStatus!=='draft'}},
   issue:    {label:'ไซต์ที่รายงานปัญหา',  test:function(p){return !!p.issue}}
 };
-function isIdle(p){ return p.missDays!==null&&p.missDays!==undefined&&p.missDays>=IDLE_DAYS; }
+// สถานะจากชีต "🏗 โครงการ" คอลัมน์ R: active | paused (พักงาน) | closed (ส่งมอบแล้ว)
+function isClosed(p){ return p.status==='closed'; }
+function isIdle(p){ return p.status==='paused' || (p.status!=='closed' && p.missDays!==null&&p.missDays!==undefined&&p.missDays>=IDLE_DAYS); }
 // เรียงตามงานที่ต้องทำก่อน: ร่างรอตรวจ → ช่างส่งแล้วรอร่าง → ยังไม่มีรายงาน → เผยแพร่แล้ว → ไซต์พัก
 function rank(p){
   if(p.todayStatus==='draft') return 0;
+  if(isClosed(p)) return 10;
   if(isIdle(p)) return 9;
   if(p.todayStatus==='published') return 3;
   return p.rawToday?1:2;
@@ -479,16 +482,20 @@ function drawTable(){
     .filter(function(o){return !f||f.test(o.p)})
     .sort(function(a,b){ return (rank(a.p)-rank(b.p)) || ((b.p.issue?1:0)-(a.p.issue?1:0)) || (a.i-b.i); });
   if(!list.length){ $('tbody').innerHTML='<tr class="empty"><td colspan="8">ไม่มีโครงการในกลุ่มนี้ 🎉</td></tr>'; return; }
-  let sepDone=false;
+  let sepIdle=false, sepClosed=false;
   $('tbody').innerHTML=list.map(function(o){
-    const p=o.p, i=o.i, idle=isIdle(p), open=!!OPEN[i];
+    const p=o.p, i=o.i, closed=isClosed(p), idle=closed||isIdle(p), open=!!OPEN[i];
     let sep='';
-    if(idle&&!sepDone){ sepDone=true; sep='<tr class="sep"><td colspan="8">ไม่มีรายงานเกิน '+IDLE_DAYS+' วัน (พักงาน / หยุดงาน)</td></tr>'; }
+    if(p.todayStatus!=='draft'){
+      if(closed&&!sepClosed){ sepClosed=true; sep='<tr class="sep"><td colspan="8">ส่งมอบแล้ว (ลูกค้ายังเข้าดูย้อนหลังได้ · ไม่นับในตัวเลขด้านบน)</td></tr>'; }
+      else if(!closed&&idle&&!sepIdle){ sepIdle=true; sep='<tr class="sep"><td colspan="8">พักงาน / ไม่มีรายงานเกิน '+IDLE_DAYS+' วัน · เปลี่ยนสถานะได้ที่ชีต 🏗 โครงการ คอลัมน์ R</td></tr>'; }
+    }
+    const stTag=p.status==='paused'?' <span class="tag none" style="opacity:.8">พักงาน</span>':(closed?' <span class="tag ok">ส่งมอบแล้ว</span>':'');
     const act=p.todayStatus==='draft'
       ? '<a class="btn sm" href="'+esc(p.reviewUrl)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">ตรวจร่าง</a>'
       : '<a class="btn ghost sm" href="'+esc(p.reviewUrl)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">หน้าตรวจ</a>';
     return sep+'<tr class="row'+(open?' open':'')+(idle?' idle':'')+'" onclick="toggleRow('+i+')">'
-      +'<td class="name"><span class="chev">›</span>'+esc(p.label)+'</td>'
+      +'<td class="name"><span class="chev">›</span>'+esc(p.label)+stTag+'</td>'
       +'<td>'+statusTag(p)+'</td>'
       +'<td class="num">'+(p.workers?esc(p.workers)+' คน'+(p.workersToday?'':' <span class="dash">(ล่าสุด)</span>'):'<span class="dash">—</span>')+'</td>'
       +'<td class="num">'+esc(p.latest)+(p.missDays!==null&&p.missDays>=2?'<br><span class="issuetxt">ห่างมา '+p.missDays+' วัน</span>':'')+'</td>'
