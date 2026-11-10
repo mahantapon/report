@@ -196,7 +196,35 @@ td.name{font-weight:600;color:var(--heading);white-space:nowrap}
 .hitem .hdel{flex:0 0 auto;background:none;border:0;color:var(--bad);cursor:pointer;font-size:12.5px;font-weight:600}
 .hempty{padding:22px 0;text-align:center;color:var(--muted);font-size:13px}
 .hnote{font-size:11.5px;color:var(--faint);line-height:1.7;margin-top:14px}
+/* ── กล่องตัวเลขกดกรอง + แถวกดขยาย ── */
+.sum.click{cursor:pointer;transition:border-color .15s,box-shadow .15s,transform .15s}
+.sum.click:hover{border-color:rgba(212,172,94,.55);transform:translateY(-1px)}
+.sum.active{border-color:var(--gold);box-shadow:0 0 0 2px rgba(212,172,94,.35)}
+.sum .hint{font-size:10px;color:var(--faint);margin-top:3px}
+.ph3{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 15px;border-bottom:1px solid var(--line)}
+.ph3 h3{padding:0;border:0}
+.fchip{display:none;align-items:center;gap:6px;font:inherit;font-size:11.5px;font-weight:600;cursor:pointer;
+  padding:3px 10px;border-radius:999px;border:1px solid rgba(212,172,94,.45);background:rgba(212,172,94,.10);color:var(--accent)}
+.fchip.on{display:inline-flex}
+.ph3 .tip{margin-left:auto;font-size:11px;color:var(--faint)}
+tr.row{cursor:pointer}
+tr.row:hover td{background:var(--th-bg)}
+tr.row.open td{background:var(--th-bg);border-bottom-color:transparent}
+.chev{display:inline-block;width:12px;color:var(--faint);transition:transform .2s;margin-right:6px}
+tr.row.open .chev{transform:rotate(90deg)}
+tr.idle td{opacity:.5}
+tr.idle:hover td{opacity:.85}
+tr.sep td{font-size:11px;font-weight:600;color:var(--faint);background:var(--th-bg);padding:7px 14px}
+tr.detail td{background:var(--th-bg);padding:4px 18px 16px 34px}
+tr.detail.idle td{opacity:1}
+.empty td{text-align:center;color:var(--muted);padding:22px}
+.btn.sm{padding:5px 11px;font-size:11.5px;white-space:nowrap}
+.det{display:flex;gap:18px 30px;flex-wrap:wrap;align-items:flex-start}
+.det .meta{min-width:230px}
+.det .stats{border:0;padding:0;gap:22px}
+.det .side{display:flex;flex-direction:column;gap:9px;flex:1;min-width:260px}
 @media(max-width:640px){.wrap{padding:18px 12px 60px}.grid{grid-template-columns:1fr}
+  .ph3 .tip{display:none}
   .hrow label{flex:1 1 100%}.hrow .btn{flex:1 1 100%}}
 </style></head><body>
 
@@ -222,22 +250,23 @@ td.name{font-weight:600;color:var(--heading);white-space:nowrap}
   <div class="sub" id="stamp"></div>
   <div class="sumbar" id="sumbar"></div>
   <div class="panel" id="tablePanel" style="display:none">
-    <h3>เทียบทุกโครงการ</h3>
+    <div class="ph3"><h3>เทียบทุกโครงการ</h3>
+      <button class="fchip" id="fchip" onclick="setFilter('')"></button>
+      <span class="tip">แตะแถวเพื่อดูรหัสลูกค้า / ปุ่มส่งลูกค้า</span></div>
     <div class="scroll"><table>
       <thead><tr>
         <th>โครงการ</th><th>รายงานวันนี้</th><th>คนงาน</th><th>เผยแพร่ล่าสุด</th>
-        <th>รวมวันที่เผยแพร่</th><th>งวดที่เบิกแล้ว</th><th>ปัญหาที่รายงานล่าสุด</th>
+        <th>รวมวันที่เผยแพร่</th><th>งวดที่เบิกแล้ว</th><th>ปัญหาที่รายงานล่าสุด</th><th></th>
       </tr></thead>
       <tbody id="tbody"></tbody>
     </table></div>
   </div>
-  <div class="grid" id="grid"></div>
   <div style="text-align:center;margin:6px 0 20px">
     <button class="btn ghost" onclick="openHoliday()" style="display:inline-flex;gap:7px;padding:10px 20px">📅 จัดการวันหยุด</button>
   </div>
   <div class="foot">
     ลิงก์ลูกค้า: <b>report.ruanganan.com</b> (ลิงก์เดียวทุกโครงการ ระบบแยกด้วย PIN)<br>
-    แตะกล่อง PIN เพื่อคัดลอก · "ข้อความส่งลูกค้า" คัดลอกลิงก์+รหัสพร้อมส่งใน LINE · เปลี่ยนรหัสแล้วรหัสเดิมใช้ไม่ได้ทันที
+    แตะกล่องตัวเลขด้านบนเพื่อกรอง · แตะแถวเพื่อเปิดรายละเอียด · แตะกล่อง PIN เพื่อคัดลอก · "ข้อความส่งลูกค้า" คัดลอกลิงก์+รหัสพร้อมส่งใน LINE · เปลี่ยนรหัสแล้วรหัสเดิมใช้ไม่ได้ทันที
   </div>
 </div>
 
@@ -389,29 +418,77 @@ function statusTag(p){
   return '<span class="tag none">ยังไม่มีข้อมูล</span>';
 }
 
+/* ---------- กรอง / เรียง / ขยายแถว ---------- */
+let FILTER='', OPEN={};
+const IDLE_DAYS=14;   // ไม่มีรายงานเผยแพร่เกินนี้ = ไซต์พัก/หยุดงาน → ย้ายไปท้ายตาราง แบบจางๆ
+const FILTERS={
+  published:{label:'เผยแพร่แล้ววันนี้', test:function(p){return p.todayStatus==='published'}},
+  draft:    {label:'ร่างรอตรวจ',        test:function(p){return p.todayStatus==='draft'}},
+  none:     {label:'ยังไม่มีรายงานวันนี้', test:function(p){return p.todayStatus!=='published'&&p.todayStatus!=='draft'}},
+  issue:    {label:'ไซต์ที่รายงานปัญหา',  test:function(p){return !!p.issue}}
+};
+function isIdle(p){ return p.missDays!==null&&p.missDays!==undefined&&p.missDays>=IDLE_DAYS; }
+// เรียงตามงานที่ต้องทำก่อน: ร่างรอตรวจ → ช่างส่งแล้วรอร่าง → ยังไม่มีรายงาน → เผยแพร่แล้ว → ไซต์พัก
+function rank(p){
+  if(p.todayStatus==='draft') return 0;
+  if(isIdle(p)) return 9;
+  if(p.todayStatus==='published') return 3;
+  return p.rawToday?1:2;
+}
+function setFilter(f){
+  FILTER=(FILTER===f)?'':f;
+  drawSum(); drawTable();
+  if(FILTER){ const el=$('tablePanel'); if(el.getBoundingClientRect().top>innerHeight*.6) el.scrollIntoView({behavior:'smooth',block:'start'}); }
+}
+function toggleRow(i){ OPEN[i]=!OPEN[i]; drawTable(); }
+
 function render(d){
   DATA=d;
   $('gate').style.display='none';
   $('stamp').innerHTML='ข้อมูล ณ <b>'+esc(d.stampedAt)+'</b> · '+d.projects.length+' โครงการ';
-
-  /* ---------- แถบสรุป ---------- */
-  const s=d.summary||{};
-  $('sumbar').innerHTML=[
-    ['<div class="sum'+(s.publishedToday===s.total?' ok':'')+'"><div class="n">'+s.publishedToday+'/'+s.total+'</div><div class="l">เผยแพร่ให้ลูกค้าแล้ววันนี้</div></div>'],
-    ['<div class="sum'+(s.draftToday?' warn':'')+'"><div class="n">'+s.draftToday+'</div><div class="l">ร่างรอตรวจ</div></div>'],
-    ['<div class="sum'+(s.noReportToday?' bad':'')+'"><div class="n">'+s.noReportToday+'</div><div class="l">ยังไม่มีรายงานวันนี้</div>'
-      +'<div class="s">ช่างส่งเข้าระบบแล้ว '+s.rawToday+'/'+s.total+' ไซต์</div></div>'],
-    ['<div class="sum"><div class="n">'+s.workersToday+'</div><div class="l">คนงานรวมวันนี้</div></div>'],
-    ['<div class="sum'+(s.issues?' warn':'')+'"><div class="n">'+s.issues+'</div><div class="l">ไซต์ที่รายงานปัญหา</div></div>'],
-    ['<div class="sum"><div class="n">'+s.billingPct+'%</div><div class="l">เบิกงวดแล้ว (ทุกโครงการ)</div>'
-      +'<div class="s">'+money(s.billingPaid)+' / '+money(s.billingTotal)+' บาท</div></div>'],
-  ].join('');
-
-  /* ---------- ตารางเทียบ ---------- */
   $('tablePanel').style.display='';
-  $('tbody').innerHTML=d.projects.map(function(p){
-    return '<tr>'
-      +'<td class="name">'+esc(p.label)+'</td>'
+  drawSum(); drawTable();
+}
+
+/* ---------- แถบสรุป (4 กล่องแรกกดกรองได้) ---------- */
+function drawSum(){
+  const s=DATA.summary||{};
+  function box(f,cls,n,l,sub){
+    const act=FILTER===f?' active':'';
+    return '<div class="sum'+cls+(f?' click'+act:'')+'"'+(f?' onclick="setFilter(\''+f+'\')" title="แตะเพื่อกรองตาราง"':'')+'>'
+      +'<div class="n">'+n+'</div><div class="l">'+l+'</div>'+(sub?'<div class="s">'+sub+'</div>':'')
+      +(f&&act?'<div class="hint">กำลังกรอง · แตะอีกครั้งเพื่อดูทั้งหมด</div>':'')+'</div>';
+  }
+  $('sumbar').innerHTML=[
+    box('published',s.publishedToday===s.total?' ok':'',s.publishedToday+'/'+s.total,'เผยแพร่ให้ลูกค้าแล้ววันนี้'),
+    box('draft',s.draftToday?' warn':'',s.draftToday,'ร่างรอตรวจ'),
+    box('none',s.noReportToday?' bad':'',s.noReportToday,'ยังไม่มีรายงานวันนี้','ช่างส่งเข้าระบบแล้ว '+s.rawToday+'/'+s.total+' ไซต์'),
+    box('',' ',s.workersToday,'คนงานรวมวันนี้'),
+    box('issue',s.issues?' warn':'',s.issues,'ไซต์ที่รายงานปัญหา'),
+    box('',' ',s.billingPct+'%','เบิกงวดแล้ว (ทุกโครงการ)',money(s.billingPaid)+' / '+money(s.billingTotal)+' บาท')
+  ].join('');
+}
+
+/* ---------- ตาราง: แถวหลัก + แถวรายละเอียด (แทนการ์ดเดิม) ---------- */
+function drawTable(){
+  const ps=DATA.projects;
+  const f=FILTERS[FILTER];
+  $('fchip').className='fchip'+(f?' on':'');
+  $('fchip').textContent=f?('กรอง: '+f.label+' ('+ps.filter(f.test).length+')  ✕'):'';
+  const list=ps.map(function(p,i){return {p:p,i:i}})
+    .filter(function(o){return !f||f.test(o.p)})
+    .sort(function(a,b){ return (rank(a.p)-rank(b.p)) || ((b.p.issue?1:0)-(a.p.issue?1:0)) || (a.i-b.i); });
+  if(!list.length){ $('tbody').innerHTML='<tr class="empty"><td colspan="8">ไม่มีโครงการในกลุ่มนี้ 🎉</td></tr>'; return; }
+  let sepDone=false;
+  $('tbody').innerHTML=list.map(function(o){
+    const p=o.p, i=o.i, idle=isIdle(p), open=!!OPEN[i];
+    let sep='';
+    if(idle&&!sepDone){ sepDone=true; sep='<tr class="sep"><td colspan="8">ไม่มีรายงานเกิน '+IDLE_DAYS+' วัน (พักงาน / หยุดงาน)</td></tr>'; }
+    const act=p.todayStatus==='draft'
+      ? '<a class="btn sm" href="'+esc(p.reviewUrl)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">ตรวจร่าง</a>'
+      : '<a class="btn ghost sm" href="'+esc(p.reviewUrl)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">หน้าตรวจ</a>';
+    return sep+'<tr class="row'+(open?' open':'')+(idle?' idle':'')+'" onclick="toggleRow('+i+')">'
+      +'<td class="name"><span class="chev">›</span>'+esc(p.label)+'</td>'
       +'<td>'+statusTag(p)+'</td>'
       +'<td class="num">'+(p.workers?esc(p.workers)+' คน'+(p.workersToday?'':' <span class="dash">(ล่าสุด)</span>'):'<span class="dash">—</span>')+'</td>'
       +'<td class="num">'+esc(p.latest)+(p.missDays!==null&&p.missDays>=2?'<br><span class="issuetxt">ห่างมา '+p.missDays+' วัน</span>':'')+'</td>'
@@ -420,38 +497,37 @@ function render(d){
           ? p.billing.paidCount+'/'+p.billing.count+' งวด · '+p.billing.pct+'%<div class="bar"><i style="width:'+p.billing.pct+'%"></i></div>'
           : '<span class="dash">ยังไม่ผูกงวดงาน</span>')+'</td>'
       +'<td class="issuetxt">'+(p.issue?esc(p.issue):'<span class="dash">ไม่มี</span>')+'</td>'
-    +'</tr>';
+      +'<td>'+act+'</td>'
+    +'</tr>'
+    +(open?detailRow(p,i,idle):'');
   }).join('');
-
-  /* ---------- การ์ดรายโครงการ ---------- */
-  $('grid').innerHTML=d.projects.map(function(p,i){
-    const warns=(p.warnings||[]).length
-      ? '<div class="flag">⚠ '+p.warnings.map(esc).join(' · ')+'</div>' : '';
-    const issue=p.issue?'<div class="flag">ปัญหาที่รายงานมาล่าสุด: '+esc(p.issue)+'</div>':'';
-    return '<div class="card">'
-      +'<h2>'+esc(p.label)+statusTag(p)+'</h2>'
-      +'<div class="meta">ลูกค้า: <b>'+esc(p.client)+'</b><br>สัญญา: <b>'+esc(p.contractNo)+'</b><br>'
-        +'รหัสลูกค้า: <span class="pin" id="pin-'+i+'" title="แตะเพื่อคัดลอก" onclick="cp(this.textContent.trim())">'+esc(p.pin)+'</span>'
-        +'<div class="pinacts">'
-          +'<button class="mini" onclick="openModal(\''+esc(p.site)+'\',\''+esc(p.label)+'\','+i+')">เปลี่ยนรหัส</button>'
-          +'<button class="mini" onclick="rollPin(\''+esc(p.site)+'\',\''+esc(p.label)+'\','+i+',this)">สุ่มใหม่</button>'
-        +'</div>'
+}
+function detailRow(p,i,idle){
+  const warns=(p.warnings||[]).length ? '<div class="flag">⚠ '+p.warnings.map(esc).join(' · ')+'</div>' : '';
+  return '<tr class="detail'+(idle?' idle':'')+'"><td colspan="8"><div class="det">'
+    +'<div class="meta">ลูกค้า: <b>'+esc(p.client)+'</b><br>สัญญา: <b>'+esc(p.contractNo)+'</b><br>'
+      +'รหัสลูกค้า: <span class="pin" id="pin-'+i+'" title="แตะเพื่อคัดลอก" onclick="cp(this.textContent.trim())">'+esc(p.pin)+'</span>'
+      +'<div class="pinacts">'
+        +'<button class="mini" onclick="openModal(\''+esc(p.site)+'\',\''+esc(p.label)+'\','+i+')">เปลี่ยนรหัส</button>'
+        +'<button class="mini" onclick="rollPin(\''+esc(p.site)+'\',\''+esc(p.label)+'\','+i+',this)">สุ่มใหม่</button>'
       +'</div>'
+    +'</div>'
+    +'<div class="side">'
       +'<div class="stats">'
         +'<div class="stat"><div class="n">'+p.days+'</div><div class="l">วันที่เผยแพร่</div></div>'
         +'<div class="stat"><div class="n">'+p.photoDays+'</div><div class="l">วันที่มีรูป</div></div>'
         +'<div class="stat"><div class="n">'+esc(p.latest)+'</div><div class="l">วันล่าสุด</div></div>'
         +'<div class="stat"><div class="n">'+(p.workers?esc(p.workers):'—')+'</div><div class="l">คนงานล่าสุด</div></div>'
       +'</div>'
-      +issue+warns
+      +warns
       +'<div class="acts">'
         // เปิดหน้าลูกค้าโดยไม่ต้องกรอก PIN: ฝาก PIN ไว้ใน sessionStorage แล้วหน้า index จะ login ให้เอง
         +'<button class="btn" onclick="openClient(document.getElementById(\'pin-'+i+'\').textContent.trim())">เปิดหน้าลูกค้า</button>'
         +'<a class="btn ghost" href="'+esc(p.reviewUrl)+'" target="_blank" rel="noopener">ตรวจรายงานวันนี้</a>'
         +'<button class="btn ghost" onclick="cpMsg(\''+esc(p.label)+'\','+i+')">ข้อความส่งลูกค้า</button>'
       +'</div>'
-    +'</div>';
-  }).join('');
+    +'</div>'
+  +'</div></td></tr>';
 }
 
 /* ---------- เปลี่ยนรหัส ---------- */
