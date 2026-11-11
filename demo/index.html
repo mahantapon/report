@@ -821,7 +821,14 @@ h2{flex-wrap:wrap;row-gap:2px}
 .cover .gmoney b{color:var(--muted)}
 .cover .gmoney .v{color:var(--gold);font-weight:800}
 .cover .gmoney .u{color:var(--muted)}
-.cover>img{image-rendering:auto}
+/* รูปหัวโครงการ: ให้รูปกินพื้นที่มากขึ้น + ม่านจางแค่ฝั่งตัวหนังสือ ฝั่งขวารูปสดเต็มที่ (เดิมม่านทับทั้งรูป ภาพดูซีด) */
+.cover>img{width:64%;-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 38%);mask-image:linear-gradient(90deg,transparent 0%,#000 38%)}
+.cover .scrim{background:linear-gradient(90deg,var(--card) 34%,color-mix(in srgb,var(--card) 50%,transparent) 46%,transparent 64%)}
+.cover .glass{background:color-mix(in srgb,var(--card) 82%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+@media(max-width:640px){
+  .cover>img{width:100%;-webkit-mask-image:linear-gradient(180deg,#000 55%,transparent);mask-image:linear-gradient(180deg,#000 55%,transparent)}
+  .cover .scrim{background:linear-gradient(180deg,transparent 0%,transparent 30%,color-mix(in srgb,var(--card) 70%,transparent) 40%,var(--card) 48%)}
+}
 .hrow img.logoD{max-height:44px}
 </style></head><body>
 <script>(function(){var h=new Date().getHours(),s=(location.hash||"").slice(1),p=null;try{p=sessionStorage.getItem("rpt_theme")}catch(e){}var t=s==="day"?"light":s==="night"?"dark":(p||((h>=6&&h<18)?"light":"dark"));if(t==="dark")document.documentElement.setAttribute("data-theme","dark");document.documentElement.classList.add("boot");})();</script>
@@ -879,7 +886,7 @@ h2{flex-wrap:wrap;row-gap:2px}
     <div class="cvin">
       <div class="cvl">
         <div class="day" id="ovCoverDay"></div>
-        <span class="kicker">โครงการ</span><h3 id="ovTitle">—</h3>
+        <h3 id="ovTitle">—</h3>
         <p id="ovLine">—</p>
         <span class="badge" id="ovBadge">—</span>
       </div>
