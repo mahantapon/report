@@ -1165,8 +1165,10 @@ function checkPin(){
     onData(data);
   })
   .catch(function(e){
-    pinFail(/PIN/.test(String(e && e.message))
-      ? 'รหัสไม่ถูกต้อง กรุณาตรวจสอบและลองใหม่อีกครั้ง'
+    const m = String(e && e.message || '');
+    // ใส่ผิดหลายครั้ง → เซิร์ฟเวอร์ตอบ "...กรุณารอ N นาที..." ให้แสดงข้อความนั้นตรง ๆ
+    pinFail(/กรุณารอ/.test(m) ? m
+      : /PIN/.test(m) ? 'รหัสไม่ถูกต้อง กรุณาตรวจสอบและลองใหม่อีกครั้ง'
       : 'เชื่อมต่อระบบไม่ได้ กรุณาลองใหม่อีกครั้ง');
   });
 }
@@ -1863,9 +1865,8 @@ function buildSlipGallery(slipsByInst){
 // ทุกคลิกยิงไปที่ประตูตรวจ: PIN ต้องถูก และไฟล์ต้องเป็นของโครงการนั้นจริง ถึงจะได้ไฟล์กลับมา
 function fetchDocBlob(id){
   const pin=recall('client_pin')||getPin();
-  return fetch(DOC_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body:JSON.stringify({action:'docFile',pin:pin,id:id})})
-  .then(function(r){return r.json()})
+  // ผ่านตัวพักข้อมูลก่อน (นับครั้งผิดต่อ IP · ไม่แคชไฟล์) ถ้าติดต่อไม่ได้ค่อยยิง Apps Script ตรง
+  return apiPost({action:'docFile',pin:pin,id:id})
   .then(function(d){
     if(d.error) throw new Error(d.error);
     const bin=atob(d.data), arr=new Uint8Array(bin.length);
